@@ -8,6 +8,11 @@ var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 
 var app = express();
+var pg = require('pg');
+var connectionString = "postgres://root:123456@localhost/studentplannerdb";
+var pgClient = new pg.Client(connectionString);
+pgClient.connect();
+
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -36,6 +41,15 @@ app.use(function(err, req, res, next) {
   // render the error page
   res.status(err.status || 500);
   res.render('error');
+});
+
+app.get('/', function(req,res){
+    res.render('index');
+});
+
+app.set('port', process.env.PORT || 8080);
+var server = app.listen(app.get('port'), function () {
+    console.log('Express server listening on port ' + server.address().port);
 });
 
 module.exports = app;
