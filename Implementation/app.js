@@ -9,9 +9,10 @@ var usersRouter = require('./routes/users');
 
 var app = express();
 var pg = require('pg');
-var connectionString = "postgres://root:123456@localhost/studentplannerdb";
-var pgClient = new pg.Client(connectionString);
-pgClient.connect();
+var connectionString = "postgres://root:123456@localhost:5432/studentplannerdb";
+var client = new pg.Client(connectionString);
+var pool = new pg.Pool(connectionString);
+client.connect();
 
 
 // view engine setup
@@ -23,7 +24,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-
+app.use('/scripts', express.static(__dirname + '/node_modules/angular/'));
+app.use('/scripts', express.static(__dirname + '/node_modules/angular-route/'));
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 
