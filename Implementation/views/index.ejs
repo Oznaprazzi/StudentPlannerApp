@@ -1,16 +1,22 @@
 <!DOCTYPE html>
-<html ng-app="studentPlanner">
-  <head>
-    <title><%= title %></title>
-    <link rel='stylesheet' href='/stylesheets/style.css' />
+<html ng-app="mwl.calendar.docs">
+<head>
+  <title><%= title %></title>
+  <link rel='stylesheet' href='/stylesheets/style.css' />
 
-    <script src="/scripts/angular.js"></script>
-    <script src="/scripts/angular-route.js"></script>
-    <script src="./javascripts/test.js"></script>
-  </head>
-  <body ng-controller="mainBodyController">
-    <h1><%= title %></h1>
-    <p>Welcome to <%= title %></p>
-  </body>
+  <script src="/scripts/angular.js"></script>
+  <script src="/scripts/angular-route.js"></script>
+  <script src="./javascripts/calendar.js"></script>
+  <script src="./javascripts/calendar-helper.js"></script>
+</head>
+<body ng-controller="calendarController as vm">
+<div id="login" ng-hide="loggedIn">
+    <% include login.ejs %>
+</div>
+<div>
+
+</div>
+
+<% include calendar.ejs %>
+</body>
 </html>
-s

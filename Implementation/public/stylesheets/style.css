@@ -6,3 +6,19 @@ body {
 a {
   color: #00B7FF;
 }
+
+#login{
+  margin: 0 auto;
+  width: 500px;
+  text-align: center;
+}
+
+#login img{
+  width: 200px;
+}
+
+#login #input{
+  display: block;
+  text-align: center;
+  padding: 10px 0;
+}

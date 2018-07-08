@@ -8,12 +8,13 @@ var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 
 var app = express();
-var pg = require('pg');
-var connectionString = "postgres://root:123456@localhost:5432/studentplannerdb";
-var client = new pg.Client(connectionString);
-var pool = new pg.Pool(connectionString);
-client.connect();
 
+// //Postgres setup
+// var pg = require('pg');
+// var connectionString = "postgres://root:123456@localhost:5432/studentplannerdb";
+// var client = new pg.Client(connectionString);
+// var pool = new pg.Pool(connectionString);
+// client.connect();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -24,10 +25,13 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-app.use('/scripts', express.static(__dirname + '/node_modules/angular/'));
-app.use('/scripts', express.static(__dirname + '/node_modules/angular-route/'));
+
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
+
+//Added scripts
+app.use('/scripts', express.static(__dirname + '/node_modules/angular/'));
+app.use('/scripts', express.static(__dirname + '/node_modules/angular-route/'));
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -45,10 +49,7 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-app.get('/', function(req,res){
-    res.render('index');
-});
-
+//Server setup
 app.set('port', process.env.PORT || 8080);
 var server = app.listen(app.get('port'), function () {
     console.log('Express server listening on port ' + server.address().port);
