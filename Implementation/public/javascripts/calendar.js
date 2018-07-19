@@ -103,13 +103,75 @@ angular
         };
 
         //Calendar Implementation
-        var loggedIn = false;
+        $scope.view = 1;
+
+        $http.get('/api/getUsers')
+            .then(function sucessCall(response)	{
+                    $scope.users = response.data.data;
+                },function errorCall()	{
+                    console.log("Error reading users list.");
+                }
+            );
+
+        $scope.setView=function(view){
+            $scope.view = view;
+        };
+
+        $scope.isView=function(view){
+            return $scope.view == view;
+        };
+
+        $scope.login = function(){
+            if($scope.username == "" && $scope.password == ""){
+                $scope.print="Please input a valid username and password";
+            }else if($scope.username == "" && $scope.password != ""){
+                $scope.print="Please input a valid username";
+            }else if($scope.password == ""){
+                $scope.print="Please input a valid password";
+            }else{
+                $scope.validUsername = false;
+                $scope.validPassword = false;
+                var userIndex = -1;
+                for (let i = 0; i < $scope.users.length; i++) {
+                    if ($scope.users[i].name == $scope.username) {
+                        $scope.validUsername = true;
+                        $scope.currentUser = $scope.users[i];
+                        userIndex = i;
+                        break;
+                    }
+                }
+                if (userIndex >= 0 && $scope.users[userIndex].password == $scope.password) {
+                    $scope.validPassword = true;
+                }
+                if ($scope.validUsername && $scope.validPassword) {
+                    $scope.setView(2);
+                    $scope.cancelLogin();
+
+                }else{
+                    $scope.print = "Incorrect username or password";
+                }
+            }
+        };
+
+        //Logout
+        $scope.logout=function(){
+            $scope.setView(1);
+        };
+
+        $scope.cancelLogin=function(){
+            $scope.print="";
+            $scope.username="";
+            $scope.password="";
+        };
+
         $scope.addNewStudent = function(){
             var formData = {
                 name: $scope.username,
                 password: $scope.password
             };
-            var request = $http.post('/createNewStudent', {
+            console.log($scope.username);
+            console.log($scope.password);
+            var request = $http.post('/api/createNewUser', {
                 params: {
                     name: $scope.username,
                     password: $scope.password
@@ -117,7 +179,7 @@ angular
             });
 
             request.then(function success(data){
-                    console.log(data);
-                });
-            }
+                $http.post('/api/createNewStudent');
+            });
+        }
     });

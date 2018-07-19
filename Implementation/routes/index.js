@@ -3,6 +3,14 @@ const router = express.Router();
 const pg = require('pg');
 const path = require('path');
 const connectionString = process.env.DATABASE_URL || 'postgres://postgres:123456@localhost:5432/studentplannerdb';
+var db = require('../queries');
+//http://mherman.org/blog/2016/03/13/designing-a-restful-api-with-node-and-postgres/
+
+router.get('/api/getUsers', db.getUsers);
+router.get('/api/getStudents', db.getStudents);
+router.get('/api/getLecturers', db.getLecturers);
+router.post('/api/createNewUser', db.createNewUser);
+router.post('/api/createNewStudent', db.createNewStudent);
 
 function getID(res) {
     pg.connect(connectionString, (err, client, done) => {
@@ -25,8 +33,8 @@ function getID(res) {
 
 
 router.post('/createNewStudent', function (req, res) {
-    var name = req.body.params.name;
-    var password = req.body.params.password;
+    var name = req.params.name;
+    var password = req.params.password;
     pg.connect(connectionString, (err, client, done) => {
         client.query('INSERT INTO users(name,password) values($1,$2)',
             [name, password],
@@ -131,4 +139,5 @@ router.get('/getLecturers', (req, res, next) => {
 router.get('/', function (req, res, next) {
     res.render('index', {title: 'Student Planner'});
 });
+
 module.exports = router;

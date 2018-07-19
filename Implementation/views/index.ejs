@@ -10,11 +10,13 @@
   <script src="./javascripts/calendar-helper.js"></script>
 </head>
 <body ng-controller="calendarController as vm">
-<div id="login" ng-hide="loggedIn">
+<div id="login" ng-show="isView(1)">
     <% include login.ejs %>
 </div>
 <div>
-
+  <div id="input" ng-hide="isView(1)">
+    <input type="submit" value="Log Out" class="btn btn-default" ng-click="logout()">
+  </div>
 </div>
 
 <% include calendar.ejs %>
