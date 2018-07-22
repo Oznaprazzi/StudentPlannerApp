@@ -8,20 +8,27 @@
   <script src="/scripts/angular-route.js"></script>
   <script src="./javascripts/calendar.js"></script>
   <script src="./javascripts/calendar-helper.js"></script>
+  <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
 </head>
-<body ng-controller="calendarController as vm">
-<div id="login" ng-show="isView('', 1)">
-    <% include login.ejs %>
-</div>
+<body ng-cloak>
+<div id="mainDiv" ng-controller="calendarController as vm">
+  <div>
+    <div id="login" ng-show="isView('', 1)">
+        <% include login.ejs %>
+    </div>
 
-<div>
-  <div id="input" ng-hide="isView('', 1)">
-    <input type="submit" value="Log Out" class="btn btn-default" ng-click="logout()">
+    <div>
+      <div id="input" ng-hide="isView('', 1)" class="logout">
+        <i class="fa fa-sign-out fa-2x" ng-click="logout()" aria-hidden="true"></i>
+        <i class="fa fa-home fa-2x" ng-click="goHome()" ng-show="view > 2" aria-hidden="true"></i>
+      </div>
+    </div>
+
+    <% include adminView.ejs %>
+
+    <% include calendar.ejs %>
   </div>
+
 </div>
-
-<% include adminView.ejs %>
-
-<% include calendar.ejs %>
 </body>
 </html>

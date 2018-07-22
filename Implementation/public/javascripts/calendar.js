@@ -105,6 +105,7 @@ angular
         //Calendar Implementation
         $scope.view = 1;
         $scope.type = "";
+        $scope.loginFailMessage = "";
 
         $http.get('/api/getUsers')
             .then(function sucessCall(response)	{
@@ -142,6 +143,7 @@ angular
         function getUserType(i){
             if ($scope.lecturers.indexOf($scope.users[i].userid) != -1) {
                 return 'lecturer';
+                return;
             }else if($scope.students.indexOf($scope.users[i].userid) != -1){
                 return 'student';
             }
@@ -150,11 +152,11 @@ angular
 
         $scope.login = function(){
             if($scope.username == "" && $scope.password == ""){
-                $scope.print="Please input a valid username and password";
+                $scope.loginFailMessage="Username And Password Cannot Be Empty";
             }else if($scope.username == "" && $scope.password != ""){
-                $scope.print="Please input a valid username";
+                $scope.loginFailMessage="Username Cannot Be Empty";
             }else if($scope.password == ""){
-                $scope.print="Please input a valid password";
+                $scope.loginFailMessage="Password Cannot Be Empty";
             }else{
                 $scope.validUsername = false;
                 $scope.validPassword = false;
@@ -171,22 +173,28 @@ angular
                     $scope.validPassword = true;
                 }
                 if ($scope.validUsername && $scope.validPassword) {
-                    $scope.setView(getUserType(userIndex), 2);
+                    $scope.userType = getUserType(userIndex);
+                    $scope.setView($scope.userType, 2);
                     $scope.cancelLogin();
 
                 }else{
-                    $scope.print = "Incorrect username or password";
+                    $scope.loginFailMessage = "Incorrect Username Or Password. Please Try Again.";
                 }
             }
         };
 
         //Logout
-        $scope.logout=function(){
+        $scope.logout = function(){
             $scope.setView('', 1);
+            $scope.cancelLogin();
+        };
+
+        $scope.goHome = function(){
+            $scope.setView($scope.userType, 2);
         };
 
         $scope.cancelLogin=function(){
-            $scope.print="";
+            $scope.loginFailMessage="";
             $scope.username="";
             $scope.password="";
         };

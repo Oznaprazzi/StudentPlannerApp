@@ -1,3 +1,20 @@
-<div ng-show="isView('admin', 2)">
-    <h2>Home</h2>
+<div id="admin">
+    <div id="menu" ng-show="isView('admin', 2)">
+        <h2>Home</h2>
+        <div id="btn">
+            <button class="btn btn-default" ng-click="setView('admin', 3)">Manage Courses</button>
+        </div>
+
+        <div id="btn">
+            <button class="btn btn-default">Manage Lecturers</button>
+        </div>
+
+        <div id="btn">
+            <button class="btn btn-default">Manage Students</button>
+        </div>
+    </div>
+
+    <div ng-show="isView('admin', 3)">
+        <h2>Courses</h2>
+    </div>
 </div>

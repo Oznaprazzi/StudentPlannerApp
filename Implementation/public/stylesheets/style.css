@@ -7,6 +7,11 @@ a {
   color: #00B7FF;
 }
 
+#mainDiv{
+  width: 900px;
+  margin: 0 auto;
+}
+
 #login{
   margin: 0 auto;
   width: 500px;
@@ -21,4 +26,41 @@ a {
   display: block;
   text-align: center;
   padding: 10px 0;
+}
+
+.logout{
+  text-align: right;
+}
+
+#menu{
+  width: 300px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+#menu #btn{
+  display: block;
+  margin:0 auto;
+}
+
+#menu .btn{
+  background-color: #4bc8f0;
+  color: white;
+  padding: 20px;
+  margin: 10px 0px;
+  text-size: 20px;
+}
+
+#loader{
+  position: absolute;
+  width:100%;
+  height: 100%;
+  top:0;
+  left: 0;
+  background: rgba(0,0,0, 20);
+  z-index: 500000;
+}
+
+.fa{
+  cursor: pointer;
 }
