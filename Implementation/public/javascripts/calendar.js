@@ -104,6 +104,7 @@ angular
 
         //Calendar Implementation
         $scope.view = 1;
+        $scope.type = "";
 
         $http.get('/api/getUsers')
             .then(function sucessCall(response)	{
@@ -113,13 +114,39 @@ angular
                 }
             );
 
-        $scope.setView=function(view){
+        $http.get('/api/getLecturers')
+            .then(function sucessCall(response)	{
+                    $scope.lecturers = response.data.data;
+                },function errorCall()	{
+                    console.log("Error reading users list.");
+                }
+            );
+
+        $http.get('/api/getStudents')
+            .then(function sucessCall(response)	{
+                    $scope.students = response.data.data;
+                },function errorCall()	{
+                    console.log("Error reading users list.");
+                }
+            );
+
+        $scope.setView=function(type, view){
+            $scope.type = type;
             $scope.view = view;
         };
 
-        $scope.isView=function(view){
-            return $scope.view == view;
+        $scope.isView=function(type, view){
+            return $scope.type == type && $scope.view == view;
         };
+
+        function getUserType(i){
+            if ($scope.lecturers.indexOf($scope.users[i].userid) != -1) {
+                return 'lecturer';
+            }else if($scope.students.indexOf($scope.users[i].userid) != -1){
+                return 'student';
+            }
+            return 'admin';
+        }
 
         $scope.login = function(){
             if($scope.username == "" && $scope.password == ""){
@@ -133,7 +160,7 @@ angular
                 $scope.validPassword = false;
                 var userIndex = -1;
                 for (let i = 0; i < $scope.users.length; i++) {
-                    if ($scope.users[i].name == $scope.username) {
+                    if ($scope.users[i].username == $scope.username) {
                         $scope.validUsername = true;
                         $scope.currentUser = $scope.users[i];
                         userIndex = i;
@@ -144,7 +171,7 @@ angular
                     $scope.validPassword = true;
                 }
                 if ($scope.validUsername && $scope.validPassword) {
-                    $scope.setView(2);
+                    $scope.setView(getUserType(userIndex), 2);
                     $scope.cancelLogin();
 
                 }else{
@@ -155,7 +182,7 @@ angular
 
         //Logout
         $scope.logout=function(){
-            $scope.setView(1);
+            $scope.setView('', 1);
         };
 
         $scope.cancelLogin=function(){
