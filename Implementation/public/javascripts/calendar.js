@@ -131,6 +131,14 @@ angular
                 }
             );
 
+        $http.get('/api/getCourses')
+            .then(function sucessCall(response)	{
+                    $scope.courses = response.data.data;
+                },function errorCall()	{
+                    console.log("Error reading users list.");
+                }
+            );
+
         $scope.setView=function(type, view){
             $scope.type = type;
             $scope.view = view;

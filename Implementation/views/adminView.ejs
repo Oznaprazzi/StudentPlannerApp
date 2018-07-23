@@ -16,5 +16,14 @@
 
     <div ng-show="isView('admin', 3)">
         <h2>Courses</h2>
+        <hr>
+        <table>
+            <tr ng-repeat="c in courses">
+                <td>c.courseCode</td>
+                <td><button class="btn btn-default">Manage</button></td>
+            </tr>
+        </table>
+        <p ng-if="courses.length <= 0">There are currently no courses in the system.</p>
+        <button class="btn btn-default">Add Course</button>
     </div>
 </div>

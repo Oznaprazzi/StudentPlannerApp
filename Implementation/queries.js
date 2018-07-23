@@ -15,8 +15,10 @@ module.exports = {
     getUsers: getUsers,
     getStudents: getStudents,
     getLecturers: getLecturers,
+    getCourses: getCourses,
     createNewUser: createNewUser,
-    createNewStudent: createNewStudent
+    createNewStudent: createNewStudent,
+    createNewCourse: createNewCourse
 };
 
 function getUsers(req, res, next) {
@@ -41,7 +43,7 @@ function getStudents(req, res, next) {
                 .json({
                     status: 'success',
                     data: data,
-                    message: 'Retrieved ALL Users'
+                    message: 'Retrieved ALL Students'
                 });
         })
         .catch(function (err) {
@@ -56,7 +58,22 @@ function getLecturers(req, res, next) {
                 .json({
                     status: 'success',
                     data: data,
-                    message: 'Retrieved ALL Users'
+                    message: 'Retrieved ALL Lecturers'
+                });
+        })
+        .catch(function (err) {
+            return next(err);
+        });
+}
+
+function getCourses(req, res, next){
+    db.any('select * from course')
+        .then(function (data) {
+            res.status(200)
+                .json({
+                    status: 'success',
+                    data: data,
+                    message: 'Retrieved ALL Courses'
                 });
         })
         .catch(function (err) {
@@ -98,6 +115,21 @@ function createNewStudent(req, res, next){
         })
         .catch(function (err) {
             console.log(err);
+        });
+}
+
+function createNewCourse(req, res, next){
+    var courseCode = req.body.params.courseCode;
+    db.none('insert into course(coursecode) values($1)', [courseCode])
+        .then(function () {
+            res.status(200)
+                .json({
+                    status: 'success',
+                    message: 'Created new course'
+                });
+        })
+        .catch(function (err) {
+            return next(err);
         });
 }
 
