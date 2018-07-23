@@ -64,3 +64,7 @@ a {
 .fa{
   cursor: pointer;
 }
+
+md-backdrop{
+  position: fixed;
+}

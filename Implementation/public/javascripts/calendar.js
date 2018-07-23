@@ -1,7 +1,7 @@
-angular.module('mwl.calendar.docs', ['mwl.calendar', 'ngAnimate', 'ui.bootstrap', 'colorpicker.module', 'ngRoute']);
+angular.module('mwl.calendar.docs', ['mwl.calendar', 'ngAnimate', 'ui.bootstrap', 'colorpicker.module', 'ngRoute', 'ngMaterial']);
 angular
     .module('mwl.calendar.docs') //you will need to declare your module with the dependencies ['mwl.calendar', 'ui.bootstrap', 'ngAnimate']
-    .controller('calendarController', function(moment, alert, calendarConfig, $scope, $http) {
+    .controller('calendarController', function(moment, alert, calendarConfig, $scope, $http, $mdDialog) {
         var vm = this;
 
         //These variables MUST be set as a minimum for the calendar to work
@@ -104,8 +104,11 @@ angular
 
         //Calendar Implementation
         $scope.view = 1;
-        $scope.type = "";
         $scope.loginFailMessage = "";
+        $scope.userType = '';
+        $scope.courseCode = '';
+
+        var viewStack = [];
 
         $http.get('/api/getUsers')
             .then(function sucessCall(response)	{
@@ -139,13 +142,22 @@ angular
                 }
             );
 
-        $scope.setView=function(type, view){
-            $scope.type = type;
+        $scope.setView=function(view){
             $scope.view = view;
+            viewStack.push(view);
+        };
+
+        $scope.setSharedView = function(view){
+            $scope.view = view;
+            viewStack.push(view);
         };
 
         $scope.isView=function(type, view){
-            return $scope.type == type && $scope.view == view;
+            return $scope.userType == type && $scope.view == view;
+        };
+
+        $scope.isSharedView = function(view){
+            return $scope.view == view;
         };
 
         function getUserType(i){
@@ -182,7 +194,7 @@ angular
                 }
                 if ($scope.validUsername && $scope.validPassword) {
                     $scope.userType = getUserType(userIndex);
-                    $scope.setView($scope.userType, 2);
+                    $scope.setView(2);
                     $scope.cancelLogin();
 
                 }else{
@@ -201,6 +213,11 @@ angular
             $scope.setView($scope.userType, 2);
         };
 
+        $scope.goBack = function(){
+            viewStack.pop();
+            $scope.setView(viewStack[viewStack.length - 1]);
+        };
+
         $scope.cancelLogin=function(){
             $scope.loginFailMessage="";
             $scope.username="";
@@ -212,8 +229,6 @@ angular
                 name: $scope.username,
                 password: $scope.password
             };
-            console.log($scope.username);
-            console.log($scope.password);
             var request = $http.post('/api/createNewUser', {
                 params: {
                     name: $scope.username,
@@ -223,6 +238,36 @@ angular
 
             request.then(function success(data){
                 $http.post('/api/createNewStudent');
+            });
+        }
+
+        $scope.addCourse = function(ev){
+            if($scope.courseCode == ''){
+                $scope.errorMessage = 'Course Code Cannot Be Empty!';
+                return;
+            }
+            var request = $http.post('/api/createNewCourse', {
+                params: {
+                    courseCode: $scope.courseCode
+                }
+            });
+
+            request.then(function success(data){
+                // Appending dialog to document.body to cover sidenav in docs app
+                var confirm = $mdDialog.confirm()
+                    .title('Would you like to continue adding another course?')
+                    .targetEvent(ev)
+                    .ok('Add Another Course')
+                    .cancel('Back');
+
+                $mdDialog.show(confirm).then(function() {
+                    $scope.courseCode = '';
+                    $scope.errorMessage = '';
+                }, function() {
+                    $scope.courseCode = '';
+                    $scope.errorMessage = '';
+                    $scope.goBack();
+                });
             });
         }
     });

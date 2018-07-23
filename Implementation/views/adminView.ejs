@@ -2,7 +2,7 @@
     <div id="menu" ng-show="isView('admin', 2)">
         <h2>Home</h2>
         <div id="btn">
-            <button class="btn btn-default" ng-click="setView('admin', 3)">Manage Courses</button>
+            <button class="btn btn-default" ng-click="setView(3)">Manage Courses</button>
         </div>
 
         <div id="btn">
@@ -19,11 +19,22 @@
         <hr>
         <table>
             <tr ng-repeat="c in courses">
-                <td>c.courseCode</td>
+                <td>{{c.coursecode}}</td>
                 <td><button class="btn btn-default">Manage</button></td>
             </tr>
         </table>
         <p ng-if="courses.length <= 0">There are currently no courses in the system.</p>
-        <button class="btn btn-default">Add Course</button>
+        <button class="btn btn-default" ng-click="setView(6)">Add Course</button>
+    </div>
+
+    <div ng-show="isView('admin', 6)">
+        <h2>Add Course</h2>
+        <hr>
+        <p ng-bind="errorMessage" style="color:red"></p>
+        <div id="input">
+            <input type="text" ng-model="courseCode" name="courseCode" placeholder="Course Code"/>
+        </div>
+        <button class="btn btn-default" ng-click="setView(3)">Cancel</button>
+        <md-button md-disable-backdrop="true" class="btn btn-default" ng-click="addCourse($event)">Add Course</md-button>
     </div>
 </div>

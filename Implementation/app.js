@@ -10,13 +10,6 @@ var usersRouter = require('./routes/users');
 
 var app = express();
 
-// //Postgres setup
-// var pg = require('pg');
-// var connectionString = "postgres://root:123456@localhost:5432/studentplannerdb";
-// var client = new pg.Client(connectionString);
-// var pool = new pg.Pool(connectionString);
-// client.connect();
-
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
@@ -35,6 +28,10 @@ app.use('/users', usersRouter);
 //Added scripts
 app.use('/scripts', express.static(__dirname + '/node_modules/angular/'));
 app.use('/scripts', express.static(__dirname + '/node_modules/angular-route/'));
+app.use('/scripts', express.static(__dirname + '/node_modules/angular-material/'));
+app.use('/scripts', express.static(__dirname + '/node_modules/angular-aria/'));
+app.use('/scripts', express.static(__dirname + '/node_modules/angular-animate/'));
+app.use('/scripts', express.static(__dirname + '/node_modules/angular-messages/'));
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
