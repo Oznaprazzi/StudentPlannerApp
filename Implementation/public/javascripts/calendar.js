@@ -1,7 +1,7 @@
 angular.module('mwl.calendar.docs', ['mwl.calendar', 'ngAnimate', 'ui.bootstrap', 'colorpicker.module', 'ngRoute', 'ngMaterial']);
 angular
     .module('mwl.calendar.docs') //you will need to declare your module with the dependencies ['mwl.calendar', 'ui.bootstrap', 'ngAnimate']
-    .controller('calendarController', function(moment, alert, calendarConfig, $scope, $http, $mdDialog) {
+    .controller('calendarController', function(moment, alert, calendarConfig, $scope, $http, $mdDialog, $window) {
         var vm = this;
 
         //These variables MUST be set as a minimum for the calendar to work
@@ -253,9 +253,12 @@ angular
             });
 
             request.then(function success(data){
+                $route.reload();
                 // Appending dialog to document.body to cover sidenav in docs app
                 var confirm = $mdDialog.confirm()
-                    .title('Would you like to continue adding another course?')
+                    .title($scope.courseCode + ' course has been successfully added!')
+                    .textContent('Would you like to continue adding another course?')
+                    .ariaLabel('Added Course')
                     .targetEvent(ev)
                     .ok('Add Another Course')
                     .cancel('Back');

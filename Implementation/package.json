@@ -27,6 +27,6 @@
     "pg-promise": "^5.9.7"
   },
   "devDependencies": {
-    "@fortawesome/fontawesome-free": "^5.1.1"
+    "@fortawesome/fontawesome-free": "^5.2.0"
   }
 }
