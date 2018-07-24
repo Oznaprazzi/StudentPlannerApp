@@ -1,0 +1,25 @@
+<div ng-show="isSharedView(10)">
+    <h2>Add New Student</h2>
+    <p ng-bind="errorMessage" style="color:red"></p>
+    <form>
+        <div id="input">
+            <h3>Username</h3>
+            <input type="text" ng-model="username" name="username" required/>
+        </div>
+        <div id="input">
+            <h3>Student ID</h3>
+            <input type="text" ng-model="studentId" name="studentId" required/>
+        </div>
+        <div id="input">
+            <h3>Name</h3>
+            <input type="text" ng-model="name" name="name" required/>
+        </div>
+        <div id="input">
+            <h3>Password</h3>
+            <input type="text" ng-model="password" name="password" required/>
+        </div>
+    </form>
+
+    <button class="btn btn-default" ng-click="setView(7)">Cancel</button>
+    <md-button md-disable-backdrop="true" class="btn btn-default" ng-click="addStudent($event)">Add Student</md-button>
+</div>

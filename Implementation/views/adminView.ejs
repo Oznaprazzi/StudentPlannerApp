@@ -15,16 +15,18 @@
     </div>
 
     <div ng-show="isView('admin', 3)">
-        <h2>Courses</h2>
+        <h2>Courses
+            <i class="titleIcon fa fa-plus-circle" ng-click="setView(6)" aria-hidden="true"></i>
+        </h2>
+
         <hr>
         <table>
             <tr ng-repeat="c in courses">
                 <td>{{c.coursecode}}</td>
-                <td><button class="btn btn-default">Manage</button></td>
+                <td><button class="btn btn-default" ng-click="setView(7); setCourse(c)">Manage</button></td>
             </tr>
         </table>
         <p ng-if="courses.length <= 0">There are currently no courses in the system.</p>
-        <button class="btn btn-default" ng-click="setView(6)">Add Course</button>
     </div>
 
     <div ng-show="isView('admin', 6)">

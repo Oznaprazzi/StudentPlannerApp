@@ -68,3 +68,8 @@ a {
 md-backdrop{
   position: fixed;
 }
+
+.titleIcon{
+  float: right;
+  font-size: 40px !important;
+}

@@ -16,6 +16,7 @@ module.exports = {
     getStudents: getStudents,
     getLecturers: getLecturers,
     getCourses: getCourses,
+    getAssessments: getAssessments,
     createNewUser: createNewUser,
     createNewStudent: createNewStudent,
     createNewCourse: createNewCourse
@@ -37,7 +38,7 @@ function getUsers(req, res, next) {
 }
 
 function getStudents(req, res, next) {
-    db.any('select * from student')
+    db.any('select * from student join users on student.userid = users.userid')
         .then(function (data) {
             res.status(200)
                 .json({
@@ -52,7 +53,7 @@ function getStudents(req, res, next) {
 }
 
 function getLecturers(req, res, next) {
-    db.any('select * from lecturer')
+    db.any('select * from lecturer join users on lecturer.userid = users.userid')
         .then(function (data) {
             res.status(200)
                 .json({
@@ -81,10 +82,26 @@ function getCourses(req, res, next){
         });
 }
 
+function getAssessments(req, res, next){
+    db.any('select assessment.*, coursecode from assessment, course where assessment.courseid = course.courseid')
+        .then(function (data) {
+            res.status(200)
+                .json({
+                    status: 'success',
+                    data: data,
+                    message: 'Retrieved ALL Assessments'
+                });
+        })
+        .catch(function (err) {
+            return next(err);
+        });
+}
+
 function createNewUser(req, res, next){
+    var username = req.body.params.username;
     var name = req.body.params.name;
     var password = req.body.params.password;
-    db.none('insert into users(name,password) values($1,$2)', [name, password])
+    db.none('insert into users(username, name,password) values($1,$2)', [username, name, password])
         .then(function () {
             res.status(200)
                 .json({
@@ -98,23 +115,18 @@ function createNewUser(req, res, next){
 }
 
 function createNewStudent(req, res, next){
-    db.one('select max(userid) from users')
-        .then(function (data) {
-            db.none('insert into student(userid) values($1)', [data.max])
-                .then(function () {
-
-                    res.status(200)
-                        .json({
-                            status: 'success',
-                            message: 'Created new student'
-                        });
-                })
-                .catch(function (err) {
-                    return next(err);
+    var username = req.body.params.username;
+    var studentid = req.body.params.studentid;
+    db.none('insert into student(username, studentid) values($1, $2)', [username, studentid])
+        .then(function () {
+            res.status(200)
+                .json({
+                    status: 'success',
+                    message: 'Created new student'
                 });
         })
         .catch(function (err) {
-            console.log(err);
+            return next(err);
         });
 }
 

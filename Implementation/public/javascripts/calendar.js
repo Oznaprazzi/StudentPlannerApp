@@ -1,7 +1,7 @@
 angular.module('mwl.calendar.docs', ['mwl.calendar', 'ngAnimate', 'ui.bootstrap', 'colorpicker.module', 'ngRoute', 'ngMaterial']);
 angular
     .module('mwl.calendar.docs') //you will need to declare your module with the dependencies ['mwl.calendar', 'ui.bootstrap', 'ngAnimate']
-    .controller('calendarController', function(moment, alert, calendarConfig, $scope, $http, $mdDialog, $window) {
+    .controller('calendarController', function(moment, alert, calendarConfig, $scope, $http, $mdDialog, $route) {
         var vm = this;
 
         //These variables MUST be set as a minimum for the calendar to work
@@ -108,6 +108,8 @@ angular
         $scope.userType = '';
         $scope.courseCode = '';
 
+        $scope.currentCourse = '';
+
         var viewStack = [];
 
         $http.get('/api/getUsers')
@@ -142,12 +144,15 @@ angular
                 }
             );
 
-        $scope.setView=function(view){
-            $scope.view = view;
-            viewStack.push(view);
-        };
+        $http.get('/api/getAssessments')
+            .then(function sucessCall(response)	{
+                    $scope.assessments = response.data.data;
+                },function errorCall()	{
+                    console.log("Error reading users list.");
+                }
+            );
 
-        $scope.setSharedView = function(view){
+        $scope.setView=function(view){
             $scope.view = view;
             viewStack.push(view);
         };
@@ -224,22 +229,13 @@ angular
             $scope.password="";
         };
 
-        $scope.addNewStudent = function(){
-            var formData = {
-                name: $scope.username,
-                password: $scope.password
-            };
-            var request = $http.post('/api/createNewUser', {
-                params: {
-                    name: $scope.username,
-                    password: $scope.password
-                }
-            });
+        $scope.setCourse = function(course){
+            $scope.currentCourse = course;
+        };
 
-            request.then(function success(data){
-                $http.post('/api/createNewStudent');
-            });
-        }
+        $scope.setAssessment = function(assessment){
+            $scope.currentAssessment = assessment;
+        };
 
         $scope.addCourse = function(ev){
             if($scope.courseCode == ''){
@@ -253,24 +249,73 @@ angular
             });
 
             request.then(function success(data){
+                $scope.courses.push({"coursecode": $scope.courseCode});
                 $route.reload();
+                console.log($scope.courses);
                 // Appending dialog to document.body to cover sidenav in docs app
                 var confirm = $mdDialog.confirm()
-                    .title($scope.courseCode + ' course has been successfully added!')
+                    .title($scope.courseCode + ' has been successfully added!')
                     .textContent('Would you like to continue adding another course?')
                     .ariaLabel('Added Course')
                     .targetEvent(ev)
                     .ok('Add Another Course')
                     .cancel('Back');
 
+                $scope.courseCode = '';
+                $scope.errorMessage = '';
                 $mdDialog.show(confirm).then(function() {
-                    $scope.courseCode = '';
-                    $scope.errorMessage = '';
+                    //Stay on current page
                 }, function() {
-                    $scope.courseCode = '';
-                    $scope.errorMessage = '';
                     $scope.goBack();
                 });
             });
-        }
+        };
+
+        $scope.addStudent = function(ev){
+            if($scope.username == '' || $scope.studentId == '' || $scope.name == '' || $scope.password == ''){
+                $scope.errorMessage = 'Please fill in all required fields.';
+                return;
+            }
+
+            var request = $http.post('/api/createNewUser', {
+                params: {
+                    username: $scope.username,
+                    name: $scope.username,
+                    password: $scope.password
+                }
+            });
+
+            request.then(function success(data){
+                $http.post('/api/createNewStudent',{
+                    params:{
+                        username: $scope.username,
+                        studentid: $scope.studentId
+                    }
+                }).then(function success(){
+                    $scope.users.push({"username": $scope.username, "name": $scope.name, "password": $scope.password});
+                    $scope.students.push({"studentid": $scope.studentId, "username": $scope.username});
+                    $route.reload();
+                    // Appending dialog to document.body to cover sidenav in docs app
+                    var confirm = $mdDialog.confirm()
+                        .title($scope.name + ' has been successfully added!')
+                        .textContent('Would you like to continue adding another student?')
+                        .ariaLabel('Added Student')
+                        .targetEvent(ev)
+                        .ok('Add Another Student')
+                        .cancel('Back');
+
+                    $scope.username = '';
+                    $scope.studentId = '';
+                    $scope.name = '';
+                    $scope.password = '';
+                    $scope.errorMessage = '';
+
+                    $mdDialog.show(confirm).then(function() {
+                        //Stay on current page
+                    }, function() {
+                        $scope.goBack();
+                    });
+                });
+            });
+        };
     });

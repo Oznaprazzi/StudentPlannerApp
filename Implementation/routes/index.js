@@ -10,6 +10,7 @@ router.get('/api/getUsers', db.getUsers);
 router.get('/api/getStudents', db.getStudents);
 router.get('/api/getLecturers', db.getLecturers);
 router.get('/api/getCourses', db.getCourses);
+router.get('/api/getAssessments', db.getAssessments);
 router.post('/api/createNewUser', db.createNewUser);
 router.post('/api/createNewStudent', db.createNewStudent);
 router.post('/api/createNewCourse', db.createNewCourse);
