@@ -19,7 +19,9 @@ module.exports = {
     getAssessments: getAssessments,
     createNewUser: createNewUser,
     createNewStudent: createNewStudent,
-    createNewCourse: createNewCourse
+    createNewCourse: createNewCourse,
+    updateCourse: updateCourse,
+    deleteCourse: deleteCourse
 };
 
 function getUsers(req, res, next) {
@@ -138,6 +140,37 @@ function createNewCourse(req, res, next){
                 .json({
                     status: 'success',
                     message: 'Created new course'
+                });
+        })
+        .catch(function (err) {
+            return next(err);
+        });
+}
+
+function updateCourse(req, res, next){
+    var coursecode = req.body.params.coursecode;
+    var id = req.body.params.id;
+    db.none('update course set coursecode = $1 where courseid = $2', [coursecode, id])
+        .then(function () {
+            res.status(200)
+                .json({
+                    status: 'success',
+                    message: 'Updated course'
+                });
+        })
+        .catch(function (err) {
+            return next(err);
+        });
+}
+
+function deleteCourse(req, res, next){
+    var id = req.body.params.id;
+    db.none('delete from course where courseid = $1', [id])
+        .then(function () {
+            res.status(200)
+                .json({
+                    status: 'success',
+                    message: 'Deleted course'
                 });
         })
         .catch(function (err) {

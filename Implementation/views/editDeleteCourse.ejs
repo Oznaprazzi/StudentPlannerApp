@@ -1,6 +1,13 @@
 <div ng-show="isSharedView(8)">
- <h2>
-     Edit Course
-     <i class="titleIcon fa fa-times-circle" ng-click="" aria-hidden="true"></i>
- </h2>
+    <h2>
+        Edit Course
+        <i class="titleIcon fa fa-times-circle" ng-click="goBack()" aria-hidden="true"></i>
+        <i class="titleIcon fa fa-check-circle" ng-click="updateCourse($event)" aria-hidden="true"></i>
+    </h2>
+    <hr>
+    <div id="input">
+        <h3>Course Code</h3>
+        <input type="text" ng-model="currentCourse.coursecode" name="courseCode"/>
+    </div>
+    <md-button md-disable-backdrop="true" class="btn btn-default" ng-click="deleteCourse($event)">Delete Course</md-button>
 </div>

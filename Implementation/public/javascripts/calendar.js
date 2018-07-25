@@ -112,45 +112,61 @@ angular
 
         var viewStack = [];
 
-        $http.get('/api/getUsers')
-            .then(function sucessCall(response)	{
-                    $scope.users = response.data.data;
-                },function errorCall()	{
-                    console.log("Error reading users list.");
-                }
-            );
+        getUsers();
+        getLecturers();
+        getStudents();
+        getAssessments();
+        getCourses();
 
-        $http.get('/api/getLecturers')
-            .then(function sucessCall(response)	{
-                    $scope.lecturers = response.data.data;
-                },function errorCall()	{
-                    console.log("Error reading users list.");
-                }
-            );
+        function getUsers(){
+            $http.get('/api/getUsers')
+                .then(function sucessCall(response)	{
+                        $scope.users = response.data.data;
+                    },function errorCall()	{
+                        console.log("Error reading users list.");
+                    }
+                );
+        }
 
-        $http.get('/api/getStudents')
-            .then(function sucessCall(response)	{
-                    $scope.students = response.data.data;
-                },function errorCall()	{
-                    console.log("Error reading users list.");
-                }
-            );
+        function getLecturers(){
+            $http.get('/api/getLecturers')
+                .then(function sucessCall(response)	{
+                        $scope.lecturers = response.data.data;
+                    },function errorCall()	{
+                        console.log("Error reading users list.");
+                    }
+                );
+        }
 
-        $http.get('/api/getCourses')
-            .then(function sucessCall(response)	{
-                    $scope.courses = response.data.data;
-                },function errorCall()	{
-                    console.log("Error reading users list.");
-                }
-            );
+        function getStudents(){
+            $http.get('/api/getStudents')
+                .then(function sucessCall(response)	{
+                        $scope.students = response.data.data;
+                    },function errorCall()	{
+                        console.log("Error reading users list.");
+                    }
+                );
+        }
 
-        $http.get('/api/getAssessments')
-            .then(function sucessCall(response)	{
-                    $scope.assessments = response.data.data;
-                },function errorCall()	{
-                    console.log("Error reading users list.");
-                }
-            );
+        function getCourses(){
+            $http.get('/api/getCourses')
+                .then(function sucessCall(response)	{
+                        $scope.courses = response.data.data;
+                    },function errorCall()	{
+                        console.log("Error reading users list.");
+                    }
+                );
+        }
+
+        function getAssessments(){
+            $http.get('/api/getAssessments')
+                .then(function sucessCall(response)	{
+                        $scope.assessments = response.data.data;
+                    },function errorCall()	{
+                        console.log("Error reading users list.");
+                    }
+                );
+        }
 
         $scope.setView=function(view){
             $scope.view = view;
@@ -210,17 +226,18 @@ angular
 
         //Logout
         $scope.logout = function(){
-            $scope.setView('', 1);
+            $scope.userType = '';
+            $scope.setView(1);
             $scope.cancelLogin();
         };
 
         $scope.goHome = function(){
-            $scope.setView($scope.userType, 2);
+            $scope.setView(2);
         };
 
         $scope.goBack = function(){
-            viewStack.pop();
-            $scope.setView(viewStack[viewStack.length - 1]);
+            viewStack.splice(-1,1);
+            $scope.view = viewStack[viewStack.length - 1];
         };
 
         $scope.cancelLogin=function(){
@@ -231,6 +248,7 @@ angular
 
         $scope.setCourse = function(course){
             $scope.currentCourse = course;
+            $scope.courseCode = course.courseCode;
         };
 
         $scope.setAssessment = function(assessment){
@@ -249,9 +267,8 @@ angular
             });
 
             request.then(function success(data){
-                $scope.courses.push({"coursecode": $scope.courseCode});
+                getCourses();
                 $route.reload();
-                console.log($scope.courses);
                 // Appending dialog to document.body to cover sidenav in docs app
                 var confirm = $mdDialog.confirm()
                     .title($scope.courseCode + ' has been successfully added!')
@@ -292,8 +309,8 @@ angular
                         studentid: $scope.studentId
                     }
                 }).then(function success(){
-                    $scope.users.push({"username": $scope.username, "name": $scope.name, "password": $scope.password});
-                    $scope.students.push({"studentid": $scope.studentId, "username": $scope.username});
+                    getUsers();
+                    getStudents();
                     $route.reload();
                     // Appending dialog to document.body to cover sidenav in docs app
                     var confirm = $mdDialog.confirm()
@@ -318,4 +335,74 @@ angular
                 });
             });
         };
+
+        $scope.updateCourse = function(ev){
+            if($scope.currentCourse.coursecode == ''){
+                $scope.errorMessage = 'Course Code Cannot Be Empty!';
+                return;
+            }
+
+            var request = $http.post('/api/updateCourse', {
+                params: {
+                    coursecode: $scope.currentCourse.coursecode,
+                    id: $scope.currentCourse.courseid
+                }
+            });
+
+            request.then(function success(data){
+                getCourses();
+                $route.reload();
+                // Appending dialog to document.body to cover sidenav in docs app
+                var alert = $mdDialog.alert()
+                    .parent(angular.element(document.querySelector('#popupContainer')))
+                    .clickOutsideToClose(true)
+                    .title($scope.currentCourse.coursecode + ' has been successfully updated!')
+                    .ariaLabel('Course Successfully Updated')
+                    .ok('OK')
+                    .targetEvent(ev);
+
+                $scope.errorMessage = '';
+
+                $mdDialog.show(alert).then(function() {
+                    $scope.goBack();
+                });
+            });
+        };
+
+        $scope.deleteCourse = function(ev){
+            var confirm = $mdDialog.confirm()
+                .title('Are you sure you want to delete this course?')
+                .ariaLabel('Delete Course')
+                .targetEvent(ev)
+                .ok('Yes')
+                .cancel('No');
+
+            $mdDialog.show(confirm).then(function() {
+                var request = $http.post('/api/deleteCourse', {
+                    params: {
+                        id: $scope.currentCourse.courseid
+                    }
+                });
+                request.then(function success(data){
+                    $route.reload();
+                    // Appending dialog to document.body to cover sidenav in docs app
+                    var alert = $mdDialog.alert()
+                        .parent(angular.element(document.querySelector('#popupContainer')))
+                        .clickOutsideToClose(true)
+                        .title($scope.courseCode + ' has been successfully deleted!')
+                        .ariaLabel('Course Successfully Deleted')
+                        .ok('OK')
+                        .targetEvent(ev);
+
+                    $mdDialog.show(alert).then(function() {
+                        getCourses();
+                        $scope.goBack();
+                        $scope.goBack();
+                    });
+                });
+            }, function() {
+                //Stay on current page
+            });
+
+        }
     });

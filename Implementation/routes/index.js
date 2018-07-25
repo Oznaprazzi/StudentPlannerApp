@@ -14,6 +14,8 @@ router.get('/api/getAssessments', db.getAssessments);
 router.post('/api/createNewUser', db.createNewUser);
 router.post('/api/createNewStudent', db.createNewStudent);
 router.post('/api/createNewCourse', db.createNewCourse);
+router.post('/api/updateCourse', db.updateCourse);
+router.post('/api/deleteCourse', db.deleteCourse);
 
 /* GET home page. */
 router.get('/', function (req, res, next) {

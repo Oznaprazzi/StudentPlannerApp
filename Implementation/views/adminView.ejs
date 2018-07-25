@@ -34,7 +34,8 @@
         <hr>
         <p ng-bind="errorMessage" style="color:red"></p>
         <div id="input">
-            <input type="text" ng-model="courseCode" name="courseCode" placeholder="Course Code"/>
+            <h3>Course Code</h3>
+            <input type="text" ng-model="courseCode" name="courseCode"/>
         </div>
         <button class="btn btn-default" ng-click="setView(3)">Cancel</button>
         <md-button md-disable-backdrop="true" class="btn btn-default" ng-click="addCourse($event)">Add Course</md-button>
