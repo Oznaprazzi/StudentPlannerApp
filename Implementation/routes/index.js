@@ -11,9 +11,13 @@ router.get('/api/getStudents', db.getStudents);
 router.get('/api/getLecturers', db.getLecturers);
 router.get('/api/getCourses', db.getCourses);
 router.get('/api/getAssessments', db.getAssessments);
+
+router.get('/api/getStudentsInCourse', db.getStudentsInCourse);
+
 router.post('/api/createNewUser', db.createNewUser);
 router.post('/api/createNewStudent', db.createNewStudent);
 router.post('/api/createNewCourse', db.createNewCourse);
+router.post('/api/addStudentToCourse', db.addStudentToCourse);
 router.post('/api/updateCourse', db.updateCourse);
 router.post('/api/deleteCourse', db.deleteCourse);
 

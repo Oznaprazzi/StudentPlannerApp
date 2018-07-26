@@ -133,7 +133,7 @@ angular
                 .then(function sucessCall(response)	{
                         $scope.lecturers = response.data.data;
                     },function errorCall()	{
-                        console.log("Error reading users list.");
+                        console.log("Error reading lecturers list.");
                     }
                 );
         }
@@ -143,7 +143,7 @@ angular
                 .then(function sucessCall(response)	{
                         $scope.students = response.data.data;
                     },function errorCall()	{
-                        console.log("Error reading users list.");
+                        console.log("Error reading students list.");
                     }
                 );
         }
@@ -153,7 +153,7 @@ angular
                 .then(function sucessCall(response)	{
                         $scope.courses = response.data.data;
                     },function errorCall()	{
-                        console.log("Error reading users list.");
+                        console.log("Error reading courses list.");
                     }
                 );
         }
@@ -163,7 +163,20 @@ angular
                 .then(function sucessCall(response)	{
                         $scope.assessments = response.data.data;
                     },function errorCall()	{
-                        console.log("Error reading users list.");
+                        console.log("Error reading assessments list.");
+                    }
+                );
+        }
+
+        function getStudentsInCourse(courseid){
+            $http.get('/api/getStudentsInCourse', {
+                params: {
+                    id: courseid
+                }
+            }).then(function sucessCall(response)	{
+                        $scope.studentsInCourse = response.data.data;
+                    },function errorCall()	{
+                        console.log("Error reading student in course list.");
                     }
                 );
         }
@@ -249,6 +262,7 @@ angular
         $scope.setCourse = function(course){
             $scope.currentCourse = course;
             $scope.courseCode = course.courseCode;
+            getStudentsInCourse(course.courseid);
         };
 
         $scope.setAssessment = function(assessment){
@@ -306,12 +320,16 @@ angular
                 $http.post('/api/createNewStudent',{
                     params:{
                         username: $scope.studentId,
-                        studentid: $scope.studentId,
-                        courses: $scope.coursesList
+                        studentid: $scope.studentId
                     }
                 }).then(function success(){
                     getUsers();
                     getStudents();
+
+                    for(let i = 0; i < $scope.coursesList.length; i++){
+                        console.log($scope.coursesList[i].courseid);
+                        $scope.addStudentToCourse($scope.studentId, $scope.coursesList[i].courseid);
+                    }
                     $route.reload();
                     // Appending dialog to document.body to cover sidenav in docs app
                     var confirm = $mdDialog.confirm()
@@ -335,6 +353,15 @@ angular
                     });
                 });
             });
+        };
+
+        $scope.addStudentToCourse = function (studentid, courseid) {
+            $http.post('/api/addStudentToCourse',{
+                params:{
+                    studentid: studentid,
+                    courseid: courseid
+                }
+            })
         };
 
         $scope.updateCourse = function(ev){

@@ -17,9 +17,11 @@ module.exports = {
     getLecturers: getLecturers,
     getCourses: getCourses,
     getAssessments: getAssessments,
+    getStudentsInCourse: getStudentsInCourse,
     createNewUser: createNewUser,
     createNewStudent: createNewStudent,
     createNewCourse: createNewCourse,
+    addStudentToCourse: addStudentToCourse,
     updateCourse: updateCourse,
     deleteCourse: deleteCourse
 };
@@ -99,6 +101,22 @@ function getAssessments(req, res, next){
         });
 }
 
+function getStudentsInCourse(req, res, next) {
+    var courseid = req.query.id;
+     db.any('select * from student join users on student.username = users.username join enrolledin on student.studentid = enrolledin.studentid and enrolledin.courseid = $1', [courseid])
+        .then(function (data) {
+            res.status(200)
+                .json({
+                    status: 'success',
+                    data: data,
+                    message: 'Retrieved ALL Students In Course'
+                });
+        })
+        .catch(function (err) {
+            return next(err);
+        });
+}
+
 function createNewUser(req, res, next){
     var username = req.body.params.username;
     var name = req.body.params.name;
@@ -119,12 +137,8 @@ function createNewUser(req, res, next){
 function createNewStudent(req, res, next){
     var username = req.body.params.username;
     var studentid = req.body.params.studentid;
-    var courses = req.body.params.courses;
     db.none('insert into student(username, studentid) values($1, $2)', [username, studentid])
         .then(function () {
-            for(let i = 0; i < courses.length; i++){
-                addStudentToCourse(req, res, next, studentid, courses[i]);
-            }
             res.status(200)
                 .json({
                     status: 'success',
@@ -136,7 +150,9 @@ function createNewStudent(req, res, next){
         });
 }
 
-function addStudentToCourse(req, res, next, studentid, courseid){
+function addStudentToCourse(req, res, next){
+    var studentid = req.body.params.studentid;
+    var courseid = req.body.params.courseid;
     db.none('insert into enrolledin(studentid, courseid) values($1, $2)', [studentid, courseid])
         .then(function () {
             res.status(200)
