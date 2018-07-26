@@ -2,22 +2,24 @@
     <h2>{{currentAssessment.title}}</h2>
     <hr>
     <table>
+        <tbody>
         <tr>
-            <td><h3>Start Date</h3></td>
+            <th scope="row">Start Date</th>
             <td>{{currentAssessment.startdate}}</td>
         </tr>
         <tr>
-            <td><h3>Due Date</h3></td>
+            <th scope="row">Due Date</th>
             <td>{{currentAssessment.duedate}}</td>
         </tr>
         <tr>
-            <td><h3>Class</h3></td>
+            <th scope="row">Class</th>
             <td>{{currentAssessment.coursecode}}</td>
         </tr>
         <tr>
-            <td><h3>Type</h3></td>
+            <th scope="row">Type</th>
             <td>{{currentAssessment.type}}</td>
         </tr>
+        </tbody>
     </table>
     <h3>Details</h3>
     <p>{{currentAssessment.details}}</p>

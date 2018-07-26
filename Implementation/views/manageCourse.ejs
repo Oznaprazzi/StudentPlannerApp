@@ -4,23 +4,34 @@
     </h2>
     <hr>
     <h3>Assessments</h3>
-    <table>
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th scope="col">Title</th>
+            <th scope="col"></th>
+        </tr>
+        </thead>
+        <tbody>
         <tr ng-repeat="a in assessments">
             <td>{{a.title}}</td>
             <td ng-show="userType == 'lecturer'"><button class="btn btn-default" ng-click="setView(9); setAssessment(a)">Manage</button></td>
         </tr>
+        </tbody>
     </table>
     <p ng-if="assessments.length <= 0">There are currently no assessments for this course.</p>
     <hr>
     <h3>Students
         <i class="fa fa-plus-circle fa-2" ng-click="setView(10)" style="float: right" aria-hidden="true"></i>
     </h3>
-    <table>
+    <table class="table table-striped">
+        <thead>
         <tr>
-            <td>Name</td>
-            <td>Student ID</td>
-            <td></td>
+            <th scope="col">Name</th>
+            <th scope="col">Student ID</th>
+            <th scope="col"></th>
         </tr>
+        </thead>
+        <tbody>
         <tr ng-repeat="s in students">
             <td>{{s.name}}</td>
             <td>{{s.studentid}}</td>
@@ -29,5 +40,6 @@
                 <i class="fa fa-trash" ng-click="" aria-hidden="true"></i>
             </td>
         </tr>
+        </tbody>
     </table>
 </div>

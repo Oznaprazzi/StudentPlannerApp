@@ -1,4 +1,4 @@
-angular.module('mwl.calendar.docs', ['mwl.calendar', 'ngAnimate', 'ui.bootstrap', 'colorpicker.module', 'ngRoute', 'ngMaterial']);
+angular.module('mwl.calendar.docs', ['mwl.calendar', 'ngAnimate', 'ui.bootstrap', 'colorpicker.module', 'ngRoute', 'ngMaterial', 'multipleSelect']);
 angular
     .module('mwl.calendar.docs') //you will need to declare your module with the dependencies ['mwl.calendar', 'ui.bootstrap', 'ngAnimate']
     .controller('calendarController', function(moment, alert, calendarConfig, $scope, $http, $mdDialog, $route) {
@@ -107,8 +107,8 @@ angular
         $scope.loginFailMessage = "";
         $scope.userType = '';
         $scope.courseCode = '';
-
         $scope.currentCourse = '';
+        $scope.coursesList = [];
 
         var viewStack = [];
 
@@ -289,15 +289,15 @@ angular
         };
 
         $scope.addStudent = function(ev){
-            if($scope.username == '' || $scope.studentId == '' || $scope.name == '' || $scope.password == ''){
-                $scope.errorMessage = 'Please fill in all required fields.';
+            if($scope.studentId == '' || $scope.name == '' || $scope.password == ''){
+                $scope.errorMessage = 'Please fill in all fields.';
                 return;
             }
 
             var request = $http.post('/api/createNewUser', {
                 params: {
-                    username: $scope.username,
-                    name: $scope.username,
+                    username: $scope.studentId,
+                    name: $scope.name,
                     password: $scope.password
                 }
             });
@@ -305,8 +305,9 @@ angular
             request.then(function success(data){
                 $http.post('/api/createNewStudent',{
                     params:{
-                        username: $scope.username,
-                        studentid: $scope.studentId
+                        username: $scope.studentId,
+                        studentid: $scope.studentId,
+                        courses: $scope.coursesList
                     }
                 }).then(function success(){
                     getUsers();

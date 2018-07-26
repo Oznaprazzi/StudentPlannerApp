@@ -40,7 +40,7 @@ function getUsers(req, res, next) {
 }
 
 function getStudents(req, res, next) {
-    db.any('select * from student join users on student.userid = users.userid')
+    db.any('select * from student join users on student.username = users.username')
         .then(function (data) {
             res.status(200)
                 .json({
@@ -55,7 +55,7 @@ function getStudents(req, res, next) {
 }
 
 function getLecturers(req, res, next) {
-    db.any('select * from lecturer join users on lecturer.userid = users.userid')
+    db.any('select * from lecturer join users on lecturer.username = users.username')
         .then(function (data) {
             res.status(200)
                 .json({
@@ -103,7 +103,7 @@ function createNewUser(req, res, next){
     var username = req.body.params.username;
     var name = req.body.params.name;
     var password = req.body.params.password;
-    db.none('insert into users(username, name,password) values($1,$2)', [username, name, password])
+    db.none('insert into users(username, name,password) values($1,$2,$3)', [username, name, password])
         .then(function () {
             res.status(200)
                 .json({
@@ -119,12 +119,30 @@ function createNewUser(req, res, next){
 function createNewStudent(req, res, next){
     var username = req.body.params.username;
     var studentid = req.body.params.studentid;
+    var courses = req.body.params.courses;
     db.none('insert into student(username, studentid) values($1, $2)', [username, studentid])
         .then(function () {
+            for(let i = 0; i < courses.length; i++){
+                addStudentToCourse(req, res, next, studentid, courses[i]);
+            }
             res.status(200)
                 .json({
                     status: 'success',
                     message: 'Created new student'
+                });
+        })
+        .catch(function (err) {
+            return next(err);
+        });
+}
+
+function addStudentToCourse(req, res, next, studentid, courseid){
+    db.none('insert into enrolledin(studentid, courseid) values($1, $2)', [studentid, courseid])
+        .then(function () {
+            res.status(200)
+                .json({
+                    status: 'success',
+                    message: 'Added student to course'
                 });
         })
         .catch(function (err) {
