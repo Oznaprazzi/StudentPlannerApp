@@ -330,6 +330,7 @@ angular
                         console.log($scope.coursesList[i].courseid);
                         $scope.addStudentToCourse($scope.studentId, $scope.coursesList[i].courseid);
                     }
+
                     $route.reload();
                     // Appending dialog to document.body to cover sidenav in docs app
                     var confirm = $mdDialog.confirm()
@@ -346,6 +347,7 @@ angular
                     $scope.password = '';
                     $scope.errorMessage = '';
 
+                    getStudentsInCourse($scope.currentCourse.courseid);
                     $mdDialog.show(confirm).then(function() {
                         //Stay on current page
                     }, function() {
