@@ -32,7 +32,7 @@
     <div ng-show="isView('admin', 6)">
         <h2>Add Course</h2>
         <hr>
-        <p ng-bind="errorMessage" style="color:red"></p>
+        <p class="alert alert-danger" ng-if="errorMessage != ''">{{errorMessage}}</p>
         <div id="input">
             <h3>Course Code</h3>
             <input type="text" ng-model="courseCode" name="courseCode"/>

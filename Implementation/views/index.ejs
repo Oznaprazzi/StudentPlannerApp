@@ -22,27 +22,26 @@
 </head>
 <body ng-cloak>
 <div id="mainDiv" ng-controller="calendarController as vm">
-  <div>
-    <div id="login" ng-show="isView('', 1)">
-        <% include login.ejs %>
-    </div>
-
     <div>
-      <div id="input" ng-hide="isView('', 1)" class="logout">
-        <i class="fa fa-sign-out fa-2x" ng-click="logout()" aria-hidden="true"></i>
-        <i class="fa fa-home fa-2x" ng-click="goHome()" ng-show="view > 2" aria-hidden="true"></i>
-        <i class="fa fa-arrow-left fa-2x" ng-click="goBack()" ng-show="view > 5" aria-hidden="true" style="float:left"></i>
-      </div>
+        <div id="login" ng-show="isView('', 1)">
+            <% include login.ejs %>
+        </div>
+
+        <div>
+            <div id="input" ng-hide="isView('', 1)" class="logout">
+                <i class="fa fa-sign-out fa-2x" ng-click="logout()" aria-hidden="true"></i>
+                <i class="fa fa-home fa-2x" ng-click="goHome()" ng-show="view > 2" aria-hidden="true"></i>
+                <i class="fa fa-arrow-left fa-2x" ng-click="goBack()" ng-show="view > 5" aria-hidden="true" style="float:left"></i>
+            </div>
+        </div>
+
+        <% include adminView.ejs %>
+        <% include manageCourse.ejs %>
+        <% include editDeleteCourse.ejs %>
+        <% include assessmentDetails.ejs %>
+        <% include addStudent.ejs %>
+        <% include calendar.ejs %>
     </div>
-
-    <% include adminView.ejs %>
-      <% include manageCourse.ejs %>
-      <% include editDeleteCourse.ejs %>
-      <% include assessmentDetails.ejs %>
-      <% include addStudent.ejs %>
-    <% include calendar.ejs %>
-  </div>
-
 </div>
 </body>
 </html>

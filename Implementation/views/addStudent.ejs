@@ -1,6 +1,6 @@
 <div ng-show="isSharedView(10)">
     <h2>Add New Student</h2>
-    <p ng-bind="errorMessage" style="color:red"></p>
+    <p class="alert alert-danger" ng-if="errorMessage != ''">{{errorMessage}}</p>
     <form>
         <div id="input">
             <h3>Username</h3>
