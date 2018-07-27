@@ -12,16 +12,16 @@
         </tr>
         </thead>
         <tbody>
-        <tr ng-repeat="a in assessments">
-            <td>{{a.title}}</td>
-            <td ng-show="userType == 'lecturer'"><button class="btn btn-default" ng-click="setView(9); setAssessment(a)">Manage</button></td>
-        </tr>
+            <tr ng-repeat="a in assessments">
+                <td>{{a.title}}</td>
+                <td ng-show="userType == 'lecturer'"><button class="btn btn-default" ng-click="setView(9); setAssessment(a)">Manage</button></td>
+            </tr>
         </tbody>
     </table>
     <p ng-if="assessments.length <= 0">There are currently no assessments for this course.</p>
     <hr>
     <h3>Students
-        <i class="fa fa-plus-circle fa-2" ng-click="setView(10)" style="float: right" aria-hidden="true"></i>
+        <i class="fa fa-plus-circle" ng-click="setView(10)" style="float: right" aria-hidden="true"></i>
     </h3>
     <table class="table table-striped">
         <thead>

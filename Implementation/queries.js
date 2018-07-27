@@ -18,6 +18,7 @@ module.exports = {
     getCourses: getCourses,
     getAssessments: getAssessments,
     getStudentsInCourse: getStudentsInCourse,
+    getStudentsNotInCourse: getStudentsNotInCourse,
     createNewUser: createNewUser,
     createNewStudent: createNewStudent,
     createNewCourse: createNewCourse,
@@ -110,6 +111,22 @@ function getStudentsInCourse(req, res, next) {
                     status: 'success',
                     data: data,
                     message: 'Retrieved ALL Students In Course'
+                });
+        })
+        .catch(function (err) {
+            return next(err);
+        });
+}
+
+function getStudentsNotInCourse(req, res, next) {
+    var courseid = req.query.id;
+    db.any('select * from student join users on student.username = users.username join enrolledin on student.studentid = enrolledin.studentid and enrolledin.courseid <> $1', [courseid])
+        .then(function (data) {
+            res.status(200)
+                .json({
+                    status: 'success',
+                    data: data,
+                    message: 'Retrieved ALL Students Not In Course'
                 });
         })
         .catch(function (err) {

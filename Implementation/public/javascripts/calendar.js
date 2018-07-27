@@ -104,11 +104,20 @@ angular
 
         //Calendar Implementation
         $scope.view = 1;
-        $scope.loginFailMessage = "";
+        $scope.loginFailMessage = '';
         $scope.userType = '';
         $scope.courseCode = '';
         $scope.currentCourse = '';
         $scope.coursesList = [];
+        $scope.studentsList = [];
+
+        var newStudentButton = {
+            name: '<button class="btn btn-default" ng-click="setView(11)">Add New Student</button>',
+            password: "",
+            points: 0,
+            studentid: "",
+            username: ""
+        };
 
         var viewStack = [];
 
@@ -181,9 +190,31 @@ angular
                 );
         }
 
+        function getStudentsNotInCourse(courseid){
+            $http.get('/api/getStudentsNotInCourse', {
+                params: {
+                    id: courseid
+                }
+            }).then(function sucessCall(response)	{
+                    $scope.studentsNotInCourse = response.data.data;
+                },function errorCall()	{
+                    console.log("Error reading student not in course list.");
+                }
+            );
+        }
+
+        $scope.addStudentButton = function(){
+            if(view == 10){
+                $scope.students.push(newStudentButton);
+            }else{
+                $scope.students.splice(newStudentButton, 1);
+            }
+        };
+
         $scope.setView=function(view){
             $scope.view = view;
             viewStack.push(view);
+            $scope.errorMessage = '';
         };
 
         $scope.isView=function(type, view){
@@ -237,6 +268,9 @@ angular
             }
         };
 
+        $scope.$watch('view', function() {
+            resetCourse();
+        });
         //Logout
         $scope.logout = function(){
             $scope.userType = '';
@@ -260,10 +294,18 @@ angular
         };
 
         $scope.setCourse = function(course){
+            $scope.courseList = [];
             $scope.currentCourse = course;
             $scope.courseCode = course.courseCode;
+            $scope.coursesList.push($scope.currentCourse);
             getStudentsInCourse(course.courseid);
+            getStudentsNotInCourse(course.courseid);
         };
+
+        function resetCourse(){
+            $scope.courseList = [];
+            $scope.courseCode = '';
+        }
 
         $scope.setAssessment = function(assessment){
             $scope.currentAssessment = assessment;
@@ -302,7 +344,18 @@ angular
             });
         };
 
-        $scope.addStudent = function(ev){
+        $scope.addStudent = function(){
+            if($scope.studentsList == []){
+                $scope.errorMessage = 'Please select at least one student to add to this course.';
+                return;
+            }
+            console.log($scope.studentsList);
+            for(let i = 0; i < $scope.studentsList.length; i++){
+                $scope.addStudentToCourse($scope.studentsList[i].studentid, $scope.currentCourse.courseid);
+            }
+        };
+
+        $scope.addNewStudent = function(ev){
             if($scope.studentId == '' || $scope.name == '' || $scope.password == ''){
                 $scope.errorMessage = 'Please fill in all fields.';
                 return;
@@ -327,7 +380,6 @@ angular
                     getStudents();
 
                     for(let i = 0; i < $scope.coursesList.length; i++){
-                        console.log($scope.coursesList[i].courseid);
                         $scope.addStudentToCourse($scope.studentId, $scope.coursesList[i].courseid);
                     }
 
@@ -347,7 +399,6 @@ angular
                     $scope.password = '';
                     $scope.errorMessage = '';
 
-                    getStudentsInCourse($scope.currentCourse.courseid);
                     $mdDialog.show(confirm).then(function() {
                         //Stay on current page
                     }, function() {
@@ -363,7 +414,22 @@ angular
                     studentid: studentid,
                     courseid: courseid
                 }
-            })
+            }).then(function success(){
+                getStudentsInCourse($scope.currentCourse.courseid);
+                var alert = $mdDialog.alert()
+                    .parent(angular.element(document.querySelector('#popupContainer')))
+                    .clickOutsideToClose(true)
+                    .title('Student(s) have been successfully added to '+ $scope.currentCourse.courseCode +'!')
+                    .ariaLabel('Student(s) Successfully Added')
+                    .ok('OK')
+                    .targetEvent(ev);
+
+                $scope.errorMessage = '';
+
+                $mdDialog.show(alert).then(function() {
+                    $scope.goBack();
+                });
+            });
         };
 
         $scope.updateCourse = function(ev){

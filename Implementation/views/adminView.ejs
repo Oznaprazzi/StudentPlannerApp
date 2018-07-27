@@ -20,11 +20,13 @@
         </h2>
 
         <hr>
-        <table>
-            <tr ng-repeat="c in courses">
-                <td>{{c.coursecode}}</td>
-                <td><button class="btn btn-default" ng-click="setView(7); setCourse(c)">Manage</button></td>
-            </tr>
+        <table class="table table-striped">
+            <tbody>
+                <tr ng-repeat="c in courses">
+                    <td>{{c.coursecode}}</td>
+                    <td><button class="btn btn-default" ng-click="setView(7); setCourse(c)">Manage</button></td>
+                </tr>
+            </tbody>
         </table>
         <p ng-if="courses.length <= 0">There are currently no courses in the system.</p>
     </div>
@@ -37,7 +39,9 @@
             <h3>Course Code</h3>
             <input type="text" ng-model="courseCode" name="courseCode"/>
         </div>
-        <button class="btn btn-default" ng-click="setView(3)">Cancel</button>
-        <md-button md-disable-backdrop="true" class="btn btn-default" ng-click="addCourse($event)">Add Course</md-button>
+        <div id="btn-group">
+            <button class="btn btn-default" ng-click="setView(3)">Cancel</button>
+            <md-button md-disable-backdrop="true" class="btn btn-default" ng-click="addCourse($event)">Add Course</md-button>
+        </div>
     </div>
 </div>
