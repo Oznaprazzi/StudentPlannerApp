@@ -2,27 +2,28 @@ CREATE TYPE atype AS ENUM ('Assignment', 'Test', 'Exam', 'Other');
 
 CREATE TABLE Users(
 	Username varchar(255) PRIMARY KEY NOT NULL,
+	UserId SERIAL NOT NULL,
 	Name varchar(255) NOT NULL,
 	Password varchar(255) NOT NULL
 );
 
-CREATE TABLE Lecturer(
+CREATE TABLE Lecturers(
 	LecturerId SERIAL PRIMARY KEY NOT NULL,
 	Username varchar(255) NOT NULL references Users(Username) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
-CREATE TABLE Student(
+CREATE TABLE Students(
 	StudentId int PRIMARY KEY NOT NULL,
 	Username varchar(255) NOT NULL references Users(Username) ON UPDATE CASCADE ON DELETE CASCADE,
 	Points int NOT NULL DEFAULT 0
 );
 
-CREATE TABLE Course(
+CREATE TABLE Courses(
 	CourseId SERIAL PRIMARY KEY NOT NULL,
 	CourseCode char(7) NOT NULL
 );
 
-CREATE TABLE Assessment(
+CREATE TABLE Assessments(
 	AssessmentId SERIAL PRIMARY KEY NOT NULL,
 	CourseId int NOT NULL references Course(CourseId) ON UPDATE CASCADE ON DELETE CASCADE,
 	AssessmentType atype NOT NULL,
@@ -32,7 +33,7 @@ CREATE TABLE Assessment(
 	Details text NOT NULL
 );
 
-CREATE TABLE Task(
+CREATE TABLE Tasks(
 	TaskId SERIAL PRIMARY KEY NOT NULL,
 	AssessmentId int NOT NULL references Assessment(AssessmentId) ON UPDATE CASCADE ON DELETE CASCADE,
 	Name varchar(255) NOT NULL,
