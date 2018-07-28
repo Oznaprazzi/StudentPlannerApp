@@ -1,0 +1,30 @@
+<div ng-show="isView('admin', 13)">
+    <h2>Add New Lecturer</h2>
+    <p class="alert alert-danger" ng-if="errorMessage != ''">{{errorMessage}}</p>
+    <form>
+        <div id="input">
+            <h3>Username</h3>
+            <input type="text" name="username" ng-model="lecturerId" disabled/>
+        </div>
+        <div id="input">
+            <h3>Name</h3>
+            <input type="text" ng-model="name" name="name" required/>
+        </div>
+        <div id="input">
+            <h3>Password</h3>
+            <input type="text" ng-model="password" name="password" required/>
+        </div>
+    </form>
+    <h3>Select Course(s)</h3>
+    <multiple-autocomplete ng-model="coursesList"
+                           object-property="coursecode"
+                           suggestions-arr="courses" ng-if="courses.length > 0">
+    </multiple-autocomplete>
+    <p class="alert alert-danger" ng-if="courses.length <= 0">There are currently no courses stored in the system.</p>
+
+    <div id="btn-group">
+        <button class="btn btn-default" ng-click="setView(7)">Cancel</button>
+        <md-button md-disable-backdrop="true" class="btn btn-default" ng-click="addNewStudent($event)">Add Lecturer</md-button>
+    </div>
+
+</div>

@@ -19,6 +19,7 @@ module.exports = {
     getAssessments: getAssessments,
     getStudentsInCourse: getStudentsInCourse,
     getStudentsNotInCourse: getStudentsNotInCourse,
+    getMaxUserId: getMaxUserId,
     createNewUser: createNewUser,
     createNewStudent: createNewStudent,
     createNewCourse: createNewCourse,
@@ -43,7 +44,7 @@ function getUsers(req, res, next) {
 }
 
 function getStudents(req, res, next) {
-    db.any('select * from student join users on student.username = users.username')
+    db.any('select * from students join users on students.username = users.username')
         .then(function (data) {
             res.status(200)
                 .json({
@@ -58,7 +59,7 @@ function getStudents(req, res, next) {
 }
 
 function getLecturers(req, res, next) {
-    db.any('select * from lecturer join users on lecturer.username = users.username')
+    db.any('select * from lecturers join users on lecturers.username = users.username')
         .then(function (data) {
             res.status(200)
                 .json({
@@ -73,7 +74,7 @@ function getLecturers(req, res, next) {
 }
 
 function getCourses(req, res, next){
-    db.any('select * from course')
+    db.any('select * from courses')
         .then(function (data) {
             res.status(200)
                 .json({
@@ -88,7 +89,7 @@ function getCourses(req, res, next){
 }
 
 function getAssessments(req, res, next){
-    db.any('select assessment.*, coursecode from assessment, course where assessment.courseid = course.courseid')
+    db.any('select assessments.*, coursecode from assessments, courses where assessments.courseid = courses.courseid')
         .then(function (data) {
             res.status(200)
                 .json({
@@ -104,7 +105,7 @@ function getAssessments(req, res, next){
 
 function getStudentsInCourse(req, res, next) {
     var courseid = req.query.id;
-     db.any('select * from student join users on student.username = users.username join enrolledin on student.studentid = enrolledin.studentid and enrolledin.courseid = $1', [courseid])
+     db.any('select * from students join users on students.username = users.username join enrolledin on students.studentid = enrolledin.studentid and enrolledin.courseid = $1', [courseid])
         .then(function (data) {
             res.status(200)
                 .json({
@@ -120,7 +121,7 @@ function getStudentsInCourse(req, res, next) {
 
 function getStudentsNotInCourse(req, res, next) {
     var courseid = req.query.id;
-    db.any('select * from student join users on student.username = users.username join enrolledin on student.studentid = enrolledin.studentid and enrolledin.courseid <> $1', [courseid])
+    db.any('select students.*, \' Name: \' || users.name || \'Student ID: \' ||students.studentid as student from students join users on students.username = users.username join enrolledin on students.studentid = enrolledin.studentid and enrolledin.courseid <> $1', [courseid])
         .then(function (data) {
             res.status(200)
                 .json({
@@ -134,11 +135,27 @@ function getStudentsNotInCourse(req, res, next) {
         });
 }
 
+
+function getMaxUserId(req, res, next){
+    db.one('select max(userid) from users')
+        .then(function(data){
+            res.status(200)
+                .json({
+                    status: 'success',
+                    data: data,
+                    message: 'Retrieved max user id'
+                });
+        })
+        .catch(function (err) {
+            return next(err);
+        });
+}
+
 function createNewUser(req, res, next){
     var username = req.body.params.username;
     var name = req.body.params.name;
     var password = req.body.params.password;
-    db.none('insert into users(username, name,password) values($1,$2,$3)', [username, name, password])
+    db.none('insert into users(username, name, password) values($1,$2,$3)', [username, name, password])
         .then(function () {
             res.status(200)
                 .json({
@@ -154,7 +171,7 @@ function createNewUser(req, res, next){
 function createNewStudent(req, res, next){
     var username = req.body.params.username;
     var studentid = req.body.params.studentid;
-    db.none('insert into student(username, studentid) values($1, $2)', [username, studentid])
+    db.none('insert into students(username, studentid) values($1, $2)', [username, studentid])
         .then(function () {
             res.status(200)
                 .json({
@@ -185,7 +202,7 @@ function addStudentToCourse(req, res, next){
 
 function createNewCourse(req, res, next){
     var courseCode = req.body.params.courseCode;
-    db.none('insert into course(coursecode) values($1)', [courseCode])
+    db.none('insert into courses(coursecode) values($1)', [courseCode])
         .then(function () {
             res.status(200)
                 .json({
@@ -201,7 +218,7 @@ function createNewCourse(req, res, next){
 function updateCourse(req, res, next){
     var coursecode = req.body.params.coursecode;
     var id = req.body.params.id;
-    db.none('update course set coursecode = $1 where courseid = $2', [coursecode, id])
+    db.none('update courses set coursecode = $1 where courseid = $2', [coursecode, id])
         .then(function () {
             res.status(200)
                 .json({
@@ -216,7 +233,7 @@ function updateCourse(req, res, next){
 
 function deleteCourse(req, res, next){
     var id = req.body.params.id;
-    db.none('delete from course where courseid = $1', [id])
+    db.none('delete from courses where courseid = $1', [id])
         .then(function () {
             res.status(200)
                 .json({

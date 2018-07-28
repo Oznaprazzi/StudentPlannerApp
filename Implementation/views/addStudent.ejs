@@ -5,9 +5,10 @@
     <p class="alert alert-danger" ng-if="errorMessage != ''">{{errorMessage}}</p>
     <h3>Select Students(s)</h3>
     <multiple-autocomplete ng-model="studentsList"
-                           object-property="studentid"
-                           suggestions-arr="studentsNotInCourse">
+                           object-property="student"
+                           suggestions-arr="studentsNotInCourse" ng-if="students.length > 0">
     </multiple-autocomplete>
+    <p class="alert alert-danger" ng-if="students.length <= 0">There are currently no students stored in the system.</p>
     <div id="btn-group">
         <button class="btn btn-default" ng-click="setView(7)">Cancel</button>
         <md-button md-disable-backdrop="true" class="btn btn-default md-btn" ng-click="addStudent($event)">Add Student</md-button>
@@ -20,7 +21,7 @@
     <form>
         <div id="input">
             <h3>Username</h3>
-            <input type="text" name="studentId" placeholder="{{studentId}}" disabled/>
+            <input type="text" name="studentId" ng-model="studentId" disabled/>
         </div>
         <div id="input">
             <h3>Student ID</h3>
@@ -38,8 +39,9 @@
     <h3>Select Course(s)</h3>
     <multiple-autocomplete ng-model="coursesList"
                            object-property="coursecode"
-                           suggestions-arr="courses">
+                           suggestions-arr="courses" ng-if="courses.length > 0">
     </multiple-autocomplete>
+    <p class="alert alert-danger" ng-if="courses.length <= 0">There are currently no courses stored in the system.</p>
 
     <div id="btn-group">
         <button class="btn btn-default" ng-click="setView(7)">Cancel</button>

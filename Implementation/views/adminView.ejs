@@ -1,4 +1,4 @@
-<div id="admin">
+<div>
     <div id="menu" ng-show="isView('admin', 2)">
         <h2>Home</h2>
         <div id="btn">
@@ -6,16 +6,16 @@
         </div>
 
         <div id="btn">
-            <button class="btn btn-default">Manage Lecturers</button>
+            <button class="btn btn-default" ng-click="setView(4)">Manage Lecturers</button>
         </div>
 
         <div id="btn">
-            <button class="btn btn-default">Manage Students</button>
+            <button class="btn btn-default" ng-click="setView(5)">Manage Students</button>
         </div>
     </div>
 
     <div ng-show="isView('admin', 3)">
-        <h2>Courses
+        <h2>Manage Courses
             <i class="titleIcon fa fa-plus-circle" ng-click="setView(6)" aria-hidden="true"></i>
         </h2>
 
@@ -26,6 +26,54 @@
                     <td>{{c.coursecode}}</td>
                     <td><button class="btn btn-default" ng-click="setView(7); setCourse(c)">Manage</button></td>
                 </tr>
+            </tbody>
+        </table>
+        <p ng-if="courses.length <= 0">There are currently no courses stored in the system.</p>
+    </div>
+
+    <div ng-show="isView('admin', 4)">
+        <h2>Manage Lecturers
+            <i class="titleIcon fa fa-plus-circle" ng-click="setView(13); setLecturerId()" aria-hidden="true"></i>
+        </h2>
+
+        <hr>
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th scope="col">Name</th>
+                <th scope="col"></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="l in lecturers">
+                <td>{{l.name}}</td>
+                <td><button class="btn btn-default" ng-click="setView(14); setLecturer(l)">Manage</button></td>
+            </tr>
+            </tbody>
+        </table>
+        <p ng-if="courses.length <= 0">There are currently no courses in the system.</p>
+    </div>
+
+    <div ng-show="isView('admin', 5)">
+        <h2>Manage Students
+            <i class="titleIcon fa fa-plus-circle" ng-click="setView(11)" aria-hidden="true"></i>
+        </h2>
+
+        <hr>
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Student ID</th>
+                <th scope="col"></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="s in students">
+                <td>{{s.name}}</td>
+                <td>{{s.studentid}}</td>
+                <td><button class="btn btn-default" ng-click="setView(12); setStudent(s)">Manage</button></td>
+            </tr>
             </tbody>
         </table>
         <p ng-if="courses.length <= 0">There are currently no courses in the system.</p>
@@ -44,4 +92,6 @@
             <md-button md-disable-backdrop="true" class="btn btn-default" ng-click="addCourse($event)">Add Course</md-button>
         </div>
     </div>
+
+    <% include addLecturer.ejs %>
 </div>

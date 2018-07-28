@@ -13,6 +13,7 @@ router.get('/api/getCourses', db.getCourses);
 router.get('/api/getAssessments', db.getAssessments);
 router.get('/api/getStudentsInCourse', db.getStudentsInCourse);
 router.get('/api/getStudentsNotInCourse', db.getStudentsNotInCourse);
+router.get('/api/getMaxUserId', db.getMaxUserId);
 
 router.post('/api/createNewUser', db.createNewUser);
 router.post('/api/createNewStudent', db.createNewStudent);

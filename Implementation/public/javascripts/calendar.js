@@ -302,6 +302,30 @@ angular
             getStudentsNotInCourse(course.courseid);
         };
 
+        $scope.setLecturer = function(lecturer){
+            $scope.currentLecturer = lecturer;
+        };
+
+        $scope.setLecturerId = function(){
+            $scope.maxid = 0;
+            $http.get('/api/getMaxUserId')
+                .then(function sucessCall(response)	{
+                        $scope.maxid = response.data.data.max;
+                        $scope.lecturerId = $scope.maxid + 1;
+                    },function errorCall()	{
+                        console.log("Error getting max user id.");
+                    }
+                );
+        };
+
+        $scope.$watch('name', function(){
+            $scope.lecturerId = $scope.name + $scope.maxid;
+        });
+
+        $scope.setStudent = function(student){
+            $scope.currentStudent = student;
+        };
+
         function resetCourse(){
             $scope.courseList = [];
             $scope.courseCode = '';
