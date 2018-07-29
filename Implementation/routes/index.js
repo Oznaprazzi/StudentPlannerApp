@@ -21,6 +21,9 @@ router.post('/api/createNewCourse', db.createNewCourse);
 router.post('/api/addStudentToCourse', db.addStudentToCourse);
 router.post('/api/updateCourse', db.updateCourse);
 router.post('/api/deleteCourse', db.deleteCourse);
+router.post('/api/updateUser', db.updateUser);
+router.post('/api/deleteUser', db.deleteUser);
+router.post('/api/updateStudent', db.updateStudent);
 
 /* GET home page. */
 router.get('/', function (req, res, next) {

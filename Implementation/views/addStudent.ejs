@@ -44,8 +44,43 @@
     <p class="alert alert-danger" ng-if="courses.length <= 0">There are currently no courses stored in the system.</p>
 
     <div id="btn-group">
-        <button class="btn btn-default" ng-click="setView(7)">Cancel</button>
+        <button class="btn btn-default" ng-click="setCancelEditStudentView()">Cancel</button>
         <md-button md-disable-backdrop="true" class="btn btn-default" ng-click="addNewStudent($event)">Add Student</md-button>
     </div>
+</div>
 
+<div ng-show="isSharedView(12)">
+    <h2>Edit or Delete Student
+        <i class="titleIcon fa fa-times-circle" ng-click="goBack()" aria-hidden="true"></i>
+        <i class="titleIcon fa fa-check-circle" ng-click="updateStudent($event)" aria-hidden="true"></i>
+    </h2>
+    <p class="alert alert-danger" ng-if="errorMessage != ''">{{errorMessage}}</p>
+    <form>
+        <div id="input">
+            <h3>Username</h3>
+            <input type="text" name="studentId" ng-model="selectedUser.studentId" disabled/>
+        </div>
+        <div id="input">
+            <h3>Student ID</h3>
+            <input type="number" ng-model="selectedUser.studentId" name="studentId" required/>
+        </div>
+        <div id="input">
+            <h3>Name</h3>
+            <input type="text" ng-model="selectedUser.name" name="name" required/>
+        </div>
+        <div id="input">
+            <h3>Password</h3>
+            <input type="text" ng-model="selectedUser.password" name="password" required/>
+        </div>
+    </form>
+    <h3>Select Course(s)</h3>
+    <multiple-autocomplete ng-model="coursesList"
+                           object-property="coursecode"
+                           suggestions-arr="courses" ng-if="courses.length > 0">
+    </multiple-autocomplete>
+    <p class="alert alert-danger" ng-if="courses.length <= 0">There are currently no courses stored in the system.</p>
+
+    <div id="btn-group">
+        <md-button md-disable-backdrop="true" class="btn btn-default" ng-click="deleteUser($event)">Delete Student</md-button>
+    </div>
 </div>

@@ -25,7 +25,10 @@ module.exports = {
     createNewCourse: createNewCourse,
     addStudentToCourse: addStudentToCourse,
     updateCourse: updateCourse,
-    deleteCourse: deleteCourse
+    deleteCourse: deleteCourse,
+    updateUser: updateUser,
+    deleteUser: deleteUser,
+    updateStudent: updateStudent
 };
 
 function getUsers(req, res, next) {
@@ -246,3 +249,52 @@ function deleteCourse(req, res, next){
         });
 }
 
+function updateUser(req, res, next){
+    var userid = req.body.params.userid;
+    var username = req.body.params.username;
+    var name = req.body.params.name;
+    var password = req.body.params.password;
+    db.none('update users set username = $1 and name = $2 and password = $3 where userid = $4', [username, name, password, userid])
+        .then(function () {
+            res.status(200)
+                .json({
+                    status: 'success',
+                    message: 'Updated User'
+                });
+
+        })
+        .catch(function (err) {
+            return next(err);
+        });
+}
+
+function deleteUser(req, res, next){
+    var id = req.body.params.id;
+    db.none('delete from users where userid = $1', [id])
+        .then(function () {
+            res.status(200)
+                .json({
+                    status: 'success',
+                    message: 'Deleted User'
+                });
+        })
+        .catch(function (err) {
+            return next(err);
+        });
+}
+
+function updateStudent(req, res, next){
+    var studentid = req.body.params.studentid;
+    var username = req.body.params.username;
+    db.none('update students set studentid = $1 where username = $2', [studentid, username])
+        .then(function () {
+            res.status(200)
+                .json({
+                    status: 'success',
+                    message: 'Updated Student'
+                });
+        })
+        .catch(function (err) {
+            return next(err);
+        });
+}

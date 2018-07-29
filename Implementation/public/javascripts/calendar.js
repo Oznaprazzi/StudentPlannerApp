@@ -303,7 +303,7 @@ angular
         };
 
         $scope.setLecturer = function(lecturer){
-            $scope.currentLecturer = lecturer;
+            $scope.selectedUser = lecturer;
         };
 
         $scope.setLecturerId = function(){
@@ -319,11 +319,19 @@ angular
         };
 
         $scope.$watch('name', function(){
-            $scope.lecturerId = $scope.name + $scope.maxid;
+            $scope.lecturerId = $scope.name + $scope.lecturerId;
         });
 
         $scope.setStudent = function(student){
-            $scope.currentStudent = student;
+            $scope.selectedUser = student;
+        };
+
+        $scope.setCancelEditStudentView = function(){
+            if(viewStack[viewStack.length-2] == 5){
+                $scope.setView(5);
+            }else{
+                $scope.setView(7);
+            }
         };
 
         function resetCourse(){
@@ -523,6 +531,45 @@ angular
             }, function() {
                 //Stay on current page
             });
+        };
 
-        }
+        $scope.updateStudent = function(ev){
+
+        };
+
+        $scope.deleteUser = function(ev){
+            var confirm = $mdDialog.confirm()
+                .title('Are you sure you want to delete this ' + $scope.userType +'?')
+                .ariaLabel('Delete user')
+                .targetEvent(ev)
+                .ok('Yes')
+                .cancel('No');
+
+            $mdDialog.show(confirm).then(function() {
+                var request = $http.post('/api/deleteUser', {
+                    params: {
+                        id: $scope.selectedUser.username
+                    }
+                });
+                request.then(function success(data){
+                    $route.reload();
+                    // Appending dialog to document.body to cover sidenav in docs app
+                    var alert = $mdDialog.alert()
+                        .parent(angular.element(document.querySelector('#popupContainer')))
+                        .clickOutsideToClose(true)
+                        .title($scope.selectedUser.name + ' has been successfully deleted!')
+                        .ariaLabel('User Successfully Deleted')
+                        .ok('OK')
+                        .targetEvent(ev);
+
+                    $mdDialog.show(alert).then(function() {
+                        getUsers();
+                        getStudents();
+                        $scope.setCancelEditStudentView();
+                    });
+                });
+            }, function() {
+                //Stay on current page
+            });
+        };
     });
