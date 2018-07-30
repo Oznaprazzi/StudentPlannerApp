@@ -52,7 +52,7 @@
 <div ng-show="isSharedView(12)">
     <h2>Edit or Delete Student
         <i class="titleIcon fa fa-times-circle" ng-click="goBack()" aria-hidden="true"></i>
-        <i class="titleIcon fa fa-check-circle" ng-click="updateStudent($event)" aria-hidden="true"></i>
+        <i class="titleIcon fa fa-check-circle" ng-click="updateUser($event, 0)" aria-hidden="true"></i>
     </h2>
     <p class="alert alert-danger" ng-if="errorMessage != ''">{{errorMessage}}</p>
     <form>

@@ -324,6 +324,7 @@ angular
 
         $scope.setStudent = function(student){
             $scope.selectedUser = student;
+
         };
 
         $scope.setCancelEditStudentView = function(){
@@ -533,8 +534,50 @@ angular
             });
         };
 
-        $scope.updateStudent = function(ev){
+        $scope.updateUser = function(ev, userType){
+            if($scope.selectedUser.username == '' || $scope.selectedUser.name == '' || $scope.selectedUser.password == ''){
+                $scope.errorMessage = 'Please fill in all fields.';
+                return;
+            }
 
+            var request = $http.post('/api/updateUser', {
+                params: {
+                    username: $scope.selectedUser.username,
+                    name: $scope.selectedUser.name,
+                    password: $scope.selectedUser.password
+                }
+            });
+
+            request.then(function success(data){
+                getUsers();
+
+                $route.reload();
+                    // Appending dialog to document.body to cover sidenav in docs app
+                if(userType == 0){ //Student
+                    $http.post('/api/updateStudent', {
+                        params: {
+                            username: $scope.selectedUser.username,
+                            studentid: $scope.selectedUser.studentid
+                        }
+                    }).then(function success(data){
+                        getStudents();
+                        $route.reload();
+                    });
+                }
+                var alert = $mdDialog.alert()
+                    .parent(angular.element(document.querySelector('#popupContainer')))
+                    .clickOutsideToClose(true)
+                    .title($scope.selectedUser.name + ' has been successfully updated!')
+                    .ariaLabel('User Successfully Updated')
+                    .ok('OK')
+                    .targetEvent(ev);
+
+                $mdDialog.show(alert).then(function() {
+                    /*getCourses();
+                    $scope.goBack();
+                    $scope.goBack();*/
+                });
+            });
         };
 
         $scope.deleteUser = function(ev){
@@ -552,6 +595,10 @@ angular
                     }
                 });
                 request.then(function success(data){
+                    getUsers();
+                    getStudents();
+                    getLecturers();
+                    getCourses();
                     $route.reload();
                     // Appending dialog to document.body to cover sidenav in docs app
                     var alert = $mdDialog.alert()
@@ -563,9 +610,9 @@ angular
                         .targetEvent(ev);
 
                     $mdDialog.show(alert).then(function() {
-                        getUsers();
+                        /*getUsers();
                         getStudents();
-                        $scope.setCancelEditStudentView();
+                        $scope.setCancelEditStudentView();*/
                     });
                 });
             }, function() {

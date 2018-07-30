@@ -31,6 +31,21 @@ module.exports = {
     updateStudent: updateStudent
 };
 
+function getMaxUserId(req, res, next){
+    db.one('select max(userid) from users')
+        .then(function(data){
+            res.status(200)
+                .json({
+                    status: 'success',
+                    data: data,
+                    message: 'Retrieved max user id'
+                });
+        })
+        .catch(function (err) {
+            return next(err);
+        });
+}
+
 function getUsers(req, res, next) {
     db.any('select * from users')
         .then(function (data) {
@@ -124,7 +139,7 @@ function getStudentsInCourse(req, res, next) {
 
 function getStudentsNotInCourse(req, res, next) {
     var courseid = req.query.id;
-    db.any('select students.*, \' Name: \' || users.name || \'Student ID: \' ||students.studentid as student from students join users on students.username = users.username join enrolledin on students.studentid = enrolledin.studentid and enrolledin.courseid <> $1', [courseid])
+    db.any('select students.*, \' Name: \' || users.name || \'Student ID: \' ||students.studentid as student from students join users on students.username = users.username left join enrolledin on students.studentid = enrolledin.studentid and enrolledin.courseid <> $1', [courseid])
         .then(function (data) {
             res.status(200)
                 .json({
@@ -138,15 +153,31 @@ function getStudentsNotInCourse(req, res, next) {
         });
 }
 
-
-function getMaxUserId(req, res, next){
-    db.one('select max(userid) from users')
-        .then(function(data){
+function getStudentsCourses(req, res, next){
+    var studentid = req.query.studentid;
+    db.any('select coursecode from courses join enolledin on courses.courseid = enrolledin.courseid and enrolledin.studentid = $1', [studentid])
+        .then(function (data) {
             res.status(200)
                 .json({
                     status: 'success',
                     data: data,
-                    message: 'Retrieved max user id'
+                    message: 'Retrieved ALL Students Not In Course'
+                });
+        })
+        .catch(function (err) {
+            return next(err);
+        });
+}
+
+function getNotStudentsCourses(req, res, next){
+    var studentid = req.query.studentid;
+    db.any('select coursecode from courses join enolledin on courses.courseid = enrolledin.courseid and enrolledin.studentid = $1', [studentid])
+        .then(function (data) {
+            res.status(200)
+                .json({
+                    status: 'success',
+                    data: data,
+                    message: 'Retrieved ALL Students Not In Course'
                 });
         })
         .catch(function (err) {
