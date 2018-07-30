@@ -58,7 +58,7 @@
     <form>
         <div id="input">
             <h3>Username</h3>
-            <input type="text" name="studentId" ng-model="selectedUser.studentId" disabled/>
+            <input type="text" ng-model="selectedUser.username" name="username" disabled/>
         </div>
         <div id="input">
             <h3>Student ID</h3>
@@ -81,6 +81,6 @@
     <p class="alert alert-danger" ng-if="courses.length <= 0">There are currently no courses stored in the system.</p>
 
     <div id="btn-group">
-        <md-button md-disable-backdrop="true" class="btn btn-default" ng-click="deleteUser($event)">Delete Student</md-button>
+        <md-button md-disable-backdrop="true" class="btn btn-default" ng-click="deleteUser($event, 0)">Delete Student</md-button>
     </div>
 </div>

@@ -300,6 +300,8 @@ angular
             $scope.coursesList.push($scope.currentCourse);
             getStudentsInCourse(course.courseid);
             getStudentsNotInCourse(course.courseid);
+            $scope.studentsList = $scope.studentsNotInCourse;
+            console.log($scope.studentsList);
         };
 
         $scope.setLecturer = function(lecturer){
@@ -413,7 +415,7 @@ angular
                     getStudents();
 
                     for(let i = 0; i < $scope.coursesList.length; i++){
-                        $scope.addStudentToCourse($scope.studentId, $scope.coursesList[i].courseid);
+                        $scope.addStudentToCourse($scope.studentId, $scope.coursesList[i].courseid, true);
                     }
 
                     $route.reload();
@@ -441,7 +443,7 @@ angular
             });
         };
 
-        $scope.addStudentToCourse = function (studentid, courseid) {
+        $scope.addStudentToCourse = function (studentid, courseid, isNew) {
             $http.post('/api/addStudentToCourse',{
                 params:{
                     studentid: studentid,
@@ -449,19 +451,22 @@ angular
                 }
             }).then(function success(){
                 getStudentsInCourse($scope.currentCourse.courseid);
-                var alert = $mdDialog.alert()
-                    .parent(angular.element(document.querySelector('#popupContainer')))
-                    .clickOutsideToClose(true)
-                    .title('Student(s) have been successfully added to '+ $scope.currentCourse.courseCode +'!')
-                    .ariaLabel('Student(s) Successfully Added')
-                    .ok('OK')
-                    .targetEvent(ev);
+                if(!isNew){
+                    var alert = $mdDialog.alert()
+                        .parent(angular.element(document.querySelector('#popupContainer')))
+                        .clickOutsideToClose(true)
+                        .title('Student(s) have been successfully added to '+ $scope.currentCourse.courseCode +'!')
+                        .ariaLabel('Student(s) Successfully Added')
+                        .ok('OK')
+                        .targetEvent(ev);
 
-                $scope.errorMessage = '';
+                    $scope.errorMessage = '';
 
-                $mdDialog.show(alert).then(function() {
-                    $scope.goBack();
-                });
+                    $mdDialog.show(alert).then(function() {
+                        $scope.goBack();
+                    });
+                }
+
             });
         };
 
@@ -535,10 +540,15 @@ angular
         };
 
         $scope.updateUser = function(ev, userType){
-            if($scope.selectedUser.username == '' || $scope.selectedUser.name == '' || $scope.selectedUser.password == ''){
+            if((userType != 0 && $scope.selectedUser.username == '') || (userType == 0 && $scope.selectedUser.studentid == '') || $scope.selectedUser.name == '' || $scope.selectedUser.password == ''){
                 $scope.errorMessage = 'Please fill in all fields.';
                 return;
             }
+
+            if(userType == 0){//Student
+                $scope.selectedUser.username = $scope.selectedUser.studentid;
+            }
+
 
             var request = $http.post('/api/updateUser', {
                 params: {
@@ -550,37 +560,53 @@ angular
 
             request.then(function success(data){
                 getUsers();
-
                 $route.reload();
+                var alert = successUserAlert('updated');
                     // Appending dialog to document.body to cover sidenav in docs app
                 if(userType == 0){ //Student
-                    $http.post('/api/updateStudent', {
+                    var request2 = $http.post('/api/updateStudent', {
                         params: {
                             username: $scope.selectedUser.username,
                             studentid: $scope.selectedUser.studentid
                         }
                     }).then(function success(data){
                         getStudents();
-                        $route.reload();
+                        $mdDialog.show(alert).then(function() {
+                            if(userType == 0){//Student
+                                $scope.setCancelEditStudentView();
+                                getStudents();
+                            }else if(userType == 1){//Lecturer
+
+                            }
+                        });
+                    });
+                }else{
+                    $mdDialog.show(alert).then(function() {
+                        if(userType == 0){//Student
+                            $scope.setCancelEditStudentView();
+                            getStudents();
+                        }else if(userType == 1){//Lecturer
+                            $scope.goBack();
+                        }
                     });
                 }
-                var alert = $mdDialog.alert()
-                    .parent(angular.element(document.querySelector('#popupContainer')))
-                    .clickOutsideToClose(true)
-                    .title($scope.selectedUser.name + ' has been successfully updated!')
-                    .ariaLabel('User Successfully Updated')
-                    .ok('OK')
-                    .targetEvent(ev);
 
-                $mdDialog.show(alert).then(function() {
-                    /*getCourses();
-                    $scope.goBack();
-                    $scope.goBack();*/
-                });
             });
         };
 
-        $scope.deleteUser = function(ev){
+        function successUserAlert(action){
+            var alert = $mdDialog.alert()
+                .parent(angular.element(document.querySelector('#popupContainer')))
+                .clickOutsideToClose(true)
+                .title($scope.selectedUser.name + ' has been successfully '+ action +'!')
+                .ariaLabel('User successfully '+ action)
+                .ok('OK')
+                .targetEvent(ev);
+
+            return alert;
+        }
+
+        $scope.deleteUser = function(ev, userType){
             var confirm = $mdDialog.confirm()
                 .title('Are you sure you want to delete this ' + $scope.userType +'?')
                 .ariaLabel('Delete user')
@@ -596,24 +622,20 @@ angular
                 });
                 request.then(function success(data){
                     getUsers();
-                    getStudents();
-                    getLecturers();
                     getCourses();
-                    $route.reload();
-                    // Appending dialog to document.body to cover sidenav in docs app
-                    var alert = $mdDialog.alert()
-                        .parent(angular.element(document.querySelector('#popupContainer')))
-                        .clickOutsideToClose(true)
-                        .title($scope.selectedUser.name + ' has been successfully deleted!')
-                        .ariaLabel('User Successfully Deleted')
-                        .ok('OK')
-                        .targetEvent(ev);
 
-                    $mdDialog.show(alert).then(function() {
-                        /*getUsers();
-                        getStudents();
-                        $scope.setCancelEditStudentView();*/
+                    // Appending dialog to document.body to cover sidenav in docs app
+
+                    $mdDialog.show(successUserAlert('deleted')).then(function() {
+                        if(userType == 0){//Student
+                            getStudents();
+                            $scope.setCancelEditStudentView();
+                        }else if(userType == 1){//Lecturer
+                            getLecturers();
+                            $scope.goBack();
+                        }
                     });
+                    $route.reload();
                 });
             }, function() {
                 //Stay on current page
