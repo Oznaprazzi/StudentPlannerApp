@@ -22,13 +22,13 @@
         <hr>
         <table class="table table-striped">
             <tbody>
-                <tr ng-repeat="c in courses">
+                <tr ng-repeat="c in qs.courses()">
                     <td>{{c.coursecode}}</td>
                     <td><button class="btn btn-default" ng-click="setView(7); setCourse(c)">Manage</button></td>
                 </tr>
             </tbody>
         </table>
-        <p ng-if="courses.length <= 0">There are currently no courses stored in the system.</p>
+        <p ng-if="qs.courses().length <= 0">There are currently no courses stored in the system.</p>
     </div>
 
     <div ng-show="isView('admin', 4)">
@@ -45,13 +45,13 @@
             </tr>
             </thead>
             <tbody>
-            <tr ng-repeat="l in lecturers">
+            <tr ng-repeat="l in qs.lecturers()">
                 <td>{{l.name}}</td>
                 <td><button class="btn btn-default" ng-click="setView(14); setLecturer(l)">Manage</button></td>
             </tr>
             </tbody>
         </table>
-        <p ng-if="courses.length <= 0">There are currently no courses in the system.</p>
+        <p ng-if="qs.courses().length <= 0">There are currently no courses in the system.</p>
     </div>
 
     <div ng-show="isView('admin', 5)">
@@ -69,14 +69,14 @@
             </tr>
             </thead>
             <tbody>
-            <tr ng-repeat="s in students">
+            <tr ng-repeat="s in qs.students()">
                 <td>{{s.name}}</td>
                 <td>{{s.studentid}}</td>
                 <td><button class="btn btn-default" ng-click="setView(12); setStudent(s)">Manage</button></td>
             </tr>
             </tbody>
         </table>
-        <p ng-if="courses.length <= 0">There are currently no courses in the system.</p>
+        <p ng-if="qs.courses().length <= 0">There are currently no courses in the system.</p>
     </div>
 
     <div ng-show="isView('admin', 6)">

@@ -1,9 +1,17 @@
 'use strict';
 angular.module('queries', []).service('queryService', function($http){
+    var users = [];
+    var lecturers = [];
+    var students = [];
+    var courses = [];
+    var assessments = [];
+    var studentsInCourse = [];
+    var studentsNotInCourse = [];
+
     this.getUsers = function(){
-        return $http.get('/api/getUsers')
+        $http.get('/api/getUsers')
             .then(function sucessCall(response)	{
-                    return response.data.data;
+                    users = response.data.data;
                 },function errorCall()	{
                     console.log("Error reading users list.");
                 }
@@ -11,9 +19,9 @@ angular.module('queries', []).service('queryService', function($http){
     };
 
     this.getLecturers = function(){
-        return $http.get('/api/getLecturers')
+        $http.get('/api/getLecturers')
             .then(function sucessCall(response)	{
-                    return response.data.data;
+                    lecturers =  response.data.data;
                 },function errorCall()	{
                     console.log("Error reading lecturers list.");
                 }
@@ -21,9 +29,9 @@ angular.module('queries', []).service('queryService', function($http){
     };
 
     this.getStudents = function(){
-        return $http.get('/api/getStudents')
+        $http.get('/api/getStudents')
             .then(function sucessCall(response)	{
-                    return response.data.data;
+                    students = response.data.data;
                 },function errorCall()	{
                     console.log("Error reading students list.");
                 }
@@ -31,9 +39,9 @@ angular.module('queries', []).service('queryService', function($http){
     };
 
     this.getCourses = function(){
-        return $http.get('/api/getCourses')
+        $http.get('/api/getCourses')
             .then(function sucessCall(response)	{
-                    return response.data.data;
+                    courses = response.data.data;
                 },function errorCall()	{
                     console.log("Error reading courses list.");
                 }
@@ -41,9 +49,9 @@ angular.module('queries', []).service('queryService', function($http){
     };
 
     this.getAssessments = function(){
-        return $http.get('/api/getAssessments')
+        $http.get('/api/getAssessments')
             .then(function sucessCall(response)	{
-                    return response.data.data;
+                    assessments = response.data.data;
                 },function errorCall()	{
                     console.log("Error reading assessments list.");
                 }
@@ -55,12 +63,12 @@ angular.module('queries', []).service('queryService', function($http){
     };
 
     this.getStudentsInCourse = function(courseid){
-        return $http.get('/api/getStudentsInCourse', {
+        $http.get('/api/getStudentsInCourse', {
             params: {
                 id: courseid
             }
         }).then(function sucessCall(response)	{
-                return response.data.data;
+                studentsInCourse = response.data.data;
             },function errorCall()	{
                 console.log("Error reading student in course list.");
             }
@@ -68,15 +76,44 @@ angular.module('queries', []).service('queryService', function($http){
     };
 
     this.getStudentsNotInCourse = function(courseid){
-        return $http.get('/api/getStudentsNotInCourse', {
+        $http.get('/api/getStudentsNotInCourse', {
             params: {
                 id: courseid
             }
         }).then(function sucessCall(response)	{
-                return response.data.data;
+                studentsNotInCourse = response.data.data;
             },function errorCall()	{
                 console.log("Error reading student not in course list.");
             }
         );
+    };
+
+    /*******GETTERS********/
+    this.users = function(){
+        return users;
+    };
+
+    this.lecturers = function(){
+        return lecturers;
+    };
+
+    this.students = function(){
+        return students;
+    };
+
+    this.courses = function(){
+        return courses;
+    };
+
+    this.assessments = function(){
+      return assessments;
+    };
+
+    this.studentsInCourse = function(){
+        return studentsInCourse;
+    };
+
+    this.studentsNotInCourse = function(){
+        return studentsNotInCourse;
     };
 });

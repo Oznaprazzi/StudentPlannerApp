@@ -6,9 +6,9 @@
     <h3>Select Students(s)</h3>
     <multiple-autocomplete ng-model="studentsList"
                            object-property="student"
-                           suggestions-arr="studentsNotInCourse" ng-if="students.length > 0">
+                           suggestions-arr="qs.studentsNotInCourse" ng-if="qs.students.length > 0">
     </multiple-autocomplete>
-    <p class="alert alert-danger" ng-if="students.length <= 0">There are currently no students stored in the system. Click on the top right button to add a new student.</p>
+    <p class="alert alert-danger" ng-if="qs.students.length <= 0">There are currently no students stored in the system. Click on the top right button to add a new student.</p>
     <div id="btn-group">
         <button class="btn btn-default" ng-click="setView(7)">Cancel</button>
         <md-button md-disable-backdrop="true" class="btn btn-default md-btn" ng-click="addStudent($event)">Add Student</md-button>
@@ -39,9 +39,9 @@
     <h3>Select Course(s)</h3>
     <multiple-autocomplete ng-model="coursesList"
                            object-property="coursecode"
-                           suggestions-arr="courses" ng-if="courses.length > 0">
+                           suggestions-arr="qs.courses" ng-if="qs.courses.length > 0">
     </multiple-autocomplete>
-    <p class="alert alert-danger" ng-if="courses.length <= 0">There are currently no courses stored in the system.</p>
+    <p class="alert alert-danger" ng-if="qs.courses.length <= 0">There are currently no courses stored in the system.</p>
 
     <div id="btn-group">
         <button class="btn btn-default" ng-click="setCancelEditStudentView()">Cancel</button>
@@ -76,9 +76,9 @@
     <h3>Select Course(s)</h3>
     <multiple-autocomplete ng-model="coursesList"
                            object-property="coursecode"
-                           suggestions-arr="courses" ng-if="courses.length > 0">
+                           suggestions-arr="qs.courses" ng-if="qs.courses.length > 0">
     </multiple-autocomplete>
-    <p class="alert alert-danger" ng-if="courses.length <= 0">There are currently no courses stored in the system.</p>
+    <p class="alert alert-danger" ng-if="qs.courses.length <= 0">There are currently no courses stored in the system.</p>
 
     <div id="btn-group">
         <md-button md-disable-backdrop="true" class="btn btn-default" ng-click="deleteUser($event, 0)">Delete Student</md-button>
