@@ -1,7 +1,5 @@
-angular.module('mwl.calendar.docs', ['mwl.calendar', 'ngAnimate', 'ui.bootstrap', 'colorpicker.module', 'ngRoute', 'ngMaterial', 'multipleSelect']);
-angular
-    .module('mwl.calendar.docs') //you will need to declare your module with the dependencies ['mwl.calendar', 'ui.bootstrap', 'ngAnimate']
-    .controller('calendarController', function(moment, alert, calendarConfig, $scope, $http, $mdDialog, $route) {
+var app = angular.module('mwl.calendar.docs', ['mwl.calendar', 'ngAnimate', 'ui.bootstrap', 'colorpicker.module', 'ngRoute', 'ngMaterial', 'multipleSelect', 'queries', 'dialogs']);
+app.controller('calendarController', function(moment, alert, calendarConfig, $scope, $http, $mdDialog, $route, queryService, dialogService) {
         var vm = this;
 
         //These variables MUST be set as a minimum for the calendar to work
@@ -111,105 +109,56 @@ angular
         $scope.coursesList = [];
         $scope.studentsList = [];
 
-        var newStudentButton = {
-            name: '<button class="btn btn-default" ng-click="setView(11)">Add New Student</button>',
-            password: "",
-            points: 0,
-            studentid: "",
-            username: ""
-        };
-
         var viewStack = [];
 
         getUsers();
-        getLecturers();
         getStudents();
+        getLecturers();
         getAssessments();
         getCourses();
-
-        function getUsers(){
-            $http.get('/api/getUsers')
-                .then(function sucessCall(response)	{
-                        $scope.users = response.data.data;
-                    },function errorCall()	{
-                        console.log("Error reading users list.");
-                    }
-                );
+        function getUsers() {
+            queryService.getUsers().then(function (data) {
+                $scope.users = data;
+            });
         }
 
         function getLecturers(){
-            $http.get('/api/getLecturers')
-                .then(function sucessCall(response)	{
-                        $scope.lecturers = response.data.data;
-                    },function errorCall()	{
-                        console.log("Error reading lecturers list.");
-                    }
-                );
+            queryService.getLecturers().then(function(data) {
+                $scope.lecturers = data;
+            });
         }
 
         function getStudents(){
-            $http.get('/api/getStudents')
-                .then(function sucessCall(response)	{
-                        $scope.students = response.data.data;
-                    },function errorCall()	{
-                        console.log("Error reading students list.");
-                    }
-                );
-        }
-
-        function getCourses(){
-            $http.get('/api/getCourses')
-                .then(function sucessCall(response)	{
-                        $scope.courses = response.data.data;
-                    },function errorCall()	{
-                        console.log("Error reading courses list.");
-                    }
-                );
+            queryService.getStudents().then(function(data) {
+                $scope.students = data;
+            });
         }
 
         function getAssessments(){
-            $http.get('/api/getAssessments')
-                .then(function sucessCall(response)	{
-                        $scope.assessments = response.data.data;
-                    },function errorCall()	{
-                        console.log("Error reading assessments list.");
-                    }
-                );
+            queryService.getAssessments().then(function(data) {
+                $scope.assessments = data;
+            });
+        }
+
+        function getCourses(){
+            queryService.getCourses().then(function(data) {
+                $scope.courses = data;
+            });
         }
 
         function getStudentsInCourse(courseid){
-            $http.get('/api/getStudentsInCourse', {
-                params: {
-                    id: courseid
-                }
-            }).then(function sucessCall(response)	{
-                        $scope.studentsInCourse = response.data.data;
-                    },function errorCall()	{
-                        console.log("Error reading student in course list.");
-                    }
-                );
+            queryService.getStudentsInCourse(courseid).then(function(data){
+                $scope.studentsInCourse = data;
+                console.log(data);
+            });
         }
 
         function getStudentsNotInCourse(courseid){
-            $http.get('/api/getStudentsNotInCourse', {
-                params: {
-                    id: courseid
-                }
-            }).then(function sucessCall(response)	{
-                    $scope.studentsNotInCourse = response.data.data;
-                },function errorCall()	{
-                    console.log("Error reading student not in course list.");
-                }
-            );
+            queryService.getStudentsNotInCourse(courseid).then(function(data){
+                $scope.studentsNotInCourse = data;
+                console.log(data);
+            });
         }
-
-        $scope.addStudentButton = function(){
-            if(view == 10){
-                $scope.students.push(newStudentButton);
-            }else{
-                $scope.students.splice(newStudentButton, 1);
-            }
-        };
 
         $scope.setView=function(view){
             $scope.view = view;
@@ -246,6 +195,7 @@ angular
                 $scope.validUsername = false;
                 $scope.validPassword = false;
                 var userIndex = -1;
+
                 for (let i = 0; i < $scope.users.length; i++) {
                     if ($scope.users[i].username == $scope.username) {
                         $scope.validUsername = true;
@@ -310,7 +260,7 @@ angular
 
         $scope.setLecturerId = function(){
             $scope.maxid = 0;
-            $http.get('/api/getMaxUserId')
+            queryService.getMaxUserId()
                 .then(function sucessCall(response)	{
                         $scope.maxid = response.data.data.max;
                         $scope.lecturerId = $scope.maxid + 1;
@@ -361,13 +311,8 @@ angular
                 getCourses();
                 $route.reload();
                 // Appending dialog to document.body to cover sidenav in docs app
-                var confirm = $mdDialog.confirm()
-                    .title($scope.courseCode + ' has been successfully added!')
-                    .textContent('Would you like to continue adding another course?')
-                    .ariaLabel('Added Course')
-                    .targetEvent(ev)
-                    .ok('Add Another Course')
-                    .cancel('Back');
+                var confirm = dialogService.confirm($scope.courseCode + ' has been successfully added!',
+                    'Would you like to continue adding another course?', 'Added Course', 'Add Another Course', 'Back', ev);
 
                 $scope.courseCode = '';
                 $scope.errorMessage = '';
@@ -388,6 +333,14 @@ angular
             for(let i = 0; i < $scope.studentsList.length; i++){
                 $scope.addStudentToCourse($scope.studentsList[i].studentid, $scope.currentCourse.courseid);
             }
+            var alert = dialogService.alert('Student(s) have been successfully added to '+ $scope.currentCourse.courseCode +'!',
+                'Student(s) Successfully Added', ev);
+
+            $scope.errorMessage = '';
+
+            $mdDialog.show(alert).then(function() {
+                $scope.goBack();
+            });
         };
 
         $scope.addNewStudent = function(ev){
@@ -405,68 +358,51 @@ angular
             });
 
             request.then(function success(data){
-                $http.post('/api/createNewStudent',{
-                    params:{
-                        username: $scope.studentId,
-                        studentid: $scope.studentId
-                    }
-                }).then(function success(){
-                    getUsers();
-                    getStudents();
+                queryService.getMaxUserId().then(function(response)	{
+                        var maxid = response.data.data.max;
+                    $http.post('/api/createNewStudent',{
+                        params:{
+                            userid: maxid,
+                            studentid: $scope.studentId
+                        }
+                    }).then(function success(){
+                        getUsers();
+                        getStudents();
 
-                    for(let i = 0; i < $scope.coursesList.length; i++){
-                        $scope.addStudentToCourse($scope.studentId, $scope.coursesList[i].courseid, true);
-                    }
+                        for(let i = 0; i < $scope.coursesList.length; i++){
+                            $scope.addStudentToCourse($scope.studentId, $scope.coursesList[i].courseid);
+                        }
 
-                    $route.reload();
-                    // Appending dialog to document.body to cover sidenav in docs app
-                    var confirm = $mdDialog.confirm()
-                        .title($scope.name + ' has been successfully added!')
-                        .textContent('Would you like to continue adding another student?')
-                        .ariaLabel('Added Student')
-                        .targetEvent(ev)
-                        .ok('Add Another Student')
-                        .cancel('Back');
+                        $route.reload();
+                        // Appending dialog to document.body to cover sidenav in docs app
+                        var confirm = dialogService.confirm($scope.name + ' has been successfully added!', 'Would you like to continue adding another student?',
+                            'Added Student', 'Add Another Student', 'Back', ev);
 
-                    $scope.username = '';
-                    $scope.studentId = '';
-                    $scope.name = '';
-                    $scope.password = '';
-                    $scope.errorMessage = '';
+                        $scope.username = '';
+                        $scope.studentId = '';
+                        $scope.name = '';
+                        $scope.password = '';
+                        $scope.errorMessage = '';
 
-                    $mdDialog.show(confirm).then(function() {
-                        //Stay on current page
-                    }, function() {
-                        $scope.goBack();
+                        $mdDialog.show(confirm).then(function() {
+                            //Stay on current page
+                        }, function() {
+                            $scope.goBack();
+                        });
                     });
-                });
+                    },function errorCall()	{
+                        console.log("Error getting max user id.");
+                    }
+                );
             });
         };
 
-        $scope.addStudentToCourse = function (studentid, courseid, isNew) {
-            $http.post('/api/addStudentToCourse',{
+        $scope.addStudentToCourse = function (studentid, courseid) {
+            return $http.post('/api/addStudentToCourse',{
                 params:{
                     studentid: studentid,
                     courseid: courseid
                 }
-            }).then(function success(){
-                getStudentsInCourse($scope.currentCourse.courseid);
-                if(!isNew){
-                    var alert = $mdDialog.alert()
-                        .parent(angular.element(document.querySelector('#popupContainer')))
-                        .clickOutsideToClose(true)
-                        .title('Student(s) have been successfully added to '+ $scope.currentCourse.courseCode +'!')
-                        .ariaLabel('Student(s) Successfully Added')
-                        .ok('OK')
-                        .targetEvent(ev);
-
-                    $scope.errorMessage = '';
-
-                    $mdDialog.show(alert).then(function() {
-                        $scope.goBack();
-                    });
-                }
-
             });
         };
 
@@ -487,13 +423,8 @@ angular
                 getCourses();
                 $route.reload();
                 // Appending dialog to document.body to cover sidenav in docs app
-                var alert = $mdDialog.alert()
-                    .parent(angular.element(document.querySelector('#popupContainer')))
-                    .clickOutsideToClose(true)
-                    .title($scope.currentCourse.coursecode + ' has been successfully updated!')
-                    .ariaLabel('Course Successfully Updated')
-                    .ok('OK')
-                    .targetEvent(ev);
+                var alert = dialogService.alert($scope.currentCourse.coursecode + ' has been successfully updated!',
+                    'Course Successfully Updated', ev);
 
                 $scope.errorMessage = '';
 
@@ -504,12 +435,8 @@ angular
         };
 
         $scope.deleteCourse = function(ev){
-            var confirm = $mdDialog.confirm()
-                .title('Are you sure you want to delete this course?')
-                .ariaLabel('Delete Course')
-                .targetEvent(ev)
-                .ok('Yes')
-                .cancel('No');
+
+            var confirm = dialogService.confirm('Are you sure you want to delete this course?', 'Delete Course', 'Yes', 'No', ev);
 
             $mdDialog.show(confirm).then(function() {
                 var request = $http.post('/api/deleteCourse', {
@@ -520,13 +447,8 @@ angular
                 request.then(function success(data){
                     $route.reload();
                     // Appending dialog to document.body to cover sidenav in docs app
-                    var alert = $mdDialog.alert()
-                        .parent(angular.element(document.querySelector('#popupContainer')))
-                        .clickOutsideToClose(true)
-                        .title($scope.courseCode + ' has been successfully deleted!')
-                        .ariaLabel('Course Successfully Deleted')
-                        .ok('OK')
-                        .targetEvent(ev);
+                    var alert = dialogService.alert($scope.courseCode + ' has been successfully deleted!',
+                        'Course Successfully Deleted', ev);
 
                     $mdDialog.show(alert).then(function() {
                         getCourses();
@@ -552,6 +474,7 @@ angular
 
             var request = $http.post('/api/updateUser', {
                 params: {
+                    userid: $scope.selectedUser.userid,
                     username: $scope.selectedUser.username,
                     name: $scope.selectedUser.name,
                     password: $scope.selectedUser.password
@@ -561,12 +484,13 @@ angular
             request.then(function success(data){
                 getUsers();
                 $route.reload();
-                var alert = successUserAlert('updated');
+                var alert = dialogService.alert($scope.selectedUser.name + ' has been successfully updated!',
+                    'User Successfully Updated', ev);
                     // Appending dialog to document.body to cover sidenav in docs app
                 if(userType == 0){ //Student
                     var request2 = $http.post('/api/updateStudent', {
                         params: {
-                            username: $scope.selectedUser.username,
+                            userid: $scope.selectedUser.userid,
                             studentid: $scope.selectedUser.studentid
                         }
                     }).then(function success(data){
@@ -594,30 +518,14 @@ angular
             });
         };
 
-        function successUserAlert(action){
-            var alert = $mdDialog.alert()
-                .parent(angular.element(document.querySelector('#popupContainer')))
-                .clickOutsideToClose(true)
-                .title($scope.selectedUser.name + ' has been successfully '+ action +'!')
-                .ariaLabel('User successfully '+ action)
-                .ok('OK')
-                .targetEvent(ev);
-
-            return alert;
-        }
-
         $scope.deleteUser = function(ev, userType){
-            var confirm = $mdDialog.confirm()
-                .title('Are you sure you want to delete this ' + $scope.userType +'?')
-                .ariaLabel('Delete user')
-                .targetEvent(ev)
-                .ok('Yes')
-                .cancel('No');
+            var confirm = dialogService.confirm('Are you sure you want to delete this ' + $scope.userType +'?', 'Delete user', 'Yes',
+                'No', ev);
 
             $mdDialog.show(confirm).then(function() {
                 var request = $http.post('/api/deleteUser', {
                     params: {
-                        id: $scope.selectedUser.username
+                        userid: $scope.selectedUser.userid
                     }
                 });
                 request.then(function success(data){
@@ -625,8 +533,9 @@ angular
                     getCourses();
 
                     // Appending dialog to document.body to cover sidenav in docs app
-
-                    $mdDialog.show(successUserAlert('deleted')).then(function() {
+                    var alert = dialogService.alert($scope.selectedUser.name + ' has been successfully deleted!',
+                        'Course Successfully Deleted', ev);
+                    $mdDialog.show(alert).then(function() {
                         if(userType == 0){//Student
                             getStudents();
                             $scope.setCancelEditStudentView();

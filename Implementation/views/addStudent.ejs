@@ -8,7 +8,7 @@
                            object-property="student"
                            suggestions-arr="studentsNotInCourse" ng-if="students.length > 0">
     </multiple-autocomplete>
-    <p class="alert alert-danger" ng-if="students.length <= 0">There are currently no students stored in the system.</p>
+    <p class="alert alert-danger" ng-if="students.length <= 0">There are currently no students stored in the system. Click on the top right button to add a new student.</p>
     <div id="btn-group">
         <button class="btn btn-default" ng-click="setView(7)">Cancel</button>
         <md-button md-disable-backdrop="true" class="btn btn-default md-btn" ng-click="addStudent($event)">Add Student</md-button>

@@ -62,7 +62,7 @@ function getUsers(req, res, next) {
 }
 
 function getStudents(req, res, next) {
-    db.any('select * from students join users on students.username = users.username')
+    db.any('select * from students join users on students.userid = users.userid')
         .then(function (data) {
             res.status(200)
                 .json({
@@ -77,7 +77,7 @@ function getStudents(req, res, next) {
 }
 
 function getLecturers(req, res, next) {
-    db.any('select * from lecturers join users on lecturers.username = users.username')
+    db.any('select * from lecturers join users on lecturers.userid = users.userid')
         .then(function (data) {
             res.status(200)
                 .json({
@@ -123,7 +123,7 @@ function getAssessments(req, res, next){
 
 function getStudentsInCourse(req, res, next) {
     var courseid = req.query.id;
-     db.any('select * from students join users on students.username = users.username join enrolledin on students.studentid = enrolledin.studentid and enrolledin.courseid = $1', [courseid])
+     db.any('select * from students join users on students.userid = users.userid join enrolledin on students.studentid = enrolledin.studentid and enrolledin.courseid = $1', [courseid])
         .then(function (data) {
             res.status(200)
                 .json({
@@ -139,7 +139,7 @@ function getStudentsInCourse(req, res, next) {
 
 function getStudentsNotInCourse(req, res, next) {
     var courseid = req.query.id;
-    db.any('select students.*, \' Name: \' || users.name || \'Student ID: \' ||students.studentid as student from students join users on students.username = users.username left join enrolledin on students.studentid = enrolledin.studentid and enrolledin.courseid <> $1', [courseid])
+    db.any('select students.*, \' Name: \' || users.name || \'Student ID: \' || students.studentid as student from students join users on students.userid = users.userid left join enrolledin on students.studentid = enrolledin.studentid and enrolledin.courseid <> $1', [courseid])
         .then(function (data) {
             res.status(200)
                 .json({
@@ -203,9 +203,9 @@ function createNewUser(req, res, next){
 }
 
 function createNewStudent(req, res, next){
-    var username = req.body.params.username;
+    var userid = req.body.params.userid;
     var studentid = req.body.params.studentid;
-    db.none('insert into students(username, studentid) values($1, $2)', [username, studentid])
+    db.none('insert into students(userid, studentid) values($1, $2)', [userid, studentid])
         .then(function () {
             res.status(200)
                 .json({
@@ -300,8 +300,8 @@ function updateUser(req, res, next){
 }
 
 function deleteUser(req, res, next){
-    var id = req.body.params.id;
-    db.none('delete from users where userid = $1', [id])
+    var userid = req.body.params.userid;
+    db.none('delete from users where userid = $1', [userid])
         .then(function () {
             res.status(200)
                 .json({
@@ -316,8 +316,8 @@ function deleteUser(req, res, next){
 
 function updateStudent(req, res, next){
     var studentid = req.body.params.studentid;
-    var username = req.body.params.username;
-    db.none('update students set studentid = $1 where username = $2', [studentid, username])
+    var userid = req.body.params.userid;
+    db.none('update students set studentid = $1 where userid = $2', [studentid, userid])
         .then(function () {
             res.status(200)
                 .json({
