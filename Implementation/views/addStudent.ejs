@@ -4,14 +4,21 @@
     </h2>
     <p class="alert alert-danger" ng-if="errorMessage != ''">{{errorMessage}}</p>
     <h3>Select Students(s)</h3>
-    <multiple-autocomplete ng-model="studentsList"
-                           object-property="student"
-                           suggestions-arr="qs.studentsNotInCourse()" ng-if="qs.students().length > 0">
-    </multiple-autocomplete>
+    <div
+            isteven-multi-select
+            max-labels="2"
+            input-model="qs.studentsNotInCourse()"
+            output-model="formData.studentsList"
+            button-label="name - studentId"
+            item-label="name (studentId)"
+            tick-property="ticked"
+            ng-if="qs.students().length > 0"
+    >
+    </div>
     <p class="alert alert-danger" ng-if="qs.students().length <= 0">There are currently no students stored in the system. Click on the top right button to add a new student.</p>
     <div id="btn-group">
         <button class="btn btn-default" ng-click="setView(7)">Cancel</button>
-        <md-button md-disable-backdrop="true" class="btn btn-default md-btn" ng-click="addStudent($event)">Add Student</md-button>
+        <md-button md-disable-backdrop="true" class="btn btn-default md-btn" ng-click="addStudent($event)" ng-disabled="formData.studentsList.length <= 0">Add Student(s)</md-button>
     </div>
 </div>
 
@@ -37,15 +44,22 @@
         </div>
     </form>
     <h3>Select Course(s)</h3>
-    <multiple-autocomplete ng-model="coursesList"
-                           object-property="coursecode"
-                           suggestions-arr="qs.courses()" ng-if="qs.courses().length > 0">
-    </multiple-autocomplete>
+    <div
+            isteven-multi-select
+            max-labels="2"
+            input-model="qs.courses()"
+            output-model="formData.coursesList"
+            button-label="coursecode"
+            item-label="coursecode"
+            tick-property="ticked"
+            ng-if="qs.courses().length > 0"
+    >
+    </div>
     <p class="alert alert-danger" ng-if="qs.courses().length <= 0">There are currently no courses stored in the system.</p>
 
     <div id="btn-group">
         <button class="btn btn-default" ng-click="setCancelEditStudentView()">Cancel</button>
-        <md-button md-disable-backdrop="true" class="btn btn-default" ng-click="addNewStudent($event)">Add Student</md-button>
+        <md-button md-disable-backdrop="true" class="btn btn-default" ng-click="addNewStudent($event)">Add New Student</md-button>
     </div>
 </div>
 
@@ -74,10 +88,17 @@
         </div>
     </form>
     <h3>Select Course(s)</h3>
-    <multiple-autocomplete ng-model="coursesList"
-                           object-property="coursecode"
-                           suggestions-arr="qs.courses()" ng-if="qs.courses().length > 0">
-    </multiple-autocomplete>
+    <div
+            isteven-multi-select
+            max-labels="2"
+            input-model="qs.courses()"
+            output-model="formData.coursesList"
+            button-label="coursecode"
+            item-label="coursecode"
+            tick-property="ticked"
+            ng-if="qs.courses().length > 0"
+    >
+    </div>
     <p class="alert alert-danger" ng-if="qs.courses().length <= 0">There are currently no courses stored in the system.</p>
 
     <div id="btn-group">

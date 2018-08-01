@@ -34,6 +34,7 @@ app.use('/scripts', express.static(__dirname + '/node_modules/angular-animate/')
 app.use('/scripts', express.static(__dirname + '/node_modules/angular-messages/'));
 app.use('/scripts', express.static(__dirname + '/node_modules/angular-multiple-select/build/'));
 app.use('/scripts', express.static(__dirname + '/node_modules/font-awesome/'));
+app.use('/scripts', express.static(__dirname + '/node_modules/isteven-angular-multiselect/'));
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

@@ -123,7 +123,7 @@ function getAssessments(req, res, next){
 
 function getStudentsInCourse(req, res, next) {
     var courseid = req.query.id;
-     db.any('select * from students join users on students.userid = users.userid join enrolledin on students.studentid = enrolledin.studentid and enrolledin.courseid = $1', [courseid])
+     db.any('select * from students join users on students.userid = users.userid join enrolledin on students.studentid = enrolledin.studentid where enrolledin.courseid = $1', [courseid])
         .then(function (data) {
             res.status(200)
                 .json({
@@ -139,7 +139,7 @@ function getStudentsInCourse(req, res, next) {
 
 function getStudentsNotInCourse(req, res, next) {
     var courseid = req.query.id;
-    db.any('select students.*, \' Name: \' || users.name || \'Student ID: \' || students.studentid as student from students join users on students.userid = users.userid left join enrolledin on students.studentid = enrolledin.studentid and enrolledin.courseid <> $1', [courseid])
+    db.any('select * from students join users on students.userid = users.userid left join enrolledin on students.studentid = enrolledin.studentid where students.studentid not in (select studentid from enrolledin where courseid = $1)', [courseid])
         .then(function (data) {
             res.status(200)
                 .json({

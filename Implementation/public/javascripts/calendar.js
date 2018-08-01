@@ -1,4 +1,4 @@
-var app = angular.module('mwl.calendar.docs', ['mwl.calendar', 'ngAnimate', 'ui.bootstrap', 'colorpicker.module', 'ngRoute', 'ngMaterial', 'multipleSelect', 'queries', 'dialogs']);
+var app = angular.module('mwl.calendar.docs', ['mwl.calendar', 'ngAnimate', 'ui.bootstrap', 'colorpicker.module', 'ngRoute', 'ngMaterial', 'multipleSelect', 'queries', 'dialogs', 'isteven-multi-select']);
 app.controller('calendarController', function(moment, alert, calendarConfig, $scope, $http, $mdDialog, $route, queryService, dialogService) {
         var vm = this;
 
@@ -106,13 +106,20 @@ app.controller('calendarController', function(moment, alert, calendarConfig, $sc
         $scope.userType = '';
         $scope.courseCode = '';
         $scope.currentCourse = '';
-        $scope.coursesList = [];
+        $scope.formData = {};
         $scope.studentsList = [];
         $scope.qs = queryService;
 
         var viewStack = [];
 
-        $scope.qs.getUsers();
+        $scope.qs.getUsers().then(function(){
+            /*if(JSON.parse(sessionStorage.getItem('loggedIn'))){
+                $scope.setView(sessionStorage.getItem('view'));
+                $scope.userType = getUserType(sessionStorage.getItem('userIndex'));
+                $scope.user = $scope.qs.getUsers()[sessionStorage.getItem('userIndex')];
+            }*/
+        });
+
         $scope.qs.getStudents();
         $scope.qs.getLecturers();
         $scope.qs.getAssessments();
@@ -123,19 +130,16 @@ app.controller('calendarController', function(moment, alert, calendarConfig, $sc
 
         $scope.setView=function(view){
             $scope.view = view;
+            sessionStorage.setItem('view', view);
             viewStack.push(view);
             $scope.errorMessage = '';
         };
 
-    function checkLoggedIn(){
-        if(sessionStorage.getItem('loggedIn')){
-            $scope.setView(2);
-            $scope.userType = getUserType(sessionStorage.getItem('userIndex'));
-            $scope.user = $scope.qs.getUsers()[sessionStorage.getItem('userIndex')];
-        }
+    /*function checkLoggedIn(){
+
     }
 
-    checkLoggedIn();
+    checkLoggedIn();*/
 
         $scope.isView=function(type, view){
             return $scope.userType == type && $scope.view == view;
@@ -200,7 +204,7 @@ app.controller('calendarController', function(moment, alert, calendarConfig, $sc
             $scope.userType = '';
             $scope.setView(1);
             $scope.cancelLogin();
-            sessionStorage.setItem('loggedIn', false);
+            sessionStorage.clear();
             $scope.user = {};
             $scope.userType = '';
         };
@@ -212,6 +216,7 @@ app.controller('calendarController', function(moment, alert, calendarConfig, $sc
         $scope.goBack = function(){
             viewStack.splice(-1,1);
             $scope.view = viewStack[viewStack.length - 1];
+            sessionStorage.setItem('viewStack', viewStack);
         };
 
         $scope.cancelLogin=function(){
@@ -224,7 +229,7 @@ app.controller('calendarController', function(moment, alert, calendarConfig, $sc
             $scope.courseList = [];
             $scope.currentCourse = course;
             $scope.courseCode = course.courseCode;
-            $scope.coursesList.push($scope.currentCourse);
+            $scope.currentCourse.ticked = true;
             $scope.qs.getStudentsInCourse(course.courseid);
             $scope.qs.getStudentsNotInCourse(course.courseid);
             $scope.studentsList = $scope.qs.studentsNotInCourse();
@@ -289,7 +294,7 @@ app.controller('calendarController', function(moment, alert, calendarConfig, $sc
                 $route.reload();
                 // Appending dialog to document.body to cover sidenav in docs app
                 var confirm = dialogService.confirm($scope.courseCode + ' has been successfully added!',
-                    'Would you like to continue adding another course?', 'Added Course', 'Add Another Course', 'Back', ev);
+                   'Added Course', 'Add Another Course', 'Back', ev);
 
                 $scope.courseCode = '';
                 $scope.errorMessage = '';
@@ -301,7 +306,7 @@ app.controller('calendarController', function(moment, alert, calendarConfig, $sc
             });
         };
 
-        $scope.addStudent = function(){
+        $scope.addStudent = function(ev){
             if($scope.studentsList == []){
                 $scope.errorMessage = 'Please select at least one student to add to this course.';
                 return;
@@ -345,14 +350,14 @@ app.controller('calendarController', function(moment, alert, calendarConfig, $sc
                     }).then(function success(){
                         $scope.qs.getUsers();
                         $scope.qs.getStudents();
-
-                        for(let i = 0; i < $scope.coursesList.length; i++){
-                            $scope.addStudentToCourse($scope.studentId, $scope.coursesList[i].courseid);
-                        }
+                        angular.forEach($scope.formData.coursesList, function(course){
+                            console.log($scope.studentId + " " + course.courseid);
+                            $scope.addStudentToCourse($scope.studentId, course.courseid);
+                        });
 
                         $route.reload();
                         // Appending dialog to document.body to cover sidenav in docs app
-                        var confirm = dialogService.confirm($scope.name + ' has been successfully added!', 'Would you like to continue adding another student?',
+                        var confirm = dialogService.confirm($scope.name + ' has been successfully added!',
                             'Added Student', 'Add Another Student', 'Back', ev);
 
                         $scope.username = '';
@@ -365,6 +370,7 @@ app.controller('calendarController', function(moment, alert, calendarConfig, $sc
                             //Stay on current page
                         }, function() {
                             $scope.goBack();
+                            $scope.qs.getStudentsInCourse($scope.currentCourse.courseid);
                         });
                     });
                     },function errorCall()	{

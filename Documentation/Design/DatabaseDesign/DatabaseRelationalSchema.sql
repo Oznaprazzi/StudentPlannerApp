@@ -16,11 +16,13 @@ CREATE TABLE Students(
 	StudentId int PRIMARY KEY NOT NULL,
 	UserId int NOT NULL references Users(UserId) ON UPDATE CASCADE ON DELETE CASCADE,
 	Points int NOT NULL DEFAULT 0
+	Ticked boolean NOT NULL DEFAULT false
 );
 
 CREATE TABLE Courses(
 	CourseId SERIAL PRIMARY KEY NOT NULL,
-	CourseCode char(7) NOT NULL
+	CourseCode char(7) NOT NULL,
+	Ticked boolean NOT NULL DEFAULT false
 );
 
 CREATE TABLE Assessments(
