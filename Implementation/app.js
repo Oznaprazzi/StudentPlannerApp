@@ -32,7 +32,6 @@ app.use('/scripts', express.static(__dirname + '/node_modules/angular-material/'
 app.use('/scripts', express.static(__dirname + '/node_modules/angular-aria/'));
 app.use('/scripts', express.static(__dirname + '/node_modules/angular-animate/'));
 app.use('/scripts', express.static(__dirname + '/node_modules/angular-messages/'));
-app.use('/scripts', express.static(__dirname + '/node_modules/angular-multiple-select/build/'));
 app.use('/scripts', express.static(__dirname + '/node_modules/font-awesome/'));
 app.use('/scripts', express.static(__dirname + '/node_modules/isteven-angular-multiselect/'));
 
