@@ -18,9 +18,9 @@
     <h3>Select Course(s)</h3>
     <multiple-autocomplete ng-model="coursesList"
                            object-property="coursecode"
-                           suggestions-arr="qs.courses" ng-if="qs.courses.length > 0">
+                           suggestions-arr="qs.courses()" ng-if="qs.courses().length > 0">
     </multiple-autocomplete>
-    <p class="alert alert-danger" ng-if="qs.courses.length <= 0">There are currently no courses stored in the system.</p>
+    <p class="alert alert-danger" ng-if="qs.courses().length <= 0">There are currently no courses stored in the system.</p>
 
     <div id="btn-group">
         <button class="btn btn-default" ng-click="goBack()">Cancel</button>
@@ -56,9 +56,9 @@
     <h3>Select Course(s)</h3>
     <multiple-autocomplete ng-model="coursesList"
                            object-property="coursecode"
-                           suggestions-arr="qs.courses" ng-if="qs.courses.length > 0">
+                           suggestions-arr="qs.courses()" ng-if="qs.courses().length > 0">
     </multiple-autocomplete>
-    <p class="alert alert-danger" ng-if="qs.courses.length <= 0">There are currently no courses stored in the system.</p>
+    <p class="alert alert-danger" ng-if="qs.courses().length <= 0">There are currently no courses stored in the system.</p>
 
     <div id="btn-group">
         <md-button md-disable-backdrop="true" class="btn btn-default" ng-click="deleteUser($event, 1)">Delete Student</md-button>

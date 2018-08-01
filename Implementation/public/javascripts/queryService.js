@@ -12,6 +12,7 @@ angular.module('queries', []).service('queryService', function($http){
         $http.get('/api/getUsers')
             .then(function sucessCall(response)	{
                     users = response.data.data;
+                    console.log(users);
                 },function errorCall()	{
                     console.log("Error reading users list.");
                 }
@@ -90,6 +91,7 @@ angular.module('queries', []).service('queryService', function($http){
 
     /*******GETTERS********/
     this.users = function(){
+        console.log(users);
         return users;
     };
 

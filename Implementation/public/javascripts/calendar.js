@@ -118,11 +118,24 @@ app.controller('calendarController', function(moment, alert, calendarConfig, $sc
         $scope.qs.getAssessments();
         $scope.qs.getCourses();
 
+        console.log($scope.qs.users());
+
+
         $scope.setView=function(view){
             $scope.view = view;
             viewStack.push(view);
             $scope.errorMessage = '';
         };
+
+    function checkLoggedIn(){
+        if(sessionStorage.getItem('loggedIn')){
+            $scope.setView(2);
+            $scope.userType = getUserType(sessionStorage.getItem('userIndex'));
+            $scope.user = $scope.qs.getUsers()[sessionStorage.getItem('userIndex')];
+        }
+    }
+
+    checkLoggedIn();
 
         $scope.isView=function(type, view){
             return $scope.userType == type && $scope.view == view;
@@ -167,6 +180,9 @@ app.controller('calendarController', function(moment, alert, calendarConfig, $sc
                 }
                 if ($scope.validUsername && $scope.validPassword) {
                     $scope.userType = getUserType(userIndex);
+                    sessionStorage.setItem('loggedIn', true);
+                    sessionStorage.setItem('user', $scope.qs.users()[userIndex]);
+                    sessionStorage.setItem('userIndex', userIndex);
                     $scope.setView(2);
                     $scope.cancelLogin();
 
@@ -184,6 +200,9 @@ app.controller('calendarController', function(moment, alert, calendarConfig, $sc
             $scope.userType = '';
             $scope.setView(1);
             $scope.cancelLogin();
+            sessionStorage.setItem('loggedIn', false);
+            $scope.user = {};
+            $scope.userType = '';
         };
 
         $scope.goHome = function(){
