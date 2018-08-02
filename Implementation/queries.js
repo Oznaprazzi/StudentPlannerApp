@@ -19,6 +19,7 @@ module.exports = {
     getAssessments: getAssessments,
     getStudentsInCourse: getStudentsInCourse,
     getStudentsNotInCourse: getStudentsNotInCourse,
+    getStudentsCourses: getStudentsCourses,
     getMaxUserId: getMaxUserId,
     createNewUser: createNewUser,
     createNewStudent: createNewStudent,
@@ -155,7 +156,7 @@ function getStudentsNotInCourse(req, res, next) {
 
 function getStudentsCourses(req, res, next){
     var studentid = req.query.studentid;
-    db.any('select coursecode from courses join enolledin on courses.courseid = enrolledin.courseid and enrolledin.studentid = $1', [studentid])
+    db.any('select * from courses join enrolledin on courses.courseid = enrolledin.courseid and enrolledin.studentid = $1', [studentid])
         .then(function (data) {
             res.status(200)
                 .json({

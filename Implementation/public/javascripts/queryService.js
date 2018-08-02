@@ -7,6 +7,7 @@ angular.module('queries', []).service('queryService', function($http){
     var assessments = [];
     var studentsInCourse = [];
     var studentsNotInCourse = [];
+    var studentsCourses = [];
 
     this.getUsers = function(){
         return $http.get('/api/getUsers')
@@ -19,7 +20,7 @@ angular.module('queries', []).service('queryService', function($http){
     };
 
     this.getLecturers = function(){
-        $http.get('/api/getLecturers')
+        return $http.get('/api/getLecturers')
             .then(function sucessCall(response)	{
                     lecturers =  response.data.data;
                 },function errorCall()	{
@@ -29,7 +30,7 @@ angular.module('queries', []).service('queryService', function($http){
     };
 
     this.getStudents = function(){
-        $http.get('/api/getStudents')
+        return $http.get('/api/getStudents')
             .then(function sucessCall(response)	{
                     students = response.data.data;
                 },function errorCall()	{
@@ -39,7 +40,7 @@ angular.module('queries', []).service('queryService', function($http){
     };
 
     this.getCourses = function(){
-        $http.get('/api/getCourses')
+        return $http.get('/api/getCourses')
             .then(function sucessCall(response)	{
                     courses = response.data.data;
                 },function errorCall()	{
@@ -49,7 +50,7 @@ angular.module('queries', []).service('queryService', function($http){
     };
 
     this.getAssessments = function(){
-        $http.get('/api/getAssessments')
+        return $http.get('/api/getAssessments')
             .then(function sucessCall(response)	{
                     assessments = response.data.data;
                 },function errorCall()	{
@@ -63,7 +64,7 @@ angular.module('queries', []).service('queryService', function($http){
     };
 
     this.getStudentsInCourse = function(courseid){
-        $http.get('/api/getStudentsInCourse', {
+        return $http.get('/api/getStudentsInCourse', {
             params: {
                 id: courseid
             }
@@ -76,12 +77,25 @@ angular.module('queries', []).service('queryService', function($http){
     };
 
     this.getStudentsNotInCourse = function(courseid){
-        $http.get('/api/getStudentsNotInCourse', {
+        return $http.get('/api/getStudentsNotInCourse', {
             params: {
                 id: courseid
             }
         }).then(function sucessCall(response)	{
                 studentsNotInCourse = response.data.data;
+            },function errorCall()	{
+                console.log("Error reading student not in course list.");
+            }
+        );
+    };
+
+    this.getStudentsCourses = function(studentid){
+        return $http.get('/api/getStudentsCourses', {
+            params: {
+                studentid: studentid
+            }
+        }).then(function sucessCall(response)	{
+            studentsCourses = response.data.data;
             },function errorCall()	{
                 console.log("Error reading student not in course list.");
             }
@@ -115,5 +129,9 @@ angular.module('queries', []).service('queryService', function($http){
 
     this.studentsNotInCourse = function(){
         return studentsNotInCourse;
+    };
+
+    this.studentsCourses = function(){
+        return studentsCourses;
     };
 });

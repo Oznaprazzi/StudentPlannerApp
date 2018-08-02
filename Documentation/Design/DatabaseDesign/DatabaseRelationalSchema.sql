@@ -15,7 +15,7 @@ CREATE TABLE Lecturers(
 CREATE TABLE Students(
 	StudentId int PRIMARY KEY NOT NULL,
 	UserId int NOT NULL references Users(UserId) ON UPDATE CASCADE ON DELETE CASCADE,
-	Points int NOT NULL DEFAULT 0
+	Points int NOT NULL DEFAULT 0,
 	Ticked boolean NOT NULL DEFAULT false
 );
 
@@ -68,3 +68,6 @@ CREATE TABLE CompletesTask (
 	Completed boolean NOT NULL DEFAULT false,
 	PRIMARY KEY(StudentId, TaskId)
 );
+
+/*Create Admin Login*/
+insert into users(username, name, password) values('admin', 'admin', 'password');

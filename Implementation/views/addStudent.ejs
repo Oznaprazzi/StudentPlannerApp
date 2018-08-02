@@ -18,7 +18,9 @@
     <p class="alert alert-danger" ng-if="qs.students().length <= 0">There are currently no students stored in the system. Click on the top right button to add a new student.</p>
     <div id="btn-group">
         <button class="btn btn-default" ng-click="setView(7)">Cancel</button>
-        <md-button md-disable-backdrop="true" class="btn btn-default md-btn" ng-click="addStudent($event)" ng-disabled="formData.studentsList.length <= 0">Add Student(s)</md-button>
+        <md-button md-disable-backdrop="true" class="btn btn-default md-btn"
+                   ng-click="addStudent($event)"
+                   ng-disabled="formData.studentsList.length <= 0 || qs.students().length <= 0">Add Student(s)</md-button>
     </div>
 </div>
 
@@ -66,7 +68,7 @@
 <div ng-show="isSharedView(12)">
     <h2>Edit or Delete Student
         <i class="titleIcon fa fa-times-circle" ng-click="goBack()" aria-hidden="true"></i>
-        <i class="titleIcon fa fa-check-circle" ng-click="updateUser($event, 0)" aria-hidden="true"></i>
+        <i class="titleIcon fa fa-check-circle" ng-click="updateUser($event, 'student')" aria-hidden="true"></i>
     </h2>
     <p class="alert alert-danger" ng-if="errorMessage != ''">{{errorMessage}}</p>
     <form>
@@ -76,7 +78,7 @@
         </div>
         <div id="input">
             <h3>Student ID</h3>
-            <input type="number" ng-model="selectedUser.studentId" name="studentId" required/>
+            <input type="number" ng-model="selectedUser.studentid" name="studentId" required/>
         </div>
         <div id="input">
             <h3>Name</h3>
@@ -102,6 +104,6 @@
     <p class="alert alert-danger" ng-if="qs.courses().length <= 0">There are currently no courses stored in the system.</p>
 
     <div id="btn-group">
-        <md-button md-disable-backdrop="true" class="btn btn-default" ng-click="deleteUser($event, 0)">Delete Student</md-button>
+        <md-button md-disable-backdrop="true" class="btn btn-default md-warn" ng-click="deleteUser($event, 'student')">Delete Student</md-button>
     </div>
 </div>

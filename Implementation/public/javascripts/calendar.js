@@ -1,4 +1,4 @@
-var app = angular.module('mwl.calendar.docs', ['mwl.calendar', 'ngAnimate', 'ui.bootstrap', 'colorpicker.module', 'ngRoute', 'ngMaterial', 'multipleSelect', 'queries', 'dialogs', 'isteven-multi-select']);
+var app = angular.module('mwl.calendar.docs', ['mwl.calendar', 'ngAnimate', 'ui.bootstrap', 'colorpicker.module', 'ngRoute', 'ngMaterial', 'queries', 'dialogs', 'isteven-multi-select']);
 app.controller('calendarController', function(moment, alert, calendarConfig, $scope, $http, $mdDialog, $route, queryService, dialogService) {
         var vm = this;
 
@@ -113,11 +113,11 @@ app.controller('calendarController', function(moment, alert, calendarConfig, $sc
         var viewStack = [];
 
         $scope.qs.getUsers().then(function(){
-            /*if(JSON.parse(sessionStorage.getItem('loggedIn'))){
-                $scope.setView(sessionStorage.getItem('view'));
+            if(JSON.parse(sessionStorage.getItem('loggedIn'))){
+                $scope.setView(2);
                 $scope.userType = getUserType(sessionStorage.getItem('userIndex'));
                 $scope.user = $scope.qs.getUsers()[sessionStorage.getItem('userIndex')];
-            }*/
+            }
         });
 
         $scope.qs.getStudents();
@@ -125,21 +125,11 @@ app.controller('calendarController', function(moment, alert, calendarConfig, $sc
         $scope.qs.getAssessments();
         $scope.qs.getCourses();
 
-        console.log($scope.qs.users());
-
-
         $scope.setView=function(view){
             $scope.view = view;
-            sessionStorage.setItem('view', view);
             viewStack.push(view);
             $scope.errorMessage = '';
         };
-
-    /*function checkLoggedIn(){
-
-    }
-
-    checkLoggedIn();*/
 
         $scope.isView=function(type, view){
             return $scope.userType == type && $scope.view == view;
@@ -199,6 +189,15 @@ app.controller('calendarController', function(moment, alert, calendarConfig, $sc
         $scope.$watch('view', function() {
             resetCourse();
         });
+
+        function resetCourse(){
+            angular.forEach($scope.qs.courses(), function(course){
+                course.ticked = false;
+            });
+            $scope.currentCourse.ticked = true;
+            $scope.courseCode = '';
+        }
+
         //Logout
         $scope.logout = function(){
             $scope.userType = '';
@@ -231,9 +230,9 @@ app.controller('calendarController', function(moment, alert, calendarConfig, $sc
             $scope.courseCode = course.courseCode;
             $scope.currentCourse.ticked = true;
             $scope.qs.getStudentsInCourse(course.courseid);
-            $scope.qs.getStudentsNotInCourse(course.courseid);
-            $scope.studentsList = $scope.qs.studentsNotInCourse();
-            console.log($scope.studentsList);
+            $scope.qs.getStudentsNotInCourse(course.courseid).then(function(){
+                $scope.studentsList = $scope.qs.studentsNotInCourse();
+            });
         };
 
         $scope.setLecturer = function(lecturer){
@@ -258,7 +257,15 @@ app.controller('calendarController', function(moment, alert, calendarConfig, $sc
 
         $scope.setStudent = function(student){
             $scope.selectedUser = student;
-
+            $scope.qs.getStudentsCourses(student.studentid).then(function(){
+                angular.forEach($scope.qs.courses(), function(course){
+                    angular.forEach($scope.qs.studentsCourses(), function(studentCourse){
+                        if(course.courseid == studentCourse.courseid){
+                            course.ticked = true;
+                        }
+                    });
+                });
+            });
         };
 
         $scope.setCancelEditStudentView = function(){
@@ -268,11 +275,6 @@ app.controller('calendarController', function(moment, alert, calendarConfig, $sc
                 $scope.setView(7);
             }
         };
-
-        function resetCourse(){
-            $scope.courseList = [];
-            $scope.courseCode = '';
-        }
 
         $scope.setAssessment = function(assessment){
             $scope.currentAssessment = assessment;
@@ -311,7 +313,6 @@ app.controller('calendarController', function(moment, alert, calendarConfig, $sc
                 $scope.errorMessage = 'Please select at least one student to add to this course.';
                 return;
             }
-            console.log($scope.studentsList);
             for(let i = 0; i < $scope.studentsList.length; i++){
                 $scope.addStudentToCourse($scope.studentsList[i].studentid, $scope.currentCourse.courseid);
             }
@@ -351,7 +352,6 @@ app.controller('calendarController', function(moment, alert, calendarConfig, $sc
                         $scope.qs.getUsers();
                         $scope.qs.getStudents();
                         angular.forEach($scope.formData.coursesList, function(course){
-                            console.log($scope.studentId + " " + course.courseid);
                             $scope.addStudentToCourse($scope.studentId, course.courseid);
                         });
 
@@ -445,12 +445,12 @@ app.controller('calendarController', function(moment, alert, calendarConfig, $sc
         };
 
         $scope.updateUser = function(ev, userType){
-            if((userType != 0 && $scope.selectedUser.username == '') || (userType == 0 && $scope.selectedUser.studentid == '') || $scope.selectedUser.name == '' || $scope.selectedUser.password == ''){
+            if((userType != 'student' && $scope.selectedUser.username == '') || (userType == 'student' && $scope.selectedUser.studentid == '') || $scope.selectedUser.name == '' || $scope.selectedUser.password == ''){
                 $scope.errorMessage = 'Please fill in all fields.';
                 return;
             }
 
-            if(userType == 0){//Student
+            if(userType == 'student'){
                 $scope.selectedUser.username = $scope.selectedUser.studentid;
             }
 
@@ -470,7 +470,7 @@ app.controller('calendarController', function(moment, alert, calendarConfig, $sc
                 var alert = dialogService.alert($scope.selectedUser.name + ' has been successfully updated!',
                     'User Successfully Updated', ev);
                     // Appending dialog to document.body to cover sidenav in docs app
-                if(userType == 0){ //Student
+                if(userType == 'student'){
                     var request2 = $http.post('/api/updateStudent', {
                         params: {
                             userid: $scope.selectedUser.userid,
@@ -492,7 +492,7 @@ app.controller('calendarController', function(moment, alert, calendarConfig, $sc
         };
 
         $scope.deleteUser = function(ev, userType){
-            var confirm = dialogService.confirm('Are you sure you want to delete this ' + $scope.userType +'?', 'Delete user', 'Yes',
+            var confirm = dialogService.confirm('Are you sure you want to delete this ' + userType +'?', 'Delete user', 'Yes',
                 'No', ev);
 
             $mdDialog.show(confirm).then(function() {
@@ -507,12 +507,12 @@ app.controller('calendarController', function(moment, alert, calendarConfig, $sc
 
                     // Appending dialog to document.body to cover sidenav in docs app
                     var alert = dialogService.alert($scope.selectedUser.name + ' has been successfully deleted!',
-                        'Course Successfully Deleted', ev);
+                        'User Successfully Deleted', ev);
                     $mdDialog.show(alert).then(function() {
-                        if(userType == 0){//Student
+                        if(userType == 'student'){//Student
                             $scope.qs.getStudents();
                             $scope.setCancelEditStudentView();
-                        }else if(userType == 1){//Lecturer
+                        }else if(userType == 'lecturer'){//Lecturer
                             $scope.qs.getLecturers();
                             $scope.goBack();
                         }
