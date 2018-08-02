@@ -562,13 +562,18 @@ app.controller('calendarController', function(moment, alert, calendarConfig, $sc
                 request.then(function success(data){
                     $scope.qs.getUsers();
                     $scope.qs.getCourses();
-
+                    $scope.username = '';
+                    $scope.studentid = '';
+                    $scope.name = '';
+                    $scope.password = '';
+                    $scope.errorMessage = '';
                     // Appending dialog to document.body to cover sidenav in docs app
                     var alert = dialogService.alert($scope.selectedUser.name + ' has been successfully deleted!',
                         'User Successfully Deleted', ev);
                     $mdDialog.show(alert).then(function() {
                         if(userType == 'student'){//Student
                             $scope.qs.getStudents();
+                            $scope.qs.getStudentsInCourse($scope.currentCourse.courseid);
                             $scope.setCancelEditStudentView();
                         }else if(userType == 'lecturer'){//Lecturer
                             $scope.qs.getLecturers();
