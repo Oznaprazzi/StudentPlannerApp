@@ -9,8 +9,8 @@
             max-labels="2"
             input-model="qs.studentsNotInCourse()"
             output-model="formData.studentsList"
-            button-label="name - studentId"
-            item-label="name (studentId)"
+            button-label="name"
+            item-label="name"
             tick-property="ticked"
             ng-if="qs.students().length > 0"
     >
@@ -30,11 +30,11 @@
     <form>
         <div id="input">
             <h3>Username</h3>
-            <input type="text" name="studentId" ng-model="studentId" disabled/>
+            <input type="text" name="studentid" ng-model="studentid" disabled/>
         </div>
         <div id="input">
             <h3>Student ID</h3>
-            <input type="number" ng-model="studentId" name="studentId" required/>
+            <input type="number" ng-model="studentid" name="studentid" required/>
         </div>
         <div id="input">
             <h3>Name</h3>

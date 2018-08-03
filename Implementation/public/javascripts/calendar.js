@@ -104,7 +104,7 @@ app.controller('calendarController', function(moment, alert, calendarConfig, $sc
         $scope.view = 1;
         $scope.loginFailMessage = '';
         $scope.userType = '';
-        $scope.courseCode = '';
+        $scope.coursecode = '';
         $scope.currentCourse = '';
         $scope.formData = {};
         $scope.studentsList = [];
@@ -127,6 +127,7 @@ app.controller('calendarController', function(moment, alert, calendarConfig, $sc
 
         $scope.setView=function(view){
             $scope.view = view;
+            console.log(view);
             viewStack.push(view);
             $scope.errorMessage = '';
         };
@@ -195,7 +196,7 @@ app.controller('calendarController', function(moment, alert, calendarConfig, $sc
                 course.ticked = false;
             });
             $scope.currentCourse.ticked = true;
-            $scope.courseCode = '';
+            $scope.coursecode = '';
         }
 
         //Logout
@@ -227,7 +228,7 @@ app.controller('calendarController', function(moment, alert, calendarConfig, $sc
         $scope.setCourse = function(course){
             $scope.courseList = [];
             $scope.currentCourse = course;
-            $scope.courseCode = course.courseCode;
+            $scope.coursecode = course.coursecode;
             $scope.currentCourse.ticked = true;
             $scope.qs.getStudentsInCourse(course.courseid);
             $scope.qs.getStudentsNotInCourse(course.courseid).then(function(){
@@ -281,13 +282,13 @@ app.controller('calendarController', function(moment, alert, calendarConfig, $sc
         };
 
         $scope.addCourse = function(ev){
-            if($scope.courseCode == ''){
+            if($scope.coursecode == ''){
                 $scope.errorMessage = 'Course Code Cannot Be Empty!';
                 return;
             }
             var request = $http.post('/api/createNewCourse', {
                 params: {
-                    courseCode: $scope.courseCode
+                    coursecode: $scope.coursecode
                 }
             });
 
@@ -295,10 +296,10 @@ app.controller('calendarController', function(moment, alert, calendarConfig, $sc
                 $scope.qs.getCourses();
                 $route.reload();
                 // Appending dialog to document.body to cover sidenav in docs app
-                var confirm = dialogService.confirm($scope.courseCode + ' has been successfully added!',
+                var confirm = dialogService.confirm($scope.coursecode + ' has been successfully added!',
                    'Added Course', 'Add Another Course', 'Back', ev);
 
-                $scope.courseCode = '';
+                $scope.coursecode = '';
                 $scope.errorMessage = '';
                 $mdDialog.show(confirm).then(function() {
                     //Stay on current page
@@ -313,28 +314,36 @@ app.controller('calendarController', function(moment, alert, calendarConfig, $sc
                 $scope.errorMessage = 'Please select at least one student to add to this course.';
                 return;
             }
-            for(let i = 0; i < $scope.studentsList.length; i++){
-                $scope.addStudentToCourse($scope.studentsList[i].studentid, $scope.currentCourse.courseid);
-            }
-            var alert = dialogService.alert('Student(s) have been successfully added to '+ $scope.currentCourse.courseCode +'!',
+            console.log($scope.formData.studentsList);
+            angular.forEach($scope.formData.studentsList, function(student){
+                console.log(student.studentid);
+                $scope.addStudentToCourse(student.studentid, $scope.currentCourse.courseid);
+            });
+
+            var alert = dialogService.alert('Student(s) have been successfully added to '+ $scope.currentCourse.coursecode +'!',
                 'Student(s) Successfully Added', ev);
 
             $scope.errorMessage = '';
 
             $mdDialog.show(alert).then(function() {
+                $scope.qs.getStudentsInCourse($scope.currentCourse.courseid);
                 $scope.goBack();
             });
         };
 
         $scope.addNewStudent = function(ev){
-            if($scope.studentId == '' || $scope.name == '' || $scope.password == ''){
+            if($scope.studentid == '' || $scope.name == '' || $scope.password == ''){
                 $scope.errorMessage = 'Please fill in all fields.';
+                return;
+            }
+            if(isIdExists($scope.studentid)) {
+                $scope.errorMessage = 'Student Id entered already exists in system!';
                 return;
             }
 
             var request = $http.post('/api/createNewUser', {
                 params: {
-                    username: $scope.studentId,
+                    username: $scope.studentid,
                     name: $scope.name,
                     password: $scope.password
                 }
@@ -346,13 +355,13 @@ app.controller('calendarController', function(moment, alert, calendarConfig, $sc
                     $http.post('/api/createNewStudent',{
                         params:{
                             userid: maxid,
-                            studentid: $scope.studentId
+                            studentid: $scope.studentid
                         }
                     }).then(function success(){
                         $scope.qs.getUsers();
                         $scope.qs.getStudents();
                         angular.forEach($scope.formData.coursesList, function(course){
-                            $scope.addStudentToCourse($scope.studentId, course.courseid);
+                            $scope.addStudentToCourse($scope.studentid, course.courseid);
                         });
 
                         $route.reload();
@@ -361,7 +370,7 @@ app.controller('calendarController', function(moment, alert, calendarConfig, $sc
                             'Added Student', 'Add Another Student', 'Back', ev);
 
                         $scope.username = '';
-                        $scope.studentId = '';
+                        $scope.studentid = '';
                         $scope.name = '';
                         $scope.password = '';
                         $scope.errorMessage = '';
@@ -370,6 +379,7 @@ app.controller('calendarController', function(moment, alert, calendarConfig, $sc
                             //Stay on current page
                         }, function() {
                             $scope.goBack();
+                            resetCourse();
                             $scope.qs.getStudentsInCourse($scope.currentCourse.courseid);
                         });
                     });
@@ -430,7 +440,7 @@ app.controller('calendarController', function(moment, alert, calendarConfig, $sc
                 request.then(function success(data){
                     $route.reload();
                     // Appending dialog to document.body to cover sidenav in docs app
-                    var alert = dialogService.alert($scope.courseCode + ' has been successfully deleted!',
+                    var alert = dialogService.alert($scope.coursecode + ' has been successfully deleted!',
                         'Course Successfully Deleted', ev);
 
                     $mdDialog.show(alert).then(function() {
@@ -444,6 +454,15 @@ app.controller('calendarController', function(moment, alert, calendarConfig, $sc
             });
         };
 
+        function isIdExists(studentid){
+            angular.forEach($scope.qs.students(), function(student){
+                if(student.studentid == studentid){
+                    $scope.errorMessage = 'Student Id entered already exists in system!';
+                    return;
+                }
+            });
+        }
+
         $scope.updateUser = function(ev, userType){
             if((userType != 'student' && $scope.selectedUser.username == '') || (userType == 'student' && $scope.selectedUser.studentid == '') || $scope.selectedUser.name == '' || $scope.selectedUser.password == ''){
                 $scope.errorMessage = 'Please fill in all fields.';
@@ -451,6 +470,10 @@ app.controller('calendarController', function(moment, alert, calendarConfig, $sc
             }
 
             if(userType == 'student'){
+                if(isIdExists($scope.selectedUser.studentid)){
+                    $scope.errorMessage = 'Student Id entered already exists in system!';
+                    return;
+                }
                 $scope.selectedUser.username = $scope.selectedUser.studentid;
             }
 
@@ -471,15 +494,32 @@ app.controller('calendarController', function(moment, alert, calendarConfig, $sc
                     'User Successfully Updated', ev);
                     // Appending dialog to document.body to cover sidenav in docs app
                 if(userType == 'student'){
-                    var request2 = $http.post('/api/updateStudent', {
+                    $http.post('/api/updateStudent', {
                         params: {
                             userid: $scope.selectedUser.userid,
                             studentid: $scope.selectedUser.studentid
                         }
                     }).then(function success(data){
-                        $scope.qs.getStudents();
+                        angular.forEach($scope.formData.coursesList, function(course){
+                            if(isNewCourse()){
+                                    $scope.addStudentToCourse($scope.selectedUser.studentid, course.courseid);
+                            }
+                        });
+
+                        angular.forEach($scope.qs.studentsCourses(), function(course){
+                            if(isRemoveCourse(course.courseid)) {
+                                $http.post('/api/removeStudentFromCourse',{
+                                    params:{
+                                        studentid: $scope.selectedUser.studentid,
+                                        courseid: course.courseid
+                                    }
+                                });
+                            }
+                        });
                         $mdDialog.show(alert).then(function() {
                             $scope.setCancelEditStudentView();
+                            $scope.qs.getStudents();
+                            $scope.qs.getStudentsInCourse($scope.currentCourse.courseid);
                         });
                     });
                 }else{
@@ -490,6 +530,24 @@ app.controller('calendarController', function(moment, alert, calendarConfig, $sc
 
             });
         };
+
+        function isRemoveCourse(courseid){
+            angular.forEach($scope.formData.coursesList, function(course){
+                if (course.courseid == courseid) {
+                    return false;
+                }
+            });
+            return true;
+        }
+
+        function isNewCourse(courseid){
+            angular.forEach($scope.qs.studentsCourses(), function(scourse) {
+                if (scourse.courseid == courseid) {
+                    return false;
+                }
+            });
+            return true;
+        }
 
         $scope.deleteUser = function(ev, userType){
             var confirm = dialogService.confirm('Are you sure you want to delete this ' + userType +'?', 'Delete user', 'Yes',
@@ -504,13 +562,18 @@ app.controller('calendarController', function(moment, alert, calendarConfig, $sc
                 request.then(function success(data){
                     $scope.qs.getUsers();
                     $scope.qs.getCourses();
-
+                    $scope.username = '';
+                    $scope.studentid = '';
+                    $scope.name = '';
+                    $scope.password = '';
+                    $scope.errorMessage = '';
                     // Appending dialog to document.body to cover sidenav in docs app
                     var alert = dialogService.alert($scope.selectedUser.name + ' has been successfully deleted!',
                         'User Successfully Deleted', ev);
                     $mdDialog.show(alert).then(function() {
                         if(userType == 'student'){//Student
                             $scope.qs.getStudents();
+                            $scope.qs.getStudentsInCourse($scope.currentCourse.courseid);
                             $scope.setCancelEditStudentView();
                         }else if(userType == 'lecturer'){//Lecturer
                             $scope.qs.getLecturers();

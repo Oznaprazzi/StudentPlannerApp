@@ -29,7 +29,8 @@ module.exports = {
     deleteCourse: deleteCourse,
     updateUser: updateUser,
     deleteUser: deleteUser,
-    updateStudent: updateStudent
+    updateStudent: updateStudent,
+    removeStudentFromCourse: removeStudentFromCourse
 };
 
 function getMaxUserId(req, res, next){
@@ -140,7 +141,7 @@ function getStudentsInCourse(req, res, next) {
 
 function getStudentsNotInCourse(req, res, next) {
     var courseid = req.query.id;
-    db.any('select * from students join users on students.userid = users.userid left join enrolledin on students.studentid = enrolledin.studentid where students.studentid not in (select studentid from enrolledin where courseid = $1)', [courseid])
+    db.any('select students.*, users.* from students join users on students.userid = users.userid left join enrolledin on students.studentid = enrolledin.studentid where students.studentid not in (select studentid from enrolledin where courseid = $1)', [courseid])
         .then(function (data) {
             res.status(200)
                 .json({
@@ -220,8 +221,8 @@ function addStudentToCourse(req, res, next){
 }
 
 function createNewCourse(req, res, next){
-    var courseCode = req.body.params.courseCode;
-    db.none('insert into courses(coursecode) values($1)', [courseCode])
+    var courseCode = req.body.params.coursecode;
+    db.none('insert into courses(coursecode) values($1)', [coursecode])
         .then(function () {
             res.status(200)
                 .json({
@@ -270,7 +271,7 @@ function updateUser(req, res, next){
     var username = req.body.params.username;
     var name = req.body.params.name;
     var password = req.body.params.password;
-    db.none('update users set username = $1 and name = $2 and password = $3 where userid = $4', [username, name, password, userid])
+    db.none('update users set username = $1, name = $2, password = $3 where userid = $4', [username, name, password, userid])
         .then(function () {
             res.status(200)
                 .json({
@@ -308,6 +309,22 @@ function updateStudent(req, res, next){
                 .json({
                     status: 'success',
                     message: 'Updated Student'
+                });
+        })
+        .catch(function (err) {
+            return next(err);
+        });
+}
+
+function removeStudentFromCourse(req, res, next){
+    var studentid = req.body.params.studentid;
+    var courseid = req.body.params.courseid;
+    db.none('delete from enrolledin where studentid = $1 and courseid = $2', [studentid, courseid])
+        .then(function () {
+            res.status(200)
+                .json({
+                    status: 'success',
+                    message: 'Removed User From Course'
                 });
         })
         .catch(function (err) {

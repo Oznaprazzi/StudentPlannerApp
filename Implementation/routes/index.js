@@ -25,6 +25,7 @@ router.post('/api/deleteCourse', db.deleteCourse);
 router.post('/api/updateUser', db.updateUser);
 router.post('/api/deleteUser', db.deleteUser);
 router.post('/api/updateStudent', db.updateStudent);
+router.post('/api/removeStudentFromCourse', db.removeStudentFromCourse);
 
 /* GET home page. */
 router.get('/', function (req, res, next) {
