@@ -4,7 +4,7 @@
     <form>
         <div id="input">
             <h3>Username</h3>
-            <input type="text" name="username" ng-model="lecturerId" disabled/>
+            <input type="text" name="username" ng-model="lecturerid" disabled/>
         </div>
         <div id="input">
             <h3>Name</h3>
@@ -16,15 +16,22 @@
         </div>
     </form>
     <h3>Select Course(s)</h3>
-    <multiple-autocomplete ng-model="coursesList"
-                           object-property="coursecode"
-                           suggestions-arr="qs.courses()" ng-if="qs.courses().length > 0">
-    </multiple-autocomplete>
+    <div
+            isteven-multi-select
+            max-labels="2"
+            input-model="qs.courses()"
+            output-model="formData.coursesList"
+            button-label="coursecode"
+            item-label="coursecode"
+            tick-property="ticked"
+            ng-if="qs.courses().length > 0"
+    >
+    </div>
     <p class="alert alert-danger" ng-if="qs.courses().length <= 0">There are currently no courses stored in the system.</p>
 
     <div id="btn-group">
         <button class="btn btn-default" ng-click="goBack()">Cancel</button>
-        <md-button md-disable-backdrop="true" class="btn btn-default" ng-click="addNewStudent($event)">Add Lecturer</md-button>
+        <md-button md-disable-backdrop="true" class="btn btn-default" ng-click="addNewLecturer($event)">Add New Lecturer</md-button>
     </div>
 
 </div>
@@ -32,7 +39,7 @@
 <div ng-show="isSharedView(14)">
     <h2>Edit or Delete Student
         <i class="titleIcon fa fa-times-circle" ng-click="goBack()" aria-hidden="true"></i>
-        <i class="titleIcon fa fa-check-circle" ng-click="updateUser($event, 1)" aria-hidden="true"></i>
+        <i class="titleIcon fa fa-check-circle" ng-click="updateUser($event, 'lecturer')" aria-hidden="true"></i>
     </h2>
     <p class="alert alert-danger" ng-if="errorMessage != ''">{{errorMessage}}</p>
     <form>
@@ -54,13 +61,20 @@
         </div>
     </form>
     <h3>Select Course(s)</h3>
-    <multiple-autocomplete ng-model="coursesList"
-                           object-property="coursecode"
-                           suggestions-arr="qs.courses()" ng-if="qs.courses().length > 0">
-    </multiple-autocomplete>
+    <div
+            isteven-multi-select
+            max-labels="2"
+            input-model="qs.courses()"
+            output-model="formData.coursesList"
+            button-label="coursecode"
+            item-label="coursecode"
+            tick-property="ticked"
+            ng-if="qs.courses().length > 0"
+    >
+    </div>
     <p class="alert alert-danger" ng-if="qs.courses().length <= 0">There are currently no courses stored in the system.</p>
 
     <div id="btn-group">
-        <md-button md-disable-backdrop="true" class="btn btn-default" ng-click="deleteUser($event, 1)">Delete Student</md-button>
+        <md-button md-disable-backdrop="true" class="btn btn-default" ng-click="deleteUser($event, 'lecturer')">Delete Student</md-button>
     </div>
 </div>

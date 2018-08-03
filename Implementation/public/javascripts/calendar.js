@@ -244,7 +244,7 @@ app.controller('calendarController', function(moment, alert, calendarConfig, $sc
             $scope.qs.getMaxUserId()
                 .then(function sucessCall(response)	{
                         $scope.maxid = response.data.data.max;
-                        $scope.lecturerId = $scope.maxid + 1;
+                        $scope.lecturerid = $scope.maxid + 1;
                     },function errorCall()	{
                         console.log("Error getting max user id.");
                     }
@@ -252,7 +252,7 @@ app.controller('calendarController', function(moment, alert, calendarConfig, $sc
         };
 
         $scope.$watch('name', function(){
-            $scope.lecturerId = $scope.name + $scope.lecturerId;
+            $scope.lecturerid = $scope.name + $scope.lecturerid;
         });
 
         $scope.setStudent = function(student){

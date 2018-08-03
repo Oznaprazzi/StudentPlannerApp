@@ -170,22 +170,6 @@ function getStudentsCourses(req, res, next){
         });
 }
 
-function getNotStudentsCourses(req, res, next){
-    var studentid = req.query.studentid;
-    db.any('select coursecode from courses join enolledin on courses.courseid = enrolledin.courseid and enrolledin.studentid = $1', [studentid])
-        .then(function (data) {
-            res.status(200)
-                .json({
-                    status: 'success',
-                    data: data,
-                    message: 'Retrieved ALL Students Not In Course'
-                });
-        })
-        .catch(function (err) {
-            return next(err);
-        });
-}
-
 function createNewUser(req, res, next){
     var username = req.body.params.username;
     var name = req.body.params.name;
