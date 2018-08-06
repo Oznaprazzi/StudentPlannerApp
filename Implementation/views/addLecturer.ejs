@@ -37,7 +37,7 @@
 </div>
 
 <div ng-show="isSharedView(14)">
-    <h2>Edit or Delete Student
+    <h2>Edit or Delete Lecturer
         <i class="titleIcon fa fa-times-circle" ng-click="goBack()" aria-hidden="true"></i>
         <i class="titleIcon fa fa-check-circle" ng-click="updateUser($event, 'lecturer')" aria-hidden="true"></i>
     </h2>
@@ -45,11 +45,7 @@
     <form>
         <div id="input">
             <h3>Username</h3>
-            <input type="text" name="studentId" ng-model="selectedUser.studentid" disabled/>
-        </div>
-        <div id="input">
-            <h3>Student ID</h3>
-            <input type="number" ng-model="selectedUser.studentid" name="studentId" required/>
+            <input type="text" name="studentId" ng-model="selectedUser.username" disabled/>
         </div>
         <div id="input">
             <h3>Name</h3>
@@ -75,6 +71,6 @@
     <p class="alert alert-danger" ng-if="qs.courses().length <= 0">There are currently no courses stored in the system.</p>
 
     <div id="btn-group">
-        <md-button md-disable-backdrop="true" class="btn btn-default" ng-click="deleteUser($event, 'lecturer')">Delete Student</md-button>
+        <md-button md-disable-backdrop="true" class="btn md-warn md-raised" ng-click="deleteUser($event, 'lecturer')">Delete Lecturer</md-button>
     </div>
 </div>

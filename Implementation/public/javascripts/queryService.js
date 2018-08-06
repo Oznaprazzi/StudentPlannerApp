@@ -8,6 +8,23 @@ angular.module('queries', []).service('queryService', function($http){
     var studentsInCourse = [];
     var studentsNotInCourse = [];
     var studentsCourses = [];
+    var lecturersCourses = [];
+
+    /***************************/
+    /*********Get IDs**********/
+    /***************************/
+
+    this.getMaxUserId = function(){
+        return $http.get('/api/getMaxUserId');
+    };
+
+    this.getMaxLecturerId = function(){
+        return $http.get('/api/getMaxLecturerId');
+    };
+
+    /***************************/
+    /*****Get Original Lists****/
+    /***************************/
 
     this.getUsers = function(){
         return $http.get('/api/getUsers')
@@ -59,9 +76,9 @@ angular.module('queries', []).service('queryService', function($http){
             );
     };
 
-    this.getMaxUserId = function(){
-        return $http.get('/api/getMaxUserId');
-    };
+    /***************************/
+    /******Get Join Lists*******/
+    /***************************/
 
     this.getStudentsInCourse = function(courseid){
         return $http.get('/api/getStudentsInCourse', {
@@ -97,12 +114,28 @@ angular.module('queries', []).service('queryService', function($http){
         }).then(function sucessCall(response)	{
             studentsCourses = response.data.data;
             },function errorCall()	{
-                console.log("Error reading student not in course list.");
+                console.log("Error reading student\'s course list.");
             }
         );
     };
 
-    /*******GETTERS********/
+    this.getLecturersCourses = function(lecturerid){
+        return $http.get('/api/getLecturersCourses', {
+            params: {
+                lecturerid: lecturerid
+            }
+        }).then(function sucessCall(response)	{
+                lecturersCourses = response.data.data;
+            },function errorCall()	{
+                console.log("Error reading student\'s course list.");
+            }
+        );
+    };
+
+    /***************************/
+    /*********Getters***********/
+    /***************************/
+
     this.users = function(){
         return users;
     };
@@ -133,5 +166,9 @@ angular.module('queries', []).service('queryService', function($http){
 
     this.studentsCourses = function(){
         return studentsCourses;
+    };
+
+    this.lecturersCourses = function(){
+        return lecturersCourses;
     };
 });

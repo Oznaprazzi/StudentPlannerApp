@@ -12,26 +12,43 @@ var db = pgp(connectionString);
 // add query functions
 
 module.exports = {
+    getMaxUserId: getMaxUserId,
+    getMaxLecturerId: getMaxLecturerId,
+
     getUsers: getUsers,
     getStudents: getStudents,
     getLecturers: getLecturers,
     getCourses: getCourses,
     getAssessments: getAssessments,
+
     getStudentsInCourse: getStudentsInCourse,
     getStudentsNotInCourse: getStudentsNotInCourse,
     getStudentsCourses: getStudentsCourses,
-    getMaxUserId: getMaxUserId,
+    getLecturersCourses: getLecturersCourses,
+
     createNewUser: createNewUser,
     createNewStudent: createNewStudent,
+    createNewLecturer: createNewLecturer,
     createNewCourse: createNewCourse,
+
     addStudentToCourse: addStudentToCourse,
+    addLecturerCourses: addLecturerCourses,
+
     updateCourse: updateCourse,
-    deleteCourse: deleteCourse,
     updateUser: updateUser,
-    deleteUser: deleteUser,
     updateStudent: updateStudent,
-    removeStudentFromCourse: removeStudentFromCourse
+    updateLecturer: updateLecturer,
+
+    deleteCourse: deleteCourse,
+    deleteUser: deleteUser,
+
+    removeStudentFromCourse: removeStudentFromCourse,
+    removeLecturerCourse: removeLecturerCourse
 };
+
+/***************************/
+/*********Get IDs**********/
+/***************************/
 
 function getMaxUserId(req, res, next){
     db.one('select max(userid) from users')
@@ -48,8 +65,27 @@ function getMaxUserId(req, res, next){
         });
 }
 
+function getMaxLecturerId(req, res, next){
+    db.one('select max(lecturerid) from lecturers')
+        .then(function(data){
+            res.status(200)
+                .json({
+                    status: 'success',
+                    data: data,
+                    message: 'Retrieved max lecturer id'
+                });
+        })
+        .catch(function (err) {
+            return next(err);
+        });
+}
+
+/***************************/
+/*****Get Original Lists****/
+/***************************/
+
 function getUsers(req, res, next) {
-    db.any('select * from users')
+    db.any('select * from users order by userid asc')
         .then(function (data) {
             res.status(200)
                 .json({
@@ -64,7 +100,7 @@ function getUsers(req, res, next) {
 }
 
 function getStudents(req, res, next) {
-    db.any('select * from students join users on students.userid = users.userid')
+    db.any('select * from students join users on students.userid = users.userid order by students.userid asc')
         .then(function (data) {
             res.status(200)
                 .json({
@@ -79,7 +115,7 @@ function getStudents(req, res, next) {
 }
 
 function getLecturers(req, res, next) {
-    db.any('select * from lecturers join users on lecturers.userid = users.userid')
+    db.any('select * from lecturers join users on lecturers.userid = users.userid order by lecturers.userid asc')
         .then(function (data) {
             res.status(200)
                 .json({
@@ -94,7 +130,7 @@ function getLecturers(req, res, next) {
 }
 
 function getCourses(req, res, next){
-    db.any('select * from courses')
+    db.any('select * from courses order by courseid asc')
         .then(function (data) {
             res.status(200)
                 .json({
@@ -109,7 +145,7 @@ function getCourses(req, res, next){
 }
 
 function getAssessments(req, res, next){
-    db.any('select assessments.*, coursecode from assessments, courses where assessments.courseid = courses.courseid')
+    db.any('select assessments.*, coursecode from assessments, courses where assessments.courseid = courses.courseid order by assessments.assessmentid asc')
         .then(function (data) {
             res.status(200)
                 .json({
@@ -122,6 +158,10 @@ function getAssessments(req, res, next){
             return next(err);
         });
 }
+
+/***************************/
+/******Get Join Lists*******/
+/***************************/
 
 function getStudentsInCourse(req, res, next) {
     var courseid = req.query.id;
@@ -163,13 +203,33 @@ function getStudentsCourses(req, res, next){
                 .json({
                     status: 'success',
                     data: data,
-                    message: 'Retrieved ALL Students Not In Course'
+                    message: 'Retrieved ALL Student\'s courses'
                 });
         })
         .catch(function (err) {
             return next(err);
         });
 }
+
+function getLecturersCourses(req, res, next){
+    var lecturerid = req.query.lecturerid;
+    db.any('select * from courses join taughtby on courses.courseid = taughtby.courseid and taughtby.lecturerid = $1', [lecturerid])
+        .then(function (data) {
+            res.status(200)
+                .json({
+                    status: 'success',
+                    data: data,
+                    message: 'Retrieved ALL Lecturer\'s courses'
+                });
+        })
+        .catch(function (err) {
+            return next(err);
+        });
+}
+
+/***************************/
+/********Create New*********/
+/***************************/
 
 function createNewUser(req, res, next){
     var username = req.body.params.username;
@@ -204,15 +264,14 @@ function createNewStudent(req, res, next){
         });
 }
 
-function addStudentToCourse(req, res, next){
-    var studentid = req.body.params.studentid;
-    var courseid = req.body.params.courseid;
-    db.none('insert into enrolledin(studentid, courseid) values($1, $2)', [studentid, courseid])
+function createNewLecturer(req, res, next){
+    var userid = req.body.params.userid;
+    db.none('insert into lecturers(userid) values($1)', [userid])
         .then(function () {
             res.status(200)
                 .json({
                     status: 'success',
-                    message: 'Added student to course'
+                    message: 'Created new lecturer'
                 });
         })
         .catch(function (err) {
@@ -235,6 +294,46 @@ function createNewCourse(req, res, next){
         });
 }
 
+/***************************/
+/**********Add To***********/
+/***************************/
+
+function addStudentToCourse(req, res, next){
+    var studentid = req.body.params.studentid;
+    var courseid = req.body.params.courseid;
+    db.none('insert into enrolledin(studentid, courseid) values($1, $2)', [studentid, courseid])
+        .then(function () {
+            res.status(200)
+                .json({
+                    status: 'success',
+                    message: 'Added student to course'
+                });
+        })
+        .catch(function (err) {
+            return next(err);
+        });
+}
+
+function addLecturerCourses(req, res, next){
+    var lecturerid = req.body.params.lecturerid;
+    var courseid = req.body.params.courseid;
+    db.none('insert into taughtby(lecturerid, courseid) values($1, $2)', [lecturerid, courseid])
+        .then(function () {
+            res.status(200)
+                .json({
+                    status: 'success',
+                    message: 'Added lecturer\'s course'
+                });
+        })
+        .catch(function (err) {
+            return next(err);
+        });
+}
+
+/***************************/
+/**********Update***********/
+/***************************/
+
 function updateCourse(req, res, next){
     var coursecode = req.body.params.coursecode;
     var id = req.body.params.id;
@@ -244,21 +343,6 @@ function updateCourse(req, res, next){
                 .json({
                     status: 'success',
                     message: 'Updated course'
-                });
-        })
-        .catch(function (err) {
-            return next(err);
-        });
-}
-
-function deleteCourse(req, res, next){
-    var id = req.body.params.id;
-    db.none('delete from courses where courseid = $1', [id])
-        .then(function () {
-            res.status(200)
-                .json({
-                    status: 'success',
-                    message: 'Deleted course'
                 });
         })
         .catch(function (err) {
@@ -285,21 +369,6 @@ function updateUser(req, res, next){
         });
 }
 
-function deleteUser(req, res, next){
-    var userid = req.body.params.userid;
-    db.none('delete from users where userid = $1', [userid])
-        .then(function () {
-            res.status(200)
-                .json({
-                    status: 'success',
-                    message: 'Deleted User'
-                });
-        })
-        .catch(function (err) {
-            return next(err);
-        });
-}
-
 function updateStudent(req, res, next){
     var studentid = req.body.params.studentid;
     var userid = req.body.params.userid;
@@ -316,6 +385,60 @@ function updateStudent(req, res, next){
         });
 }
 
+function updateLecturer(req, res, next) {
+    var lecturerid = req.body.params.lecturerid;
+    var userid = req.body.params.userid;
+    db.none('update lecturers set lecturerid = $1 where userid = $2', [lecturerid, userid])
+        .then(function () {
+            res.status(200)
+                .json({
+                    status: 'success',
+                    message: 'Updated Lecturer'
+                });
+        })
+        .catch(function (err) {
+            return next(err);
+        });
+}
+
+/***************************/
+/**********Delete***********/
+/***************************/
+
+function deleteCourse(req, res, next){
+    var id = req.body.params.id;
+    db.none('delete from courses where courseid = $1', [id])
+        .then(function () {
+            res.status(200)
+                .json({
+                    status: 'success',
+                    message: 'Deleted course'
+                });
+        })
+        .catch(function (err) {
+            return next(err);
+        });
+}
+
+function deleteUser(req, res, next){
+    var userid = req.body.params.userid;
+    db.none('delete from users where userid = $1', [userid])
+        .then(function () {
+            res.status(200)
+                .json({
+                    status: 'success',
+                    message: 'Deleted User'
+                });
+        })
+        .catch(function (err) {
+            return next(err);
+        });
+}
+
+/***************************/
+/**********Remove***********/
+/***************************/
+
 function removeStudentFromCourse(req, res, next){
     var studentid = req.body.params.studentid;
     var courseid = req.body.params.courseid;
@@ -325,6 +448,22 @@ function removeStudentFromCourse(req, res, next){
                 .json({
                     status: 'success',
                     message: 'Removed User From Course'
+                });
+        })
+        .catch(function (err) {
+            return next(err);
+        });
+}
+
+function removeLecturerCourse(req, res, next){
+    var lecturerid = req.body.params.studentid;
+    var courseid = req.body.params.courseid;
+    db.none('delete from taughtby where lecturerid = $1 and courseid = $2', [lecturerid, courseid])
+        .then(function () {
+            res.status(200)
+                .json({
+                    status: 'success',
+                    message: 'Removed Lecturer\'s Course'
                 });
         })
         .catch(function (err) {

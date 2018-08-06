@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html ng-app="mwl.calendar.docs">
+<html ng-app="studentPlanner">
 <head>
     <title><%= title %></title>
     <link rel='stylesheet' href='/stylesheets/style.css' />
@@ -15,6 +15,8 @@
     <script src="scripts/isteven-multi-select.js"></script>
     <link href="scripts/isteven-multi-select.css" rel="stylesheet" />
 
+    <script src="./javascripts/main.js"></script>
+
     <script src="./javascripts/calendar.js"></script>
     <script src="./javascripts/calendar-helper.js"></script>
     <script src="./javascripts/queryService.js"></script>
@@ -23,8 +25,8 @@
     <link rel="stylesheet" type="text/css" href="scripts/css/font-awesome.min.css" />
 </head>
 <body ng-cloak>
-<div id="mainDiv" ng-controller="calendarController as vm">
-    <div>
+<div id="mainDiv">
+    <div  ng-controller="mainBodyController">
         <div id="login" ng-show="isView('', 1)">
             <% include login.ejs %>
         </div>
@@ -42,8 +44,8 @@
         <% include editDeleteCourse.ejs %>
         <% include assessmentDetails.ejs %>
         <% include addStudent.ejs %>
-        <% include calendar.ejs %>
     </div>
+    <% include calendar.ejs %>
 </div>
 </body>
 </html>

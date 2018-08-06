@@ -1,5 +1,5 @@
 angular
-    .module('mwl.calendar.docs')
+    .module('studentPlanner')
     .factory('alert', function($uibModal) {
 
         function show(action, event) {

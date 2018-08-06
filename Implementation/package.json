@@ -7,9 +7,13 @@
   },
   "dependencies": {
     "angular": "^1.7.2",
+    "angular-animate": "^1.7.2",
+    "angular-aria": "^1.7.2",
     "angular-bootstrap-calendar": "^1.0.0",
     "angular-bootstrap-colorpicker": "^3.0.32",
     "angular-font-awesome": "^3.1.2",
+    "angular-material": "^1.1.10",
+    "angular-messages": "^1.7.2",
     "angular-route": "^1.7.2",
     "angular-ui-bootstrap": "^2.5.6",
     "bluebird": "^3.5.1",
