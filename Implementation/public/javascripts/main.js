@@ -43,13 +43,30 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
     };
 
     function getUserType(i) {
-        if ($scope.qs.lecturers().indexOf($scope.qs.users()[i].userid) != -1) {
+        if(isLecturer(i)){
             return 'lecturer';
-            return;
-        } else if ($scope.qs.students().indexOf($scope.qs.users()[i].userid) != -1) {
+        }else if(isStudent(i)){
             return 'student';
         }
         return 'admin';
+    }
+
+    function isLecturer(i){
+        for(let j = 0; j < $scope.qs.lecturers(); j++){
+            if ($scope.qs.lecturers()[j].userid === $scope.qs.users()[i].userid) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function isStudent(i){
+        angular.forEach($scope.qs.students(), function (s) {
+            if (s.userid === $scope.qs.users()[i].userid) {
+                return true;
+            }
+        });
+        return false;
     }
 
     $scope.login = function () {
@@ -80,7 +97,11 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
                 sessionStorage.setItem('loggedIn', true);
                 sessionStorage.setItem('user', $scope.qs.users()[userIndex]);
                 sessionStorage.setItem('userIndex', userIndex);
-                $scope.setView(2);
+                if($scope.userType == 'lecturer'){
+                    $scope.setView(3);
+                }else{
+                    $scope.setView(2);
+                }
                 $scope.cancelLogin();
 
             } else {

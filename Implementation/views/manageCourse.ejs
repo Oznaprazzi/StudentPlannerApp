@@ -1,3 +1,20 @@
+<div ng-show="isSharedView(3)">
+    <h2>Manage Courses
+        <i class="titleIcon fa fa-plus-circle" ng-click="setView(6)" ng-show="userType == 'admin'" aria-hidden="true"></i>
+    </h2>
+
+    <hr>
+    <table class="table table-striped">
+        <tbody>
+        <tr ng-repeat="c in qs.courses()">
+            <td>{{c.coursecode}}</td>
+            <td><button class="btn btn-default" ng-click="setView(7); setCourse(c)">Manage</button></td>
+        </tr>
+        </tbody>
+    </table>
+    <p ng-if="qs.courses().length <= 0">There are currently no courses stored in the system.</p>
+</div>
+
 <div ng-show="isSharedView(7)">
     <h2>{{currentCourse.coursecode}}
         <i class="titleIcon fa fa-pencil" ng-click="setView(8)" aria-hidden="true"></i>
