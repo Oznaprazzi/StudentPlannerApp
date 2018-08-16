@@ -1,5 +1,5 @@
 'use strict';
-angular.module('queries', []).service('queryService', function($http, $async){
+angular.module('queries', []).service('queryService', function($http){
     var users = [];
     var lecturers = [];
     var students = [];
@@ -26,14 +26,8 @@ angular.module('queries', []).service('queryService', function($http, $async){
     /*****Get Original Lists****/
     /***************************/
 
-    this.getStuff = $async(function*() {
-        var someStuff = yield getUsersRequest();
-        var someOtherStuff = yield getLecturersRequest();
-        console.log("we're done");
-    });
-
-    function getUsersRequest(){
-        $http.get('/api/getUsers')
+    this.getUsers = function(){
+        return $http.get('/api/getUsers')
             .then(function sucessCall(response)	{
                     users = response.data.data;
                 },function errorCall()	{
@@ -42,8 +36,8 @@ angular.module('queries', []).service('queryService', function($http, $async){
             );
     };
 
-    function getLecturersRequest(){
-        $http.get('/api/getLecturers')
+    this.getLecturers = function(){
+        return $http.get('/api/getLecturers')
             .then(function sucessCall(response)	{
                 console.log(response);
                     lecturers =  response.data.data;

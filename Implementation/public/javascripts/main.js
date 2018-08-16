@@ -1,6 +1,4 @@
-import ngAsync from './scripts/ng-async';
-
-var app = angular.module('studentPlanner', [ngAsync.name, 'mwl.calendar', 'ngAnimate', 'ui.bootstrap', 'colorpicker.module', 'ngRoute', 'ngMaterial', 'queries', 'dialogs', 'isteven-multi-select']);
+var app = angular.module('studentPlanner', ['mwl.calendar', 'ngAnimate', 'ui.bootstrap', 'colorpicker.module', 'ngRoute', 'ngMaterial', 'queries', 'dialogs', 'isteven-multi-select']);
 
 app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route, queryService, dialogService) {
     //Calendar Implementation
@@ -15,21 +13,22 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
 
     var viewStack = [];
 
-   /* $scope.qs.getUsers().then(function () {
-        if (JSON.parse(sessionStorage.getItem('loggedIn'))) {
-            $scope.setView(2);
-            $scope.userType = getUserType(sessionStorage.getItem('userIndex'));
-            $scope.user = $scope.qs.getUsers()[sessionStorage.getItem('userIndex')];
-        }
-    });
 
-    $scope.qs.getStudents();
-    $scope.qs.getLecturers();*/
-   $scope.qs.getStuff();
-    $scope.qs.getAssessments();
-    $scope.qs.getCourses();
+    async function loadAllQueries(){
+        $scope.qs.getUsers().then(function () {
+            if (JSON.parse(sessionStorage.getItem('loggedIn'))) {
+                $scope.setView(2);
+                $scope.userType = getUserType(sessionStorage.getItem('userIndex'));
+                $scope.user = $scope.qs.getUsers()[sessionStorage.getItem('userIndex')];
+            }
+        });
+        await $scope.qs.getStudents();
+        await $scope.qs.getLecturers();
+        await $scope.qs.getAssessments();
+        await $scope.qs.getCourses();
+    }
 
-
+    loadAllQueries();
 
     $scope.setView = function (view) {
         $scope.view = view;
@@ -56,9 +55,8 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
     }
 
     function isLecturer(i){
-        for(let j = 0; j < $scope.qs.lecturers(); j++){
+        for(let j = 0; j < $scope.qs.lecturers().length; j++){
             if ($scope.qs.lecturers()[j].userid === $scope.qs.users()[i].userid) {
-                console.log("lecturer");
                 return true;
             }
         }
@@ -66,11 +64,11 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
     }
 
     function isStudent(i){
-        angular.forEach($scope.qs.students(), function (s) {
-            if (s.userid === $scope.qs.users()[i].userid) {
+        for(let j = 0; j < $scope.qs.students().length; j++){
+            if ($scope.qs.students()[j].userid === $scope.qs.users()[i].userid) {
                 return true;
             }
-        });
+        }
         return false;
     }
 
