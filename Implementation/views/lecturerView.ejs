@@ -48,7 +48,7 @@
         </div>
         <div id="input">
             <h3>Due Date</h3>
-            <md-datepicker md-min-date="currentAssessment.startdate" ng-model="currentAssessment.duedate"></md-datepicker>
+            <md-datepicker ng-model="currentAssessment.duedate" min="{{minDate}}"></md-datepicker>
         </div>
         <div id="input">
             <h3>Course</h3>

@@ -149,7 +149,7 @@ function getCourses(req, res, next){
 
 function getAssessments(req, res, next){
     var courseid = req.query.courseid;
-    db.any('select assessments.*, coursecode from assessments, courses where assessments.courseid = $1 order by assessments.assessmentid asc', [courseid])
+    db.any('select assessments.*, courses.coursecode from assessments join courses on assessments.courseid = courses.courseid where assessments.courseid = $1 order by assessments.assessmentid asc;', [courseid])
         .then(function (data) {
             res.status(200)
                 .json({

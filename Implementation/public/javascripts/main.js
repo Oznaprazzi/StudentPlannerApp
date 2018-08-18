@@ -180,6 +180,7 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
         await $scope.qs.getStudentsInCourse(courseid);
         await $scope.qs.getStudentsNotInCourse(courseid);
         $scope.studentsList = $scope.qs.studentsNotInCourse();
+        console.log($scope.qs.assessments());
     }
 
 
@@ -242,6 +243,7 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
 
     $scope.setAssessment = function (assessment) {
         $scope.currentAssessment = assessment;
+        $scope.minDate = assessment.startdate;
     };
 
     $scope.addCourse = function (ev) {
@@ -725,6 +727,8 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
         $scope.dueDate = new Date();
         $scope.courseid = $scope.currentCourse.courseid;
         $scope.type = "Assignment";
+        $scope.minDate = new Date();
+        console.log($scope.minDate);
     }
 });
 
