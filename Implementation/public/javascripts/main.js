@@ -11,21 +11,35 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
     $scope.studentsList = [];
     $scope.qs = queryService;
 
+    $scope.assessmentType = ['Assignment', 'Test', 'Exam', 'Other'];
+
     var viewStack = [];
 
 
     async function loadAllQueries(){
-        $scope.qs.getUsers().then(function () {
-            if (JSON.parse(sessionStorage.getItem('loggedIn'))) {
-                $scope.setView(2);
-                $scope.userType = getUserType(sessionStorage.getItem('userIndex'));
-                $scope.user = $scope.qs.getUsers()[sessionStorage.getItem('userIndex')];
-            }
-        });
+        await $scope.qs.getUsers();
         await $scope.qs.getStudents();
         await $scope.qs.getLecturers();
         await $scope.qs.getAssessments();
         await $scope.qs.getCourses();
+        if (JSON.parse(sessionStorage.getItem('loggedIn'))) {
+            $scope.user = JSON.parse(sessionStorage.getItem('user'));
+            $scope.userType = getUserType(sessionStorage.getItem('userIndex'));
+            if($scope.userType == 'lecturer'){
+                await $scope.qs.getLecturersCourses($scope.user.lecturerid);
+                $scope.courses = $scope.qs.lecturersCourses();
+                $scope.setView(3);
+            }else{
+                $scope.courses = $scope.qs.courses();
+                $scope.setView(2);
+            }
+
+            console.log($scope.user);
+        }
+    }
+
+    async function loadCourses(lecturerId){
+        await $scope.qs.getLecturersCourses(lecturerId);
     }
 
     loadAllQueries();
@@ -57,6 +71,8 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
     function isLecturer(i){
         for(let j = 0; j < $scope.qs.lecturers().length; j++){
             if ($scope.qs.lecturers()[j].userid === $scope.qs.users()[i].userid) {
+                sessionStorage.setItem('user', JSON.stringify($scope.qs.lecturers()[j]));
+                $scope.user = $scope.qs.lecturers()[j];
                 return true;
             }
         }
@@ -66,6 +82,8 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
     function isStudent(i){
         for(let j = 0; j < $scope.qs.students().length; j++){
             if ($scope.qs.students()[j].userid === $scope.qs.users()[i].userid) {
+                sessionStorage.setItem('user', JSON.stringify($scope.qs.students()[j]));
+                $scope.user = $scope.qs.students()[j];
                 return true;
             }
         }
@@ -96,13 +114,16 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
                 $scope.validPassword = true;
             }
             if ($scope.validUsername && $scope.validPassword) {
+                sessionStorage.setItem('user', JSON.stringify($scope.qs.users()[userIndex]));
                 $scope.userType = getUserType(userIndex);
                 sessionStorage.setItem('loggedIn', true);
-                sessionStorage.setItem('user', $scope.qs.users()[userIndex]);
                 sessionStorage.setItem('userIndex', userIndex);
                 if($scope.userType == 'lecturer'){
+                    loadCourses($scope.user.lecturerid);
+                    $scope.courses = $scope.qs.lecturersCourses();
                     $scope.setView(3);
                 }else{
+                    $scope.courses = $scope.qs.courses();
                     $scope.setView(2);
                 }
                 $scope.cancelLogin();
@@ -122,7 +143,6 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
             course.ticked = false;
         });
         $scope.currentCourse.ticked = true;
-        $scope.coursecode = '';
     }
 
     //Logout
@@ -136,6 +156,10 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
     };
 
     $scope.goHome = function () {
+        if($scope.userType == 'lecturer'){
+            $scope.setView(3);
+            return;
+        }
         $scope.setView(2);
     };
 
@@ -151,15 +175,20 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
         $scope.password = "";
     };
 
+    async function loadCourseInformation(courseid){
+        await $scope.qs.getAssessments(courseid);
+        await $scope.qs.getStudentsInCourse(courseid);
+        await $scope.qs.getStudentsNotInCourse(courseid);
+        $scope.studentsList = $scope.qs.studentsNotInCourse();
+    }
+
+
     $scope.setCourse = function (course) {
         $scope.courseList = [];
         $scope.currentCourse = course;
         $scope.coursecode = course.coursecode;
         $scope.currentCourse.ticked = true;
-        $scope.qs.getStudentsInCourse(course.courseid);
-        $scope.qs.getStudentsNotInCourse(course.courseid).then(function () {
-            $scope.studentsList = $scope.qs.studentsNotInCourse();
-        });
+        loadCourseInformation(course.courseid);
     };
 
     $scope.setLecturer = function (lecturer) {
@@ -593,5 +622,114 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
             }
         });
     }
+
+    $scope.addNewAssessment = function (ev) {
+        if ($scope.title == undefined || $scope.type == undefined || $scope.details == undefined) {
+            $scope.errorMessage = 'Please fill in all fields.';
+            return;
+        }
+
+        var request = $http.post('/api/createNewAssessment', {
+            params: {
+                courseid: $scope.courseid,
+                assessmenttype: $scope.type,
+                startDate: new Date(),
+                dueDate: $scope.dueDate,
+                title: $scope.title,
+                details: $scope.details
+            }
+        });
+
+        request.then(function success(data) {
+            $scope.qs.getAssessments($scope.courseid);
+            var confirm = dialogService.confirm($scope.title + ' has been successfully added!',
+                'Added Assessment', 'Add Another Assessment', 'Back', ev);
+
+            $scope.course = '';
+            $scope.type = '';
+            $scope.dueDate = '';
+            $scope.title = '';
+            $scope.details = '';
+            $scope.errorMessage = '';
+
+            $mdDialog.show(confirm).then(function () {
+
+            }, function () {
+                $scope.goBack();
+            });
+        });
+    };
+
+    $scope.updateAssessment = function (ev) {
+        if ($scope.currentAssessment.title == undefined || $scope.currentAssessment.assessmenttype == undefined || $scope.currentAssessment.details == undefined) {
+            $scope.errorMessage = 'Please fill in all fields.';
+            return;
+        }
+
+        var request = $http.post('/api/updateAssessment', {
+            params: {
+                courseid: $scope.currentAssessment.courseid,
+                assessmenttype: $scope.currentAssessment.type,
+                dueDate: $scope.currentAssessment.dueDate,
+                title: $scope.currentAssessment.title,
+                details: $scope.currentAssessment.details
+            }
+        });
+
+        request.then(function success(data) {
+            $scope.qs.getAssessments($scope.currentAssessment.courseid);
+            var alert = dialogService.alert($scope.currentAssessment.title + ' has been successfully updated!',
+                'Assessment Successfully Updated', ev);
+            $mdDialog.show(alert).then(function () {
+                $scope.goBack();
+            });
+        });
+    };
+
+    $scope.deleteAssessment = function (ev) {
+        var confirm = dialogService.confirm('Are you sure you want to delete this assessment?', 'Delete Assessment', 'Yes',
+            'No', ev);
+
+        $mdDialog.show(confirm).then(function () {
+            var request = $http.post('/api/deleteAssessment', {
+                params: {
+                    assessmentid: $scope.currentAssessment.assessmentid
+                }
+            });
+
+            request.then(function success(data) {
+                $scope.qs.getAssessments($scope.currentAssessment.courseid);
+                var alert = dialogService.alert($scope.currentAssessment.title + ' has been successfully deleted!',
+                    'Assessment Successfully Deleted', ev);
+                $mdDialog.show(alert).then(function () {
+                    $scope.goBack();
+                    $scope.goBack();
+                });
+            });
+        }, function () {
+            //Stay on current page
+        });
+
+    };
+
+    $scope.showHomeButton = function(){
+        if($scope.view > 2 && $scope.userType != 'lecturer'){
+            return true;
+        }else if($scope.view > 3 && $scope.userType == 'lecturer'){
+            return true;
+        }
+        return false;
+    }
+
+    $scope.setNewAssessment = function(){
+        $scope.dueDate = new Date();
+        $scope.courseid = $scope.currentCourse.courseid;
+        $scope.type = "Assignment";
+    }
 });
 
+app.config(function($mdDateLocaleProvider){
+    $mdDateLocaleProvider.formatDate = function(date) {
+        return moment(date).format("DD/MM/YYYY");
+    };
+});

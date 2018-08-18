@@ -1,26 +1,30 @@
 <div ng-show="isSharedView(9)">
-    <h2>{{currentAssessment.title}}</h2>
+    <h2>{{currentAssessment.title}}
+        <i class="titleIcon fa fa-pencil" ng-click="setView(16)" ng-show="userType == 'lecturer'" aria-hidden="true"></i>
+    </h2>
     <hr>
-    <table>
+    <table class="table table-striped">
         <tbody>
         <tr>
-            <th scope="row">Start Date</th>
-            <td>{{currentAssessment.startdate}}</td>
+            <th scope="row" class="col-sm-4">Start Date</th>
+            <td scope="col" class="col-sm-8">{{currentAssessment.startdate | date: "dd MMM yyyy"}}</td>
         </tr>
         <tr>
             <th scope="row">Due Date</th>
-            <td>{{currentAssessment.duedate}}</td>
+            <td scope="col">{{currentAssessment.duedate | date: "dd MMM yyyy"}}</td>
         </tr>
         <tr>
-            <th scope="row">Class</th>
-            <td>{{currentAssessment.coursecode}}</td>
+            <th scope="row">Course</th>
+            <td scope="col">{{currentAssessment.coursecode}}</td>
         </tr>
         <tr>
             <th scope="row">Type</th>
-            <td>{{currentAssessment.type}}</td>
+            <td scope="col">{{currentAssessment.assessmenttype}}</td>
+        </tr>
+        <tr>
+            <th scope="row">Details</th>
+            <td scope="col" style="word-break: break-word;">{{currentAssessment.details}}</td>
         </tr>
         </tbody>
     </table>
-    <h3>Details</h3>
-    <p>{{currentAssessment.details}}</p>
 </div>

@@ -67,8 +67,12 @@ angular.module('queries', []).service('queryService', function($http){
             );
     };
 
-    this.getAssessments = function(){
-        return $http.get('/api/getAssessments')
+    this.getAssessments = function(courseid){
+        return $http.get('/api/getAssessments', {
+            params:{
+                courseid: courseid
+            }
+        })
             .then(function sucessCall(response)	{
                     assessments = response.data.data;
                 },function errorCall()	{

@@ -6,7 +6,7 @@
     <hr>
     <table class="table table-striped">
         <tbody>
-        <tr ng-repeat="c in qs.courses()">
+        <tr ng-repeat="c in courses">
             <td>{{c.coursecode}}</td>
             <td><button class="btn btn-default" ng-click="setView(7); setCourse(c)">Manage</button></td>
         </tr>
@@ -20,7 +20,9 @@
         <i class="titleIcon fa fa-pencil" ng-click="setView(8)" aria-hidden="true"></i>
     </h2>
     <hr>
-    <h3>Assessments</h3>
+    <h3>Assessments
+        <i class="fa fa-plus-circle" ng-click="setView(15); setNewAssessment()" ng-show="userType == 'lecturer'" style="float: right" aria-hidden="true"></i>
+    </h3>
     <table class="table table-striped">
         <thead>
         <tr>
@@ -29,13 +31,15 @@
         </tr>
         </thead>
         <tbody>
-            <tr ng-repeat="a in qs.assessments">
+            <tr ng-repeat="a in qs.assessments()">
                 <td>{{a.title}}</td>
-                <td ng-show="userType == 'lecturer'"><button class="btn btn-default" ng-click="setView(9); setAssessment(a)">Manage</button></td>
+                <td>
+                    <button class="btn btn-default" ng-click="setView(9); setAssessment(a)">More Information</button>
+                </td>
             </tr>
         </tbody>
     </table>
-    <p ng-if="qs.assessments.length <= 0">There are currently no assessments for this course.</p>
+    <p ng-if="qs.assessments().length <= 0">There are currently no assessments for this course.</p>
     <hr>
     <h3>Students
         <i class="fa fa-plus-circle" ng-click="setView(10)" style="float: right" aria-hidden="true"></i>
@@ -53,7 +57,7 @@
             <td>{{s.name}}</td>
             <td>{{s.studentid}}</td>
             <td>
-                <i class="fa fa-pencil" ng-click="setView(12); setStudent(s)" aria-hidden="true"></i>
+                <i class="fa fa-pencil" ng-click="setView(12); setStudent(s)" ng-show="userType == 'admin'" aria-hidden="true"></i>
                 <i class="fa fa-trash" ng-click="" aria-hidden="true"></i>
             </td>
         </tr>

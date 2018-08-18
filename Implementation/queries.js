@@ -30,6 +30,7 @@ module.exports = {
     createNewStudent: createNewStudent,
     createNewLecturer: createNewLecturer,
     createNewCourse: createNewCourse,
+    createNewAssessment: createNewAssessment,
 
     addStudentToCourse: addStudentToCourse,
     addLecturerCourses: addLecturerCourses,
@@ -38,9 +39,11 @@ module.exports = {
     updateUser: updateUser,
     updateStudent: updateStudent,
     updateLecturer: updateLecturer,
+    updateAssessment: updateAssessment,
 
     deleteCourse: deleteCourse,
     deleteUser: deleteUser,
+    deleteAssessment: deleteAssessment,
 
     removeStudentFromCourse: removeStudentFromCourse,
     removeLecturerCourse: removeLecturerCourse
@@ -145,7 +148,8 @@ function getCourses(req, res, next){
 }
 
 function getAssessments(req, res, next){
-    db.any('select assessments.*, coursecode from assessments, courses where assessments.courseid = courses.courseid order by assessments.assessmentid asc')
+    var courseid = req.query.courseid;
+    db.any('select assessments.*, coursecode from assessments, courses where assessments.courseid = $1 order by assessments.assessmentid asc', [courseid])
         .then(function (data) {
             res.status(200)
                 .json({
@@ -294,6 +298,26 @@ function createNewCourse(req, res, next){
         });
 }
 
+function createNewAssessment(req, res, next){
+    var courseid = req.body.params.courseid;
+    var assessmenttype = req.body.params.assessmenttype;
+    var startDate = req.body.params.startDate;
+    var dueDate = req.body.params.dueDate;
+    var title = req.body.params.title;
+    var details = req.body.params.details;
+    db.none('insert into assessments(courseid, assessmentType, startDate, dueDate, title, details) values($1, $2, $3, $4, $5, $6)', [courseid, assessmenttype, startDate, dueDate, title, details])
+        .then(function () {
+            res.status(200)
+                .json({
+                    status: 'success',
+                    message: 'Created new assessment'
+                });
+        })
+        .catch(function (err) {
+            return next(err);
+        });
+}
+
 /***************************/
 /**********Add To***********/
 /***************************/
@@ -401,6 +425,26 @@ function updateLecturer(req, res, next) {
         });
 }
 
+function updateAssessment(req, res, next) {
+    var assessmentid = req.body.params.assessmentid;
+    var courseid = req.body.params.courseid;
+    var assessmenttype = req.body.params.assessmenttype;
+    var dueDate = req.body.params.dueDate;
+    var title = req.body.params.title;
+    var details = req.body.params.details;
+    db.none('update assessments set courseid = $1, assessmentType = $2, dueDate = $3, title = $4, details = $5 where assessmentid = $6', [courseid, assessmenttype, dueDate, title, details, assessmentid])
+        .then(function () {
+            res.status(200)
+                .json({
+                    status: 'success',
+                    message: 'Updated assessment'
+                });
+        })
+        .catch(function (err) {
+            return next(err);
+        });
+}
+
 /***************************/
 /**********Delete***********/
 /***************************/
@@ -428,6 +472,21 @@ function deleteUser(req, res, next){
                 .json({
                     status: 'success',
                     message: 'Deleted User'
+                });
+        })
+        .catch(function (err) {
+            return next(err);
+        });
+}
+
+function deleteAssessment(req, res, next){
+    var assessmentid = req.body.params.assessmentid;
+    db.none('delete from assessments where assessmentid = $1', [assessmentid])
+        .then(function () {
+            res.status(200)
+                .json({
+                    status: 'success',
+                    message: 'Deleted Assessment'
                 });
         })
         .catch(function (err) {

@@ -24,6 +24,7 @@ router.post('/api/createNewUser', db.createNewUser);
 router.post('/api/createNewStudent', db.createNewStudent);
 router.post('/api/createNewLecturer', db.createNewLecturer);
 router.post('/api/createNewCourse', db.createNewCourse);
+router.post('/api/createNewAssessment', db.createNewAssessment);
 
 router.post('/api/addStudentToCourse', db.addStudentToCourse);
 router.post('/api/addLecturerCourses', db.addLecturerCourses);
@@ -32,9 +33,11 @@ router.post('/api/updateCourse', db.updateCourse);
 router.post('/api/updateUser', db.updateUser);
 router.post('/api/updateStudent', db.updateStudent);
 router.post('/api/updateLecturer', db.updateLecturer);
+router.post('/api/updateAssessment', db.updateAssessment);
 
 router.post('/api/deleteCourse', db.deleteCourse);
 router.post('/api/deleteUser', db.deleteUser);
+router.post('/api/deleteAssessment', db.deleteAssessment);
 
 router.post('/api/removeStudentFromCourse', db.removeStudentFromCourse);
 router.post('/api/removeLecturerCourse', db.removeLecturerCourse);

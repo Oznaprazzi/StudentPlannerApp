@@ -1,0 +1,74 @@
+<div ng-show="isView('lecturer', 15)">
+    <h2>Add New Assessment</h2>
+    <p class="alert alert-danger" ng-if="errorMessage != ''">{{errorMessage}}</p>
+    <form>
+        <div id="input">
+            <h3>Title</h3>
+            <input type="text" name="title" ng-model="title"/>
+        </div>
+        <div id="input">
+            <h3>Due Date</h3>
+            <md-datepicker ng-model="dueDate"></md-datepicker>
+        </div>
+        <div id="input">
+            <h3>Course</h3>
+            <select ng-model="courseid">
+                <option ng-selected="courseid == c.courseid" ng-repeat="c in courses" value="{{c.courseid}}">{{c.coursecode}}</option>
+            </select>
+        </div>
+        <div id="input">
+            <h3>Type</h3>
+            <select ng-model="type">
+                <option ng-repeat="t in assessmentType" value="{{t}}">{{t}}</option>
+            </select>
+        </div>
+        <div id="input">
+            <h3>Details</h3>
+            <textarea ng-model="details" name="details"></textarea>
+        </div>
+    </form>
+
+    <div id="btn-group">
+        <button class="btn btn-default" ng-click="goBack()">Cancel</button>
+        <md-button md-disable-backdrop="true" class="btn btn-default" ng-click="addNewAssessment($event)">Add New Assessment</md-button>
+    </div>
+
+</div>
+
+<div ng-show="isView('lecturer', 16)">
+    <h2>Edit or Delete Assessmnet
+        <i class="titleIcon fa fa-times-circle" ng-click="goBack()" aria-hidden="true"></i>
+        <i class="titleIcon fa fa-check-circle" ng-click="updateAssessment($event)" aria-hidden="true"></i>
+    </h2>
+    <p class="alert alert-danger" ng-if="errorMessage != ''">{{errorMessage}}</p>
+    <form>
+        <div id="input">
+            <h3>Title</h3>
+            <input type="text" name="title" ng-model="currentAssessment.title"/>
+        </div>
+        <div id="input">
+            <h3>Due Date</h3>
+            <md-datepicker md-min-date="currentAssessment.startdate" ng-model="currentAssessment.duedate"></md-datepicker>
+        </div>
+        <div id="input">
+            <h3>Course</h3>
+            <select ng-model="currentAssessment.courseid">
+                <option ng-selected="currentAssessment.courseid == c.courseid" ng-repeat="c in courses" value="{{c.courseid}}">{{c.coursecode}}</option>
+            </select>
+        </div>
+        <div id="input">
+            <h3>Type</h3>
+            <select ng-model="currentAssessment.assessmenttype">
+                <option ng-repeat="t in assessmentType" value="{{t}}">{{t}}</option>
+            </select>
+        </div>
+        <div id="input">
+            <h3>Details</h3>
+            <textarea ng-model="currentAssessment.details" name="details"></textarea>
+        </div>
+    </form>
+
+    <div id="btn-group">
+        <md-button md-disable-backdrop="true" class="btn md-warn md-raised" ng-click="deleteAssessment($event)">Delete Assessment</md-button>
+    </div>
+</div>
