@@ -34,6 +34,7 @@
 
         <div>
             <div id="input" ng-hide="isView('', 1)" class="logout">
+                <% include studentMenu.ejs %>
                 <i class="fa fa-sign-out fa-2x" ng-click="logout()" aria-hidden="true"></i>
                 <i class="fa fa-home fa-2x" ng-click="goHome()" ng-show="showHomeButton()" aria-hidden="true"></i>
                 <i class="fa fa-arrow-left fa-2x" ng-click="goBack()" ng-show="view > 5" aria-hidden="true" style="float:left"></i>

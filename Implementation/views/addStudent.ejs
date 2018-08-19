@@ -1,109 +1,111 @@
-<div ng-show="isSharedView(10)">
-    <h2>Add Student(s) To Course
-        <i class="titleIcon fa fa-plus-circle" ng-click="setView(11)" aria-hidden="true"></i>
-    </h2>
-    <p class="alert alert-danger" ng-if="errorMessage != ''">{{errorMessage}}</p>
-    <h3>Select Students(s)</h3>
-    <div
-            isteven-multi-select
-            max-labels="2"
-            input-model="qs.studentsNotInCourse()"
-            output-model="formData.studentsList"
-            button-label="name"
-            item-label="name"
-            tick-property="ticked"
-            ng-if="qs.students().length > 0"
-    >
+<div>
+    <div ng-show="isSharedView(10)">
+        <h2>Add Student(s) To Course
+            <i class="titleIcon fa fa-plus-circle" ng-click="setView(11)" aria-hidden="true"></i>
+        </h2>
+        <p class="alert alert-danger" ng-if="errorMessage != ''">{{errorMessage}}</p>
+        <h3>Select Students(s)</h3>
+        <div
+                isteven-multi-select
+                max-labels="2"
+                input-model="qs.studentsNotInCourse()"
+                output-model="formData.studentsList"
+                button-label="name"
+                item-label="name"
+                tick-property="ticked"
+                ng-if="qs.students().length > 0"
+        >
+        </div>
+        <p class="alert alert-danger" ng-if="qs.students().length <= 0">There are currently no students stored in the system. Click on the top right button to add a new student.</p>
+        <div id="btn-group">
+            <button class="btn btn-default" ng-click="setView(7)">Cancel</button>
+            <md-button md-disable-backdrop="true" class="btn btn-default md-btn"
+                       ng-click="addStudent($event)"
+                       ng-disabled="formData.studentsList.length <= 0 || qs.students().length <= 0">Add Student(s)</md-button>
+        </div>
     </div>
-    <p class="alert alert-danger" ng-if="qs.students().length <= 0">There are currently no students stored in the system. Click on the top right button to add a new student.</p>
-    <div id="btn-group">
-        <button class="btn btn-default" ng-click="setView(7)">Cancel</button>
-        <md-button md-disable-backdrop="true" class="btn btn-default md-btn"
-                   ng-click="addStudent($event)"
-                   ng-disabled="formData.studentsList.length <= 0 || qs.students().length <= 0">Add Student(s)</md-button>
-    </div>
-</div>
 
-<div ng-show="isSharedView(11)">
-    <h2>Add New Student</h2>
-    <p class="alert alert-danger" ng-if="errorMessage != ''">{{errorMessage}}</p>
-    <form>
-        <div id="input">
-            <h3>Username</h3>
-            <input type="text" name="studentid" ng-model="studentid" disabled/>
+    <div ng-show="isSharedView(11)">
+        <h2>Add New Student</h2>
+        <p class="alert alert-danger" ng-if="errorMessage != ''">{{errorMessage}}</p>
+        <form>
+            <div id="input">
+                <h3>Username</h3>
+                <input type="text" name="studentid" ng-model="studentid" disabled/>
+            </div>
+            <div id="input">
+                <h3>Student ID</h3>
+                <input type="number" ng-model="studentid" name="studentid" required/>
+            </div>
+            <div id="input">
+                <h3>Name</h3>
+                <input type="text" ng-model="name" name="name" required/>
+            </div>
+            <div id="input">
+                <h3>Password</h3>
+                <input type="text" ng-model="password" name="password" required/>
+            </div>
+        </form>
+        <h3>Select Course(s)</h3>
+        <div
+                isteven-multi-select
+                max-labels="2"
+                input-model="qs.courses()"
+                output-model="formData.coursesList"
+                button-label="coursecode"
+                item-label="coursecode"
+                tick-property="ticked"
+                ng-if="qs.courses().length > 0"
+        >
         </div>
-        <div id="input">
-            <h3>Student ID</h3>
-            <input type="number" ng-model="studentid" name="studentid" required/>
-        </div>
-        <div id="input">
-            <h3>Name</h3>
-            <input type="text" ng-model="name" name="name" required/>
-        </div>
-        <div id="input">
-            <h3>Password</h3>
-            <input type="text" ng-model="password" name="password" required/>
-        </div>
-    </form>
-    <h3>Select Course(s)</h3>
-    <div
-            isteven-multi-select
-            max-labels="2"
-            input-model="qs.courses()"
-            output-model="formData.coursesList"
-            button-label="coursecode"
-            item-label="coursecode"
-            tick-property="ticked"
-            ng-if="qs.courses().length > 0"
-    >
-    </div>
-    <p class="alert alert-danger" ng-if="qs.courses().length <= 0">There are currently no courses stored in the system.</p>
+        <p class="alert alert-danger" ng-if="qs.courses().length <= 0">There are currently no courses stored in the system.</p>
 
-    <div id="btn-group">
-        <button class="btn btn-default" ng-click="setCancelEditStudentView()">Cancel</button>
-        <md-button md-disable-backdrop="true" class="btn btn-default" ng-click="addNewStudent($event)">Add New Student</md-button>
+        <div id="btn-group">
+            <button class="btn btn-default" ng-click="setCancelEditStudentView()">Cancel</button>
+            <md-button md-disable-backdrop="true" class="btn btn-default" ng-click="addNewStudent($event)">Add New Student</md-button>
+        </div>
     </div>
-</div>
 
-<div ng-show="isSharedView(12)">
-    <h2>Edit or Delete Student
-        <i class="titleIcon fa fa-times-circle" ng-click="goBack()" aria-hidden="true"></i>
-        <i class="titleIcon fa fa-check-circle" ng-click="updateUser($event, 'student')" aria-hidden="true"></i>
-    </h2>
-    <p class="alert alert-danger" ng-if="errorMessage != ''">{{errorMessage}}</p>
-    <form>
-        <div id="input">
-            <h3>Username</h3>
-            <input type="text" ng-model="selectedUser.username" name="username" disabled/>
+    <div ng-show="isSharedView(12)">
+        <h2>Edit or Delete Student
+            <i class="titleIcon fa fa-times-circle" ng-click="goBack()" aria-hidden="true"></i>
+            <i class="titleIcon fa fa-check-circle" ng-click="updateUser($event, 'student')" aria-hidden="true"></i>
+        </h2>
+        <p class="alert alert-danger" ng-if="errorMessage != ''">{{errorMessage}}</p>
+        <form>
+            <div id="input">
+                <h3>Username</h3>
+                <input type="text" ng-model="selectedUser.username" name="username" disabled/>
+            </div>
+            <div id="input">
+                <h3>Student ID</h3>
+                <input type="number" ng-model="selectedUser.studentid" name="studentId" required/>
+            </div>
+            <div id="input">
+                <h3>Name</h3>
+                <input type="text" ng-model="selectedUser.name" name="name" required/>
+            </div>
+            <div id="input">
+                <h3>Password</h3>
+                <input type="text" ng-model="selectedUser.password" name="password" required/>
+            </div>
+        </form>
+        <h3>Select Course(s)</h3>
+        <div
+                isteven-multi-select
+                max-labels="2"
+                input-model="qs.courses()"
+                output-model="formData.coursesList"
+                button-label="coursecode"
+                item-label="coursecode"
+                tick-property="ticked"
+                ng-if="qs.courses().length > 0"
+        >
         </div>
-        <div id="input">
-            <h3>Student ID</h3>
-            <input type="number" ng-model="selectedUser.studentid" name="studentId" required/>
-        </div>
-        <div id="input">
-            <h3>Name</h3>
-            <input type="text" ng-model="selectedUser.name" name="name" required/>
-        </div>
-        <div id="input">
-            <h3>Password</h3>
-            <input type="text" ng-model="selectedUser.password" name="password" required/>
-        </div>
-    </form>
-    <h3>Select Course(s)</h3>
-    <div
-            isteven-multi-select
-            max-labels="2"
-            input-model="qs.courses()"
-            output-model="formData.coursesList"
-            button-label="coursecode"
-            item-label="coursecode"
-            tick-property="ticked"
-            ng-if="qs.courses().length > 0"
-    >
-    </div>
-    <p class="alert alert-danger" ng-if="qs.courses().length <= 0">There are currently no courses stored in the system.</p>
+        <p class="alert alert-danger" ng-if="qs.courses().length <= 0">There are currently no courses stored in the system.</p>
 
-    <div id="btn-group">
-        <md-button md-disable-backdrop="true" class="btn md-warn md-raised" ng-click="deleteUser($event, 'student')">Delete Student</md-button>
+        <div id="btn-group">
+            <md-button md-disable-backdrop="true" class="btn md-warn md-raised" ng-click="deleteUser($event, 'student')">Delete Student</md-button>
+        </div>
     </div>
 </div>

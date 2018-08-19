@@ -14,6 +14,7 @@ router.get('/api/getStudents', db.getStudents);
 router.get('/api/getLecturers', db.getLecturers);
 router.get('/api/getCourses', db.getCourses);
 router.get('/api/getAssessments', db.getAssessments);
+router.get('/api/getTasks', db.getTasks);
 
 router.get('/api/getStudentsInCourse', db.getStudentsInCourse);
 router.get('/api/getStudentsNotInCourse', db.getStudentsNotInCourse);
@@ -25,6 +26,7 @@ router.post('/api/createNewStudent', db.createNewStudent);
 router.post('/api/createNewLecturer', db.createNewLecturer);
 router.post('/api/createNewCourse', db.createNewCourse);
 router.post('/api/createNewAssessment', db.createNewAssessment);
+router.post('/api/createNewTask', db.createNewTask);
 
 router.post('/api/addStudentToCourse', db.addStudentToCourse);
 router.post('/api/addLecturerCourses', db.addLecturerCourses);
@@ -34,10 +36,12 @@ router.post('/api/updateUser', db.updateUser);
 router.post('/api/updateStudent', db.updateStudent);
 router.post('/api/updateLecturer', db.updateLecturer);
 router.post('/api/updateAssessment', db.updateAssessment);
+router.post('/api/updateTask', db.updateTask);
 
 router.post('/api/deleteCourse', db.deleteCourse);
 router.post('/api/deleteUser', db.deleteUser);
 router.post('/api/deleteAssessment', db.deleteAssessment);
+router.post('/api/deleteTask', db.deleteTask);
 
 router.post('/api/removeStudentFromCourse', db.removeStudentFromCourse);
 router.post('/api/removeLecturerCourse', db.removeLecturerCourse);

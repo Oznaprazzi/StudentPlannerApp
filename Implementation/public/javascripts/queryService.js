@@ -9,6 +9,7 @@ angular.module('queries', []).service('queryService', function($http){
     var studentsNotInCourse = [];
     var studentsCourses = [];
     var lecturersCourses = [];
+    var tasks = [];
 
     /***************************/
     /*********Get IDs**********/
@@ -77,6 +78,20 @@ angular.module('queries', []).service('queryService', function($http){
                     assessments = response.data.data;
                 },function errorCall()	{
                     console.log("Error reading assessments list.");
+                }
+            );
+    };
+
+    this.getTasks = function(assessmentid){
+        return $http.get('/api/getTasks', {
+            params:{
+                assessmentid: assessmentid
+            }
+        })
+            .then(function sucessCall(response)	{
+                    tasks = response.data.data;
+                },function errorCall()	{
+                    console.log("Error reading tasks list.");
                 }
             );
     };
@@ -159,6 +174,10 @@ angular.module('queries', []).service('queryService', function($http){
 
     this.assessments = function(){
       return assessments;
+    };
+
+    this.tasks = function(){
+        return tasks;
     };
 
     this.studentsInCourse = function(){

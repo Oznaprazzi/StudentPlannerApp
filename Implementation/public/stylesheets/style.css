@@ -89,3 +89,13 @@ table td i{
 h3 i{
   font-size: 30px !important;
 }
+
+md-menu .md-button.md-icon-button{
+  margin: 0;
+  padding: 0;
+  height: auto;
+}
+
+.md-open-menu-container{
+  top: 80px !important;
+}

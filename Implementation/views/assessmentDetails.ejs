@@ -27,4 +27,33 @@
         </tr>
         </tbody>
     </table>
+
+    <hr>
+    <table class="table table-striped">
+        <tbody>
+            <thead>
+                <tr>
+                    <th scope="col" style="font-size: 20px">Tasks</th>
+                    <th></th>
+                    <th scope="col"><i class="fa fa-plus-circle" ng-click="addTask($event)" ng-show="userType == 'lecturer'" style="font-size: 25px; float: right" aria-hidden="true"></i></th>
+                </tr>
+            </thead>
+            <tr>
+                <th class="col-sm-6">Name</th>
+                <td class="col-sm-4">Points</td>
+                <td class="col-sm-2"></td>
+            </tr>
+            <tr ng-repeat="task in qs.tasks()">
+                <td>{{task.description}}</td>
+                <td>{{task.points}}</td>
+                <td ng-show="userType == 'lecturer'">
+                    <div>
+                        <i class="fa fa-pencil" ng-click="editTask(task)" aria-hidden="true"></i>
+                        <i class="fa fa-trash" ng-click="deleteTask($event, task)" aria-hidden="true"></i>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <p ng-if="qs.tasks().length <= 0">There are currently no tasks for this assessment.</p>
 </div>

@@ -1,6 +1,6 @@
 var app = angular.module('studentPlanner', ['mwl.calendar', 'ngAnimate', 'ui.bootstrap', 'colorpicker.module', 'ngRoute', 'ngMaterial', 'queries', 'dialogs', 'isteven-multi-select']);
 
-app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route, queryService, dialogService) {
+app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route, queryService, dialogService, $rootScope) {
     //Calendar Implementation
     $scope.view = 1;
     $scope.loginFailMessage = '';
@@ -20,7 +20,6 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
         await $scope.qs.getUsers();
         await $scope.qs.getStudents();
         await $scope.qs.getLecturers();
-        await $scope.qs.getAssessments();
         await $scope.qs.getCourses();
         if (JSON.parse(sessionStorage.getItem('loggedIn'))) {
             $scope.user = JSON.parse(sessionStorage.getItem('user'));
@@ -33,12 +32,10 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
                 $scope.courses = $scope.qs.courses();
                 $scope.setView(2);
             }
-
-            console.log($scope.user);
         }
     }
 
-    async function loadCourses(lecturerId){
+    async function loadLecturerCourses(lecturerId){
         await $scope.qs.getLecturersCourses(lecturerId);
     }
 
@@ -46,7 +43,7 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
 
     $scope.setView = function (view) {
         $scope.view = view;
-        console.log(view);
+        $rootScope.view = view;
         viewStack.push(view);
         $scope.errorMessage = '';
     };
@@ -116,10 +113,11 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
             if ($scope.validUsername && $scope.validPassword) {
                 sessionStorage.setItem('user', JSON.stringify($scope.qs.users()[userIndex]));
                 $scope.userType = getUserType(userIndex);
+                $rootScope.userType = $scope.userType;
                 sessionStorage.setItem('loggedIn', true);
                 sessionStorage.setItem('userIndex', userIndex);
                 if($scope.userType == 'lecturer'){
-                    loadCourses($scope.user.lecturerid);
+                    loadLecturerCourses($scope.user.lecturerid);
                     $scope.courses = $scope.qs.lecturersCourses();
                     $scope.setView(3);
                 }else{
@@ -241,10 +239,20 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
         }
     };
 
+    async function assessmentInformation(assessmentid){
+        await $scope.qs.getTasks(assessmentid);
+    }
+
     $scope.setAssessment = function (assessment) {
+        assessmentInformation(assessment.assessmentid);
         $scope.currentAssessment = assessment;
+        $rootScope.currentAssessment = assessment;
         $scope.minDate = assessment.startdate;
     };
+
+    async function loadCourses(){
+        await $scope.qs.getCourses();
+    }
 
     $scope.addCourse = function (ev) {
         if ($scope.coursecode == '') {
@@ -258,8 +266,7 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
         });
 
         request.then(function success(data) {
-            $scope.qs.getCourses();
-            $route.reload();
+            loadCourses();
             // Appending dialog to document.body to cover sidenav in docs app
             var confirm = dialogService.confirm($scope.coursecode + ' has been successfully added!',
                 'Added Course', 'Add Another Course', 'Back', ev);
@@ -496,7 +503,6 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
                     $mdDialog.show(alert).then(function () {
                         $scope.goBack();
                         $scope.qs.getLecturers();
-                        //$scope.qs.getStudentsInCourse($scope.currentCourse.courseid);
                     });
                 });
             }else{
@@ -564,6 +570,24 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
             //Stay on current page
         });
     };
+
+    $scope.removeStudentFromCourse = function(student, ev){
+        var confirm = dialogService.confirm('Are you sure you want to remove this student from this course?', 'Remove student from course', 'Yes',
+            'No', ev);
+
+        $mdDialog.show(confirm).then(function () {
+            $http.post('/api/removeStudentFromCourse', {
+                params: {
+                    studentid: student.studentid,
+                    courseid: $scope.currentCourse.courseid
+                }
+            }).then(function () {
+                $scope.qs.getStudentsInCourse($scope.currentCourse.courseid);
+            });
+        }, function(){
+
+        });
+    }
 
     $scope.addNewLecturer = function (ev) {
         if ($scope.name == '' || $scope.password == '') {
@@ -711,7 +735,6 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
         }, function () {
             //Stay on current page
         });
-
     };
 
     $scope.showHomeButton = function(){
@@ -729,6 +752,102 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
         $scope.type = "Assignment";
         $scope.minDate = new Date();
         console.log($scope.minDate);
+    }
+
+    $scope.addTask = function () {
+        var prompt = dialogService.addTaskPrompt(DialogController);
+        $mdDialog.show(prompt);
+    };
+
+    $scope.editTask = function (task) {
+        $rootScope.task = task;
+        var prompt = dialogService.editTaskPrompt(DialogController);
+        $mdDialog.show(prompt);
+    };
+
+    $scope.deleteTask = function (ev, task) {
+        var confirm = dialogService.confirm('Are you sure you want to delete this task?', 'Delete Task', 'Yes',
+            'No', ev);
+
+        $mdDialog.show(confirm).then(function () {
+            var request = $http.post('/api/deleteTask', {
+                params: {
+                    taskid: $scope.task.taskid
+                }
+            });
+
+            request.then(function success(data) {
+                $scope.qs.getTasks($scope.currentAssessment.assessmentid);
+                var alert = dialogService.alert('Task has been successfully deleted!',
+                    'Task Successfully Deleted', ev);
+                $mdDialog.show(alert);
+            });
+        }, function () {
+            //Stay on current page
+        });
+    };
+
+    $scope.openMenu = function($mdMenu, ev) {
+        $mdMenu.open(ev);
+    };
+
+    function DialogController($scope, $mdDialog, $rootScope, queryService, dialogService) {
+        $scope.qs = queryService;
+        $scope.task = $rootScope.task;
+        $scope.points = 2;
+        $scope.closeDialog = function() {
+            $mdDialog.hide();
+        };
+
+        $scope.saveTask = function(ev){
+            if($scope.description == '' || $scope.description == undefined){
+                var alert = dialogService.alert('An error occured. New task was not added.',
+                    'Task not saved', ev);
+                $mdDialog.show(alert);
+                return;
+            }
+
+            var request = $http.post('/api/createNewTask', {
+                params: {
+                    assessmentid: $rootScope.currentAssessment.assessmentid,
+                    description: $scope.description,
+                    points: $scope.points
+                }
+            });
+
+            request.then(function success(data) {
+                $scope.qs.getTasks($rootScope.currentAssessment.assessmentid);
+                var alert = dialogService.alert('Task successfully added',
+                    'Task saved', ev);
+                $mdDialog.show(alert);
+            });
+
+        };
+
+        $scope.updateTask = function(ev){
+            if($scope.task.description == '' || $scope.task.description == undefined){
+                var alert = dialogService.alert('An error occured. New task was not added.',
+                    'Task not saved', ev);
+                $mdDialog.show(alert);
+                return;
+            }
+
+            var request = $http.post('/api/updateTask', {
+                params: {
+                    taskid: $scope.task.taskid,
+                    description: $scope.task.description,
+                    points: $scope.task.points
+                }
+            });
+
+            request.then(function success(data) {
+                $scope.qs.getTasks($rootScope.currentAssessment.assessmentid);
+                var alert = dialogService.alert('Task successfully updated',
+                    'Task updated', ev);
+                $mdDialog.show(alert);
+            });
+
+        }
     }
 });
 

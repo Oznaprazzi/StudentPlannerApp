@@ -20,6 +20,7 @@ module.exports = {
     getLecturers: getLecturers,
     getCourses: getCourses,
     getAssessments: getAssessments,
+    getTasks: getTasks,
 
     getStudentsInCourse: getStudentsInCourse,
     getStudentsNotInCourse: getStudentsNotInCourse,
@@ -31,6 +32,7 @@ module.exports = {
     createNewLecturer: createNewLecturer,
     createNewCourse: createNewCourse,
     createNewAssessment: createNewAssessment,
+    createNewTask: createNewTask,
 
     addStudentToCourse: addStudentToCourse,
     addLecturerCourses: addLecturerCourses,
@@ -40,10 +42,12 @@ module.exports = {
     updateStudent: updateStudent,
     updateLecturer: updateLecturer,
     updateAssessment: updateAssessment,
+    updateTask: updateTask,
 
     deleteCourse: deleteCourse,
     deleteUser: deleteUser,
     deleteAssessment: deleteAssessment,
+    deleteTask: deleteTask,
 
     removeStudentFromCourse: removeStudentFromCourse,
     removeLecturerCourse: removeLecturerCourse
@@ -156,6 +160,22 @@ function getAssessments(req, res, next){
                     status: 'success',
                     data: data,
                     message: 'Retrieved ALL Assessments'
+                });
+        })
+        .catch(function (err) {
+            return next(err);
+        });
+}
+
+function getTasks(req, res, next){
+    var assessmentid = req.query.assessmentid;
+    db.any('select * from tasks join assessments on tasks.assessmentid = assessments.assessmentid where tasks.assessmentid = $1 order by tasks.taskid asc;', [assessmentid])
+        .then(function (data) {
+            res.status(200)
+                .json({
+                    status: 'success',
+                    data: data,
+                    message: 'Retrieved ALL Tasks For Requested Assessment'
                 });
         })
         .catch(function (err) {
@@ -284,7 +304,7 @@ function createNewLecturer(req, res, next){
 }
 
 function createNewCourse(req, res, next){
-    var courseCode = req.body.params.coursecode;
+    var coursecode = req.body.params.coursecode;
     db.none('insert into courses(coursecode) values($1)', [coursecode])
         .then(function () {
             res.status(200)
@@ -311,6 +331,23 @@ function createNewAssessment(req, res, next){
                 .json({
                     status: 'success',
                     message: 'Created new assessment'
+                });
+        })
+        .catch(function (err) {
+            return next(err);
+        });
+}
+
+function createNewTask(req, res, next){
+    var assessmentid = req.body.params.assessmentid;
+    var description = req.body.params.description;
+    var points = req.body.params.points;
+    db.none('insert into tasks(assessmentid, description, points) values($1, $2, $3)', [assessmentid, description, points])
+        .then(function () {
+            res.status(200)
+                .json({
+                    status: 'success',
+                    message: 'Created new task'
                 });
         })
         .catch(function (err) {
@@ -445,6 +482,23 @@ function updateAssessment(req, res, next) {
         });
 }
 
+function updateTask(req, res, next){
+    var taskid = req.body.params.taskid;
+    var description = req.body.params.description;
+    var points = req.body.params.points;
+    db.none('update tasks set description = $1, points = $2 where taskid = $3', [description, points, taskid])
+        .then(function () {
+            res.status(200)
+                .json({
+                    status: 'success',
+                    message: 'Updated task'
+                });
+        })
+        .catch(function (err) {
+            return next(err);
+        });
+}
+
 /***************************/
 /**********Delete***********/
 /***************************/
@@ -487,6 +541,21 @@ function deleteAssessment(req, res, next){
                 .json({
                     status: 'success',
                     message: 'Deleted Assessment'
+                });
+        })
+        .catch(function (err) {
+            return next(err);
+        });
+}
+
+function deleteTask(req, res, next){
+    var taskid = req.body.params.taskid;
+    db.none('delete from tasks where taskid = $1', [taskid])
+        .then(function () {
+            res.status(200)
+                .json({
+                    status: 'success',
+                    message: 'Deleted Task'
                 });
         })
         .catch(function (err) {

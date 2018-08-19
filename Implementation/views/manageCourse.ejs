@@ -6,7 +6,7 @@
     <hr>
     <table class="table table-striped">
         <tbody>
-        <tr ng-repeat="c in courses">
+        <tr ng-repeat="c in qs.courses()">
             <td>{{c.coursecode}}</td>
             <td><button class="btn btn-default" ng-click="setView(7); setCourse(c)">Manage</button></td>
         </tr>
@@ -58,7 +58,7 @@
             <td>{{s.studentid}}</td>
             <td>
                 <i class="fa fa-pencil" ng-click="setView(12); setStudent(s)" ng-show="userType == 'admin'" aria-hidden="true"></i>
-                <i class="fa fa-trash" ng-click="" aria-hidden="true"></i>
+                <i class="fa fa-trash" ng-click="removeStudentFromCourse(s, $event)" aria-hidden="true"></i>
             </td>
         </tr>
         </tbody>

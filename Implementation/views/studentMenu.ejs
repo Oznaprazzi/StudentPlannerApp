@@ -1,0 +1,22 @@
+<md-menu ng-show="userType == 'student'" style="float:left">
+    <md-button class="md-icon-button" ng-click="openMenu($mdMenu, $event)">
+        <i class="fa fa-bars fa-2x" aria-hidden="true"></i>
+    </md-button>
+    <md-menu-content width="4">
+        <md-menu-item>
+            <md-button ng-click="setView(2)">
+                Calendar View
+            </md-button>
+        </md-menu-item>
+        <md-menu-item>
+            <md-button ng-click="setView(3)">
+                View Courses
+            </md-button>
+        </md-menu-item>
+        <md-menu-item>
+            <md-button ng-click="setView(4)">
+                My Points and Rewards
+            </md-button>
+        </md-menu-item>
+    </md-menu-content>
+</md-menu>
