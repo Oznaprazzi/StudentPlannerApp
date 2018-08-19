@@ -1,8 +1,6 @@
-CREATE TYPE atype AS ENUM ('Assignment', 'Test', 'Exam', 'Other');
-
 CREATE TABLE Users(
 	UserId SERIAL PRIMARY KEY NOT NULL,
-	Username varchar(255) NOT NULL,
+	Username varchar(255) UNIQUE NOT NULL,
 	Name varchar(255) NOT NULL,
 	Password varchar(255) NOT NULL
 );
@@ -28,7 +26,7 @@ CREATE TABLE Courses(
 CREATE TABLE Assessments(
 	AssessmentId SERIAL PRIMARY KEY NOT NULL,
 	CourseId int NOT NULL references Courses(CourseId) ON UPDATE CASCADE ON DELETE CASCADE,
-	AssessmentType atype NOT NULL,
+	AssessmentType varchar(50) NOT NULL,
 	StartDate date NOT NULL,
 	DueDate date NOT NULL CHECK(DueDate >= current_date),
 	Title varchar(255) NOT NULL,
@@ -38,9 +36,8 @@ CREATE TABLE Assessments(
 CREATE TABLE Tasks(
 	TaskId SERIAL PRIMARY KEY NOT NULL,
 	AssessmentId int NOT NULL references Assessments(AssessmentId) ON UPDATE CASCADE ON DELETE CASCADE,
-	Name varchar(255) NOT NULL,
-	Points int NOT NULL DEFAULT 2,
-	Description text NOT NULL	
+	Description varchar(100) NOT NULL,
+	Points int NOT NULL DEFAULT 2
 );
 
 CREATE TABLE EnrolledIn (
