@@ -102,7 +102,7 @@ app.controller('calendarController', function(moment, alert, calendarConfig, $ro
 
     function checkLoggedIn(){
         if (JSON.parse(sessionStorage.getItem('loggedIn'))) {
-            $rootScope.userType = 'student';
+            $rootScope.userType = sessionStorage.getItem('userType');
             $rootScope.view = 2;
         }
     }

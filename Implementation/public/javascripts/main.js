@@ -23,7 +23,7 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
         await $scope.qs.getCourses();
         if (JSON.parse(sessionStorage.getItem('loggedIn'))) {
             $scope.user = JSON.parse(sessionStorage.getItem('user'));
-            $scope.userType = getUserType(sessionStorage.getItem('userIndex'));
+            $scope.userType = sessionStorage.getItem('userType');
             if($scope.userType == 'lecturer'){
                 await $scope.qs.getLecturersCourses($scope.user.lecturerid);
                 $scope.courses = $scope.qs.lecturersCourses();
@@ -114,6 +114,7 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
                 sessionStorage.setItem('user', JSON.stringify($scope.qs.users()[userIndex]));
                 $scope.userType = getUserType(userIndex);
                 $rootScope.userType = $scope.userType;
+                sessionStorage.setItem('userType', $scope.userType);
                 sessionStorage.setItem('loggedIn', true);
                 sessionStorage.setItem('userIndex', userIndex);
                 if($scope.userType == 'lecturer'){
