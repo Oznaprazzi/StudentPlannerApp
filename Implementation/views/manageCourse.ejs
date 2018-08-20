@@ -6,7 +6,7 @@
     <hr>
     <table class="table table-striped">
         <tbody>
-        <tr ng-repeat="c in qs.courses()">
+        <tr ng-repeat="c in courses">
             <td>{{c.coursecode}}</td>
             <td><button class="btn btn-default" ng-click="setView(7); setCourse(c)">Manage</button></td>
         </tr>

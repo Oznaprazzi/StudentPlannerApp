@@ -1,19 +1,4 @@
 <div>
-    <div id="menu" ng-show="isView('student', 2)">
-        <h2>Home</h2>
-        <div id="btn">
-            <button class="btn btn-default" ng-click="setView(3)">Calender View</button>
-        </div>
-
-        <div id="btn">
-            <button class="btn btn-default" ng-click="setView(4)">View Courses</button>
-        </div>
-
-        <div id="btn">
-            <button class="btn btn-default" ng-click="setView(5)">My Points and Rewards</button>
-        </div>
-    </div>
-
     <div ng-show="isView('admin', 4)">
         <h2>Manage Lecturers
             <i class="titleIcon fa fa-plus-circle" ng-click="setView(13); setLecturerId()" aria-hidden="true"></i>
