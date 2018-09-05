@@ -101,11 +101,16 @@ app.controller('calendarController', function(moment, alert, calendarConfig, $ro
     };
 
     $scope.qs = queryService;
+    async function loadStudent(user){
+        await $scope.qs.getStudentsCourses(user.studentid);
+        $scope.courses = $scope.qs.studentsCourses();
+    }
+
     function checkLoggedIn(){
         if (JSON.parse(sessionStorage.getItem('loggedIn'))) {
             $rootScope.userType = sessionStorage.getItem('userType');
-            $scope.user = sessionStorage.getItem('user');
-            $scope.courses = $scope.qs.getStudentsCourses($scope.user.studentid);
+            $scope.user = JSON.parse(sessionStorage.getItem('user'));
+            loadStudent($scope.user);
             $rootScope.view = 2;
         }
     }

@@ -28,6 +28,10 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
                 await $rootScope.qs.getLecturersCourses($rootScope.user.lecturerid);
                 $scope.courses = $rootScope.qs.lecturersCourses();
                 $rootScope.setView(3);
+            }else if($rootScope.userType == 'student'){
+                await $rootScope.qs.getStudentsCourses($rootScope.user.studentid);
+                $scope.courses = $rootScope.qs.studentsCourses();
+                $rootScope.setView(2);
             }else{
                 $scope.courses = $rootScope.qs.courses();
                 $rootScope.setView(2);
@@ -37,6 +41,10 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
 
     async function loadLecturerCourses(lecturerId){
         await $rootScope.qs.getLecturersCourses(lecturerId);
+    }
+
+    async function loadStudent(studentid){
+        await $rootScope.qs.getStudentsCourses(studentid);
     }
 
     loadAllQueries();
@@ -121,7 +129,8 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
                     $scope.courses = $rootScope.qs.lecturersCourses();
                     $rootScope.setView(3);
                 }else if($rootScope.userType == 'student'){
-                    $scope.courses = $rootScope.qs.getStudentsCourses($rootScope.user.studentid);
+                    loadStudent($rootScope.user.studentid);
+                    $scope.courses = $scope.qs.studentsCourses();
                     $rootScope.setView(2);
                 }else {
                     $scope.courses = $rootScope.qs.courses();
