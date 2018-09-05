@@ -120,7 +120,10 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
                     loadLecturerCourses($rootScope.user.lecturerid);
                     $scope.courses = $rootScope.qs.lecturersCourses();
                     $rootScope.setView(3);
-                }else{
+                }else if($rootScope.userType == 'student'){
+                    $scope.courses = $rootScope.qs.getStudentsCourses($rootScope.user.studentid);
+                    $rootScope.setView(2);
+                }else {
                     $scope.courses = $rootScope.qs.courses();
                     $rootScope.setView(2);
                 }

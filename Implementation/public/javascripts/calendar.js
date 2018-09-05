@@ -1,5 +1,5 @@
 var app = angular.module('studentPlanner');
-app.controller('calendarController', function(moment, alert, calendarConfig, $rootScope, $scope) {
+app.controller('calendarController', function(moment, alert, calendarConfig, $rootScope, $scope, queryService) {
     var vm = this;
 
     //These variables MUST be set as a minimum for the calendar to work
@@ -100,9 +100,12 @@ app.controller('calendarController', function(moment, alert, calendarConfig, $ro
 
     };
 
+    $scope.qs = queryService;
     function checkLoggedIn(){
         if (JSON.parse(sessionStorage.getItem('loggedIn'))) {
             $rootScope.userType = sessionStorage.getItem('userType');
+            $scope.user = sessionStorage.getItem('user');
+            $scope.courses = $scope.qs.getStudentsCourses($scope.user.studentid);
             $rootScope.view = 2;
         }
     }

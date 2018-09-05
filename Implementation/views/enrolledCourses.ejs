@@ -1,14 +1,12 @@
-<div ng-show="isSharedView(3) && userType != 'student'">
-    <h2>Manage Courses
-        <i class="titleIcon fa fa-plus-circle" ng-click="setView(6)" ng-show="userType == 'admin'" aria-hidden="true"></i>
-    </h2>
+<div ng-show="isView('student', 3)">
+    <h2>Enrolled Courses</h2>
 
     <hr>
     <table class="table table-striped">
         <tbody>
         <tr ng-repeat="c in courses">
             <td>{{c.coursecode}}</td>
-            <td><button class="btn btn-default" ng-click="setView(7); setCourse(c)">Manage</button></td>
+            <td><button class="btn btn-default" ng-click="setView(7); setCourse(c)">View Assessments</button></td>
         </tr>
         </tbody>
     </table>
