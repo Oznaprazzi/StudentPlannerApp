@@ -30,7 +30,7 @@ CREATE TABLE Assessments(
 	CourseId int NOT NULL references Courses(CourseId) ON UPDATE CASCADE ON DELETE CASCADE,
 	AssessmentType atype NOT NULL,
 	StartDate date NOT NULL,
-	DueDate date NOT NULL CHECK(DueDate >= current_date),
+	DueDate date NOT NULL CHECK(DueDate >= StartDate),
 	Title varchar(255) NOT NULL,
 	Details text NOT NULL
 );
