@@ -896,21 +896,15 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
     $scope.taskDone = function(task){
         if(task.completed == true){
             task.completed = false;
-            $rootScope.qs.updateTaskCompleted(task.taskid, task.completed, $rootScope.user.studentid).then(function(){
-                $scope.reloadStudent();
-                $rootScope.qs.updateStudentPoints($rootScope.user.points - task.points, $rootScope.user.studentid).then(function(){
-
-                });
-            });
         }else if(task.completed == false){
             task.completed = true;
-            $rootScope.qs.updateTaskCompleted(task.taskid, task.completed, $rootScope.user.studentid).then(function(){
-                $scope.reloadStudent();
-                $rootScope.qs.updateStudentPoints($rootScope.user.points + task.points, $rootScope.user.studentid).then(function(){
-
-                });
-            });
         }
+        $rootScope.qs.updateTaskCompleted(task.taskid, task.completed, $rootScope.user.studentid).then(function(){
+            $scope.reloadStudent();
+            $rootScope.qs.updateStudentPoints(task.points, $rootScope.user.studentid).then(function(){
+
+            });
+        });
     }
 });
 

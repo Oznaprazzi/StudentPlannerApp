@@ -605,12 +605,18 @@ function updateTaskCompleted(req, res, next){
 function updateStudentPoints(req, res, next){
     var points = req.body.params.points;
     var studentid = req.body.params.studentid;
-    db.none('update students set points = $1 where studentid = $2', [points, studentid])
-        .then(function () {
-            res.status(200)
-                .json({
-                    status: 'success',
-                    message: 'Updated student points'
+    db.one('select points from students where studentid = $1', [studentid])
+        .then(function (data) {
+            db.none('update students set points = $1 where studentid = $2', [data.points + points, studentid])
+                .then(function () {
+                    res.status(200)
+                        .json({
+                            status: 'success',
+                            message: 'Updated student points'
+                        });
+                })
+                .catch(function (err) {
+                    return next(err);
                 });
         })
         .catch(function (err) {
