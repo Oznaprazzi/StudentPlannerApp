@@ -55,7 +55,7 @@ CREATE TABLE TaughtBy (
 	PRIMARY KEY(LecturerId, CourseId)
 );
 
-CREATE TABLE CompletesAsessment (
+CREATE TABLE CompletesAssessment (
 	StudentId int NOT NULL references Students(StudentId) ON UPDATE CASCADE ON DELETE CASCADE,
 	AssessmentId int NOT NULL references Assessments(AssessmentId) ON UPDATE CASCADE ON DELETE CASCADE,
 	Completed boolean NOT NULL DEFAULT false,
