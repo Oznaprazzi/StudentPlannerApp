@@ -41,15 +41,19 @@
             <tr>
                 <th class="col-sm-6">Name</th>
                 <td class="col-sm-4">Points</td>
-                <td class="col-sm-2"></td>
+                <td class="col-sm-2" ng-show="userType == 'student'">Mark Done</td>
             </tr>
-            <tr ng-repeat="task in qs.tasks()">
+            <tr ng-repeat="task in tasks">
                 <td>{{task.description}}</td>
                 <td>{{task.points}}</td>
-                <td ng-show="userType == 'lecturer'">
-                    <div>
+                <td>
+                    <div ng-show="userType == 'lecturer'">
                         <i class="fa fa-pencil" ng-click="editTask(task)" aria-hidden="true"></i>
                         <i class="fa fa-trash" ng-click="deleteTask($event, task)" aria-hidden="true"></i>
+                    </div>
+                    <div ng-show="userType == 'student'"> {{task.completed}}
+                        <i class="fa fa-check-square-o" ng-click="taskDone(task)" aria-hidden="true" ng-hide="task.completed"></i>
+                        <i class="fa fa-check-square" ng-click="taskDone(task)" aria-hidden="true" ng-show="task.completed"></i>
                     </div>
                 </td>
             </tr>

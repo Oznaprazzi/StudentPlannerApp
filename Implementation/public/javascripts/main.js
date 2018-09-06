@@ -3,6 +3,7 @@ var app = angular.module('studentPlanner', ['mwl.calendar', 'ngAnimate', 'ui.boo
 app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route, queryService, dialogService, $rootScope) {
     //Calendar Implementation
     $rootScope.view = 1;
+    $scope.done = false;
     $scope.loginFailMessage = '';
     $rootScope.userType = '';
     $rootScope.coursecode = '';
@@ -52,6 +53,7 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
     $rootScope.setView = function (view) {
         $rootScope.view = view;
         viewStack.push(view);
+        console.log(viewStack);
         $scope.errorMessage = '';
     };
 
@@ -88,6 +90,7 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
             if ($rootScope.qs.students()[j].userid === $rootScope.qs.users()[i].userid) {
                 sessionStorage.setItem('user', JSON.stringify($rootScope.qs.students()[j]));
                 $rootScope.user = $rootScope.qs.students()[j];
+                sessionStorage.setItem('studentIndex', j);
                 return true;
             }
         }
@@ -144,6 +147,12 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
         }
     };
 
+    $scope.reloadStudent = function(){
+        $rootScope.qs.getStudents().then(function(){
+            $rootScope.user = $rootScope.qs.students()[sessionStorage.getItem('studentIndex')];
+        });
+    };
+
     $scope.$watch('view', function () {
         resetCourse();
     });
@@ -175,6 +184,7 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
 
     $scope.goBack = function () {
         viewStack.splice(-1, 1);
+        console.log(viewStack);
         $rootScope.view = viewStack[viewStack.length - 1];
         sessionStorage.setItem('viewStack', viewStack);
     };
@@ -253,10 +263,16 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
 
     async function assessmentInformation(assessmentid){
         await $rootScope.qs.getTasks(assessmentid);
+        $scope.tasks = $rootScope.qs.tasks();
+        if($rootScope.userType == 'student'){
+            await $rootScope.qs.getStudentTasks($rootScope.user.studentid, assessmentid);
+            $scope.tasks = $rootScope.qs.studentTasks();
+        }
     }
 
     $scope.setAssessment = function (assessment) {
         assessmentInformation(assessment.assessmentid);
+        $scope.tasks = $rootScope.qs.studentTasks();
         $scope.currentAssessment = assessment;
         $rootScope.currentAssessment = assessment;
         $scope.minDate = assessment.startdate;
@@ -784,7 +800,7 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
         $mdDialog.show(confirm).then(function () {
             var request = $http.post('/api/deleteTask', {
                 params: {
-                    taskid: $scope.task.taskid
+                    taskid: task.taskid
                 }
             });
 
@@ -803,8 +819,7 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
         $mdMenu.open(ev);
     };
 
-    function DialogController($scope, $mdDialog, $rootScope, queryService, dialogService) {
-        $rootScope.qs = queryService;
+    function DialogController($scope, $mdDialog, $rootScope, dialogService) {
         $scope.task = $rootScope.task;
         $scope.points = 2;
         $scope.closeDialog = function() {
@@ -828,10 +843,17 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
             });
 
             request.then(function success(data) {
-                $rootScope.qs.getTasks($rootScope.currentAssessment.assessmentid);
-                var alert = dialogService.alert('Task successfully added',
-                    'Task saved', ev);
-                $mdDialog.show(alert);
+                $rootScope.qs.getMaxTaskId().then(function (response) {
+                    var maxid = response.data.data.max;
+                    for(let i = 0; i < $rootScope.qs.studentsInCourse().length; i++){
+                        addTaskToStudent($rootScope.qs.studentsInCourse()[i].studentid, maxid);
+                    }
+
+                    $rootScope.qs.getTasks($rootScope.currentAssessment.assessmentid);
+                    var alert = dialogService.alert('Task successfully added',
+                        'Task saved', ev);
+                    $mdDialog.show(alert);
+                });
             });
 
         };
@@ -859,6 +881,35 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
                 $mdDialog.show(alert);
             });
 
+        };
+
+        function addTaskToStudent(studentid, taskid){
+            var request = $http.post('/api/addToCompleteTask', {
+                params: {
+                    studentid: studentid,
+                    taskid: taskid
+                }
+            });
+        }
+    }
+
+    $scope.taskDone = function(task){
+        if(task.completed == true){
+            task.completed = false;
+            $rootScope.qs.updateTaskCompleted(task.taskid, task.completed, $rootScope.user.studentid).then(function(){
+                $scope.reloadStudent();
+                $rootScope.qs.updateStudentPoints($rootScope.user.points - task.points, $rootScope.user.studentid).then(function(){
+
+                });
+            });
+        }else if(task.completed == false){
+            task.completed = true;
+            $rootScope.qs.updateTaskCompleted(task.taskid, task.completed, $rootScope.user.studentid).then(function(){
+                $scope.reloadStudent();
+                $rootScope.qs.updateStudentPoints($rootScope.user.points + task.points, $rootScope.user.studentid).then(function(){
+
+                });
+            });
         }
     }
 });

@@ -117,9 +117,10 @@ app.controller('calendarController', function(moment, alert, calendarConfig, $ro
 
     checkLoggedIn();
 
-    $scope.setView = function (view) {
+   /* $scope.setView = function (view) {
         $rootScope.view = view;
-    };
+        console.log("View" + view);
+    };*/
 
     $scope.isView = function (type, view) {
         return $rootScope.userType == type && $rootScope.view == view;

@@ -14,6 +14,8 @@ var db = pgp(connectionString);
 module.exports = {
     getMaxUserId: getMaxUserId,
     getMaxLecturerId: getMaxLecturerId,
+    getMaxTaskId: getMaxTaskId,
+    getMaxAssessmentId: getMaxAssessmentId,
 
     getUsers: getUsers,
     getStudents: getStudents,
@@ -26,6 +28,7 @@ module.exports = {
     getStudentsNotInCourse: getStudentsNotInCourse,
     getStudentsCourses: getStudentsCourses,
     getLecturersCourses: getLecturersCourses,
+    getStudentTasks: getStudentTasks,
 
     createNewUser: createNewUser,
     createNewStudent: createNewStudent,
@@ -36,6 +39,8 @@ module.exports = {
 
     addStudentToCourse: addStudentToCourse,
     addLecturerCourses: addLecturerCourses,
+    addToCompleteTask: addToCompleteTask,
+    addToCompleteAssessment: addToCompleteAssessment,
 
     updateCourse: updateCourse,
     updateUser: updateUser,
@@ -43,6 +48,8 @@ module.exports = {
     updateLecturer: updateLecturer,
     updateAssessment: updateAssessment,
     updateTask: updateTask,
+    updateTaskCompleted: updateTaskCompleted,
+    updateStudentPoints: updateStudentPoints,
 
     deleteCourse: deleteCourse,
     deleteUser: deleteUser,
@@ -80,6 +87,36 @@ function getMaxLecturerId(req, res, next){
                     status: 'success',
                     data: data,
                     message: 'Retrieved max lecturer id'
+                });
+        })
+        .catch(function (err) {
+            return next(err);
+        });
+}
+
+function getMaxTaskId(req, res, next){
+    db.one('select max(taskid) from tasks')
+        .then(function(data){
+            res.status(200)
+                .json({
+                    status: 'success',
+                    data: data,
+                    message: 'Retrieved max task id'
+                });
+        })
+        .catch(function (err) {
+            return next(err);
+        });
+}
+
+function getMaxAssessmentId(req, res, next){
+    db.one('select max(assessmentid) from assessments')
+        .then(function(data){
+            res.status(200)
+                .json({
+                    status: 'success',
+                    data: data,
+                    message: 'Retrieved max assessment id'
                 });
         })
         .catch(function (err) {
@@ -251,6 +288,23 @@ function getLecturersCourses(req, res, next){
         });
 }
 
+function getStudentTasks(req, res, next){
+    var studentid = req.query.studentid;
+    var assessmentid = req.query.assessmentid;
+    db.any('select * from tasks join completestask on tasks.taskid = completestask.taskid and completestask.studentid = $1 and tasks.assessmentid = $2', [studentid, assessmentid])
+        .then(function (data) {
+            res.status(200)
+                .json({
+                    status: 'success',
+                    data: data,
+                    message: 'Retrieved ALL Student\'s tasks for current assessment'
+                });
+        })
+        .catch(function (err) {
+            return next(err);
+        });
+}
+
 /***************************/
 /********Create New*********/
 /***************************/
@@ -391,6 +445,38 @@ function addLecturerCourses(req, res, next){
         });
 }
 
+function addToCompleteTask(req, res, next){
+    var studentid = req.body.params.studentid;
+    var taskid = req.body.params.taskid;
+    db.none('insert into completestask(studentid, taskid) values($1, $2)', [studentid, taskid])
+        .then(function () {
+            res.status(200)
+                .json({
+                    status: 'success',
+                    message: 'Linked task to student'
+                });
+        })
+        .catch(function (err) {
+            return next(err);
+        });
+}
+
+function addToCompleteAssessment(req, res, next){
+    var studentid = req.body.params.studentid;
+    var assessmentid = req.body.params.assessmentid;
+    db.none('insert into completesassessment(lecturerid, assessmentid) values($1, $2)', [studentid, assessmentid])
+        .then(function () {
+            res.status(200)
+                .json({
+                    status: 'success',
+                    message: 'Linked assessment to student'
+                });
+        })
+        .catch(function (err) {
+            return next(err);
+        });
+}
+
 /***************************/
 /**********Update***********/
 /***************************/
@@ -492,6 +578,39 @@ function updateTask(req, res, next){
                 .json({
                     status: 'success',
                     message: 'Updated task'
+                });
+        })
+        .catch(function (err) {
+            return next(err);
+        });
+}
+
+function updateTaskCompleted(req, res, next){
+    var taskid = req.body.params.taskid;
+    var studentid = req.body.params.studentid;
+    var completed = req.body.params.completed;
+    db.none('update completestask set completed = $1 where taskid = $2 and studentid = $3', [completed, taskid, studentid])
+        .then(function () {
+            res.status(200)
+                .json({
+                    status: 'success',
+                    message: 'Updated task completed'
+                });
+        })
+        .catch(function (err) {
+            return next(err);
+        });
+}
+
+function updateStudentPoints(req, res, next){
+    var points = req.body.params.points;
+    var studentid = req.body.params.studentid;
+    db.none('update students set points = $1 where studentid = $2', [points, studentid])
+        .then(function () {
+            res.status(200)
+                .json({
+                    status: 'success',
+                    message: 'Updated student points'
                 });
         })
         .catch(function (err) {

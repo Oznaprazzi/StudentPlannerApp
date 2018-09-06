@@ -9,6 +9,7 @@ angular.module('queries', []).service('queryService', function($http){
     var studentsNotInCourse = [];
     var studentsCourses = [];
     var lecturersCourses = [];
+    var studentTasks = [];
     var tasks = [];
 
     /***************************/
@@ -21,6 +22,14 @@ angular.module('queries', []).service('queryService', function($http){
 
     this.getMaxLecturerId = function(){
         return $http.get('/api/getMaxLecturerId');
+    };
+
+    this.getMaxTaskId = function(){
+        return $http.get('/api/getMaxTaskId');
+    };
+
+    this.getMaxAssessmentId = function(){
+        return $http.get('/api/getMaxAssessmentId');
     };
 
     /***************************/
@@ -152,6 +161,43 @@ angular.module('queries', []).service('queryService', function($http){
         );
     };
 
+    this.getStudentTasks = function(studentid, assessmentid){
+        return $http.get('/api/getStudentTasks', {
+            params: {
+                studentid: studentid,
+                assessmentid: assessmentid
+            }
+        }).then(function sucessCall(response)	{
+                studentTasks = response.data.data;
+            },function errorCall()	{
+                console.log("Error reading student\'s task list.");
+            }
+        );
+    };
+
+    /***************************/
+    /*********Update***********/
+    /***************************/
+    this.updateTaskCompleted = function(taskid, completed, studentid){
+        return $http.post('/api/updateTaskCompleted', {
+            params: {
+                taskid: taskid,
+                completed: completed,
+                studentid: studentid
+            }
+        });
+    };
+
+    this.updateStudentPoints = function(points, studentid){
+        return $http.post('/api/updateStudentPoints', {
+            params: {
+                points: points,
+                studentid: studentid
+            }
+        });
+    };
+
+
     /***************************/
     /*********Getters***********/
     /***************************/
@@ -194,5 +240,9 @@ angular.module('queries', []).service('queryService', function($http){
 
     this.lecturersCourses = function(){
         return lecturersCourses;
+    };
+
+    this.studentTasks = function(){
+        return studentTasks;
     };
 });

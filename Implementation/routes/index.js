@@ -8,6 +8,8 @@ var db = require('../queries');
 
 router.get('/api/getMaxUserId', db.getMaxUserId);
 router.get('/api/getMaxLecturerId', db.getMaxLecturerId);
+router.get('/api/getMaxTaskId', db.getMaxTaskId);
+router.get('/api/getMaxAssessmentId', db.getMaxAssessmentId);
 
 router.get('/api/getUsers', db.getUsers);
 router.get('/api/getStudents', db.getStudents);
@@ -20,6 +22,7 @@ router.get('/api/getStudentsInCourse', db.getStudentsInCourse);
 router.get('/api/getStudentsNotInCourse', db.getStudentsNotInCourse);
 router.get('/api/getStudentsCourses', db.getStudentsCourses);
 router.get('/api/getLecturersCourses', db.getLecturersCourses);
+router.get('/api/getStudentTasks', db.getStudentTasks);
 
 router.post('/api/createNewUser', db.createNewUser);
 router.post('/api/createNewStudent', db.createNewStudent);
@@ -30,6 +33,8 @@ router.post('/api/createNewTask', db.createNewTask);
 
 router.post('/api/addStudentToCourse', db.addStudentToCourse);
 router.post('/api/addLecturerCourses', db.addLecturerCourses);
+router.post('/api/addToCompleteTask', db.addToCompleteTask);
+router.post('/api/addToCompleteAssessment', db.addToCompleteAssessment);
 
 router.post('/api/updateCourse', db.updateCourse);
 router.post('/api/updateUser', db.updateUser);
@@ -37,6 +42,8 @@ router.post('/api/updateStudent', db.updateStudent);
 router.post('/api/updateLecturer', db.updateLecturer);
 router.post('/api/updateAssessment', db.updateAssessment);
 router.post('/api/updateTask', db.updateTask);
+router.post('/api/updateTaskCompleted', db.updateTaskCompleted);
+router.post('/api/updateStudentPoints', db.updateStudentPoints);
 
 router.post('/api/deleteCourse', db.deleteCourse);
 router.post('/api/deleteUser', db.deleteUser);
