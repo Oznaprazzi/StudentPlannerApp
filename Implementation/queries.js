@@ -62,11 +62,12 @@ module.exports = {
 
 /***************************/
 /*********Get IDs**********/
+
 /***************************/
 
-function getMaxUserId(req, res, next){
+function getMaxUserId(req, res, next) {
     db.one('select max(userid) from users')
-        .then(function(data){
+        .then(function (data) {
             res.status(200)
                 .json({
                     status: 'success',
@@ -79,9 +80,9 @@ function getMaxUserId(req, res, next){
         });
 }
 
-function getMaxLecturerId(req, res, next){
+function getMaxLecturerId(req, res, next) {
     db.one('select max(lecturerid) from lecturers')
-        .then(function(data){
+        .then(function (data) {
             res.status(200)
                 .json({
                     status: 'success',
@@ -94,9 +95,9 @@ function getMaxLecturerId(req, res, next){
         });
 }
 
-function getMaxTaskId(req, res, next){
+function getMaxTaskId(req, res, next) {
     db.one('select max(taskid) from tasks')
-        .then(function(data){
+        .then(function (data) {
             res.status(200)
                 .json({
                     status: 'success',
@@ -109,9 +110,9 @@ function getMaxTaskId(req, res, next){
         });
 }
 
-function getMaxAssessmentId(req, res, next){
+function getMaxAssessmentId(req, res, next) {
     db.one('select max(assessmentid) from assessments')
-        .then(function(data){
+        .then(function (data) {
             res.status(200)
                 .json({
                     status: 'success',
@@ -126,6 +127,7 @@ function getMaxAssessmentId(req, res, next){
 
 /***************************/
 /*****Get Original Lists****/
+
 /***************************/
 
 function getUsers(req, res, next) {
@@ -173,7 +175,7 @@ function getLecturers(req, res, next) {
         });
 }
 
-function getCourses(req, res, next){
+function getCourses(req, res, next) {
     db.any('select * from courses order by courseid asc')
         .then(function (data) {
             res.status(200)
@@ -188,7 +190,7 @@ function getCourses(req, res, next){
         });
 }
 
-function getAssessments(req, res, next){
+function getAssessments(req, res, next) {
     var courseid = req.query.courseid;
     db.any('select assessments.*, courses.coursecode from assessments join courses on assessments.courseid = courses.courseid where assessments.courseid = $1 order by assessments.assessmentid asc;', [courseid])
         .then(function (data) {
@@ -204,7 +206,7 @@ function getAssessments(req, res, next){
         });
 }
 
-function getTasks(req, res, next){
+function getTasks(req, res, next) {
     var assessmentid = req.query.assessmentid;
     db.any('select * from tasks join assessments on tasks.assessmentid = assessments.assessmentid where tasks.assessmentid = $1 order by tasks.taskid asc;', [assessmentid])
         .then(function (data) {
@@ -222,11 +224,12 @@ function getTasks(req, res, next){
 
 /***************************/
 /******Get Join Lists*******/
+
 /***************************/
 
 function getStudentsInCourse(req, res, next) {
     var courseid = req.query.id;
-     db.any('select * from students join users on students.userid = users.userid join enrolledin on students.studentid = enrolledin.studentid where enrolledin.courseid = $1', [courseid])
+    db.any('select * from students join users on students.userid = users.userid join enrolledin on students.studentid = enrolledin.studentid where enrolledin.courseid = $1', [courseid])
         .then(function (data) {
             res.status(200)
                 .json({
@@ -256,7 +259,7 @@ function getStudentsNotInCourse(req, res, next) {
         });
 }
 
-function getStudentsCourses(req, res, next){
+function getStudentsCourses(req, res, next) {
     var studentid = req.query.studentid;
     db.any('select * from courses join enrolledin on courses.courseid = enrolledin.courseid and enrolledin.studentid = $1', [studentid])
         .then(function (data) {
@@ -272,7 +275,7 @@ function getStudentsCourses(req, res, next){
         });
 }
 
-function getLecturersCourses(req, res, next){
+function getLecturersCourses(req, res, next) {
     var lecturerid = req.query.lecturerid;
     db.any('select * from courses join taughtby on courses.courseid = taughtby.courseid and taughtby.lecturerid = $1', [lecturerid])
         .then(function (data) {
@@ -288,7 +291,7 @@ function getLecturersCourses(req, res, next){
         });
 }
 
-function getStudentTasks(req, res, next){
+function getStudentTasks(req, res, next) {
     var studentid = req.query.studentid;
     var assessmentid = req.query.assessmentid;
     db.any('select * from tasks join completestask on tasks.taskid = completestask.taskid and completestask.studentid = $1 and tasks.assessmentid = $2', [studentid, assessmentid])
@@ -307,9 +310,10 @@ function getStudentTasks(req, res, next){
 
 /***************************/
 /********Create New*********/
+
 /***************************/
 
-function createNewUser(req, res, next){
+function createNewUser(req, res, next) {
     var username = req.body.params.username;
     var name = req.body.params.name;
     var password = req.body.params.password;
@@ -326,7 +330,7 @@ function createNewUser(req, res, next){
         });
 }
 
-function createNewStudent(req, res, next){
+function createNewStudent(req, res, next) {
     var userid = req.body.params.userid;
     var studentid = req.body.params.studentid;
     db.none('insert into students(userid, studentid) values($1, $2)', [userid, studentid])
@@ -342,7 +346,7 @@ function createNewStudent(req, res, next){
         });
 }
 
-function createNewLecturer(req, res, next){
+function createNewLecturer(req, res, next) {
     var userid = req.body.params.userid;
     db.none('insert into lecturers(userid) values($1)', [userid])
         .then(function () {
@@ -357,7 +361,7 @@ function createNewLecturer(req, res, next){
         });
 }
 
-function createNewCourse(req, res, next){
+function createNewCourse(req, res, next) {
     var coursecode = req.body.params.coursecode;
     db.none('insert into courses(coursecode) values($1)', [coursecode])
         .then(function () {
@@ -372,7 +376,7 @@ function createNewCourse(req, res, next){
         });
 }
 
-function createNewAssessment(req, res, next){
+function createNewAssessment(req, res, next) {
     var courseid = req.body.params.courseid;
     var assessmenttype = req.body.params.assessmenttype;
     var startDate = req.body.params.startDate;
@@ -392,7 +396,7 @@ function createNewAssessment(req, res, next){
         });
 }
 
-function createNewTask(req, res, next){
+function createNewTask(req, res, next) {
     var assessmentid = req.body.params.assessmentid;
     var description = req.body.params.description;
     var points = req.body.params.points;
@@ -411,9 +415,10 @@ function createNewTask(req, res, next){
 
 /***************************/
 /**********Add To***********/
+
 /***************************/
 
-function addStudentToCourse(req, res, next){
+function addStudentToCourse(req, res, next) {
     var studentid = req.body.params.studentid;
     var courseid = req.body.params.courseid;
     db.none('insert into enrolledin(studentid, courseid) values($1, $2)', [studentid, courseid])
@@ -429,7 +434,7 @@ function addStudentToCourse(req, res, next){
         });
 }
 
-function addLecturerCourses(req, res, next){
+function addLecturerCourses(req, res, next) {
     var lecturerid = req.body.params.lecturerid;
     var courseid = req.body.params.courseid;
     db.none('insert into taughtby(lecturerid, courseid) values($1, $2)', [lecturerid, courseid])
@@ -445,7 +450,7 @@ function addLecturerCourses(req, res, next){
         });
 }
 
-function addToCompleteTask(req, res, next){
+function addToCompleteTask(req, res, next) {
     var studentid = req.body.params.studentid;
     var taskid = req.body.params.taskid;
     db.none('insert into completestask(studentid, taskid) values($1, $2)', [studentid, taskid])
@@ -461,7 +466,7 @@ function addToCompleteTask(req, res, next){
         });
 }
 
-function addToCompleteAssessment(req, res, next){
+function addToCompleteAssessment(req, res, next) {
     var studentid = req.body.params.studentid;
     var assessmentid = req.body.params.assessmentid;
     db.none('insert into completesassessment(lecturerid, assessmentid) values($1, $2)', [studentid, assessmentid])
@@ -479,9 +484,10 @@ function addToCompleteAssessment(req, res, next){
 
 /***************************/
 /**********Update***********/
+
 /***************************/
 
-function updateCourse(req, res, next){
+function updateCourse(req, res, next) {
     var coursecode = req.body.params.coursecode;
     var id = req.body.params.id;
     db.none('update courses set coursecode = $1 where courseid = $2', [coursecode, id])
@@ -497,7 +503,7 @@ function updateCourse(req, res, next){
         });
 }
 
-function updateUser(req, res, next){
+function updateUser(req, res, next) {
     var userid = req.body.params.userid;
     var username = req.body.params.username;
     var name = req.body.params.name;
@@ -516,7 +522,7 @@ function updateUser(req, res, next){
         });
 }
 
-function updateStudent(req, res, next){
+function updateStudent(req, res, next) {
     var studentid = req.body.params.studentid;
     var userid = req.body.params.userid;
     db.none('update students set studentid = $1 where userid = $2', [studentid, userid])
@@ -568,7 +574,7 @@ function updateAssessment(req, res, next) {
         });
 }
 
-function updateTask(req, res, next){
+function updateTask(req, res, next) {
     var taskid = req.body.params.taskid;
     var description = req.body.params.description;
     var points = req.body.params.points;
@@ -585,16 +591,51 @@ function updateTask(req, res, next){
         });
 }
 
-function updateTaskCompleted(req, res, next){
+function updateTaskCompleted(req, res, next) {
     var taskid = req.body.params.taskid;
     var studentid = req.body.params.studentid;
     var completed = req.body.params.completed;
     db.none('update completestask set completed = $1 where taskid = $2 and studentid = $3', [completed, taskid, studentid])
         .then(function () {
-            res.status(200)
-                .json({
-                    status: 'success',
-                    message: 'Updated task completed'
+            db.one('select assessments.assessmentid from assessments join tasks on assessments.assessmentid =' +
+                ' tasks.assessmentid where tasks.taskid = $1', [taskid]) //gets associated assessmentid
+                .then(function (data) {
+                    console.log(data);
+                    db.any('select assessments.assessmentid,  completestask.completed from assessments join tasks on assessments.assessmentid = tasks.assessmentid join completestask on completestask.taskid = tasks.taskid where completestask.studentid = $1 and assessments.assessmentid = $2;', [studentid, data.assessmentid])
+                        .then(function (data) {
+                            if (allTasksCompleted(data)) {
+                                console.log(data);
+                                db.none('update completesassessment set completed = true where assessmentid = $1 and studentid = $2', [data[0].assessmentid, studentid])
+                                    .then(function () {
+                                        res.status(200)
+                                            .json({
+                                                status: 'success',
+                                                message: 'Updated task points'
+                                            });
+                                    })
+                                    .catch(function (err) {
+                                        return next(err);
+                                    });
+                            } else {
+                                db.none('update completesassessment set completed = false where assessmentid = $1 and studentid = $2', [data[0].assessmentid, studentid])
+                                    .then(function () {
+                                        res.status(200)
+                                            .json({
+                                                status: 'success',
+                                                message: 'Updated task points'
+                                            });
+                                    })
+                                    .catch(function (err) {
+                                        return next(err);
+                                    });
+                            }
+                        })
+                        .catch(function (err) {
+                            return next(err);
+                        });
+                })
+                .catch(function (err) {
+                    return next(err);
                 });
         })
         .catch(function (err) {
@@ -602,12 +643,28 @@ function updateTaskCompleted(req, res, next){
         });
 }
 
-function updateStudentPoints(req, res, next){
+function allTasksCompleted(data) {
+    for (let i = 0; i < data.length; i++) {
+        if (!data[i].completed) {
+            return false;
+        }
+    }
+    return true;
+}
+
+function updateStudentPoints(req, res, next) {
     var points = req.body.params.points;
     var studentid = req.body.params.studentid;
+    var completed = req.body.params.completed;
     db.one('select points from students where studentid = $1', [studentid])
         .then(function (data) {
-            db.none('update students set points = $1 where studentid = $2', [data.points + points, studentid])
+            var totalPoints = data.points;
+            if (completed) {
+                totalPoints += points;
+            } else {
+                totalPoints -= points;
+            }
+            db.none('update students set points = $1 where studentid = $2', [totalPoints, studentid])
                 .then(function () {
                     res.status(200)
                         .json({
@@ -626,9 +683,10 @@ function updateStudentPoints(req, res, next){
 
 /***************************/
 /**********Delete***********/
+
 /***************************/
 
-function deleteCourse(req, res, next){
+function deleteCourse(req, res, next) {
     var id = req.body.params.id;
     db.none('delete from courses where courseid = $1', [id])
         .then(function () {
@@ -643,7 +701,7 @@ function deleteCourse(req, res, next){
         });
 }
 
-function deleteUser(req, res, next){
+function deleteUser(req, res, next) {
     var userid = req.body.params.userid;
     db.none('delete from users where userid = $1', [userid])
         .then(function () {
@@ -658,7 +716,7 @@ function deleteUser(req, res, next){
         });
 }
 
-function deleteAssessment(req, res, next){
+function deleteAssessment(req, res, next) {
     var assessmentid = req.body.params.assessmentid;
     db.none('delete from assessments where assessmentid = $1', [assessmentid])
         .then(function () {
@@ -673,7 +731,7 @@ function deleteAssessment(req, res, next){
         });
 }
 
-function deleteTask(req, res, next){
+function deleteTask(req, res, next) {
     var taskid = req.body.params.taskid;
     db.none('delete from tasks where taskid = $1', [taskid])
         .then(function () {
@@ -690,9 +748,10 @@ function deleteTask(req, res, next){
 
 /***************************/
 /**********Remove***********/
+
 /***************************/
 
-function removeStudentFromCourse(req, res, next){
+function removeStudentFromCourse(req, res, next) {
     var studentid = req.body.params.studentid;
     var courseid = req.body.params.courseid;
     db.none('delete from enrolledin where studentid = $1 and courseid = $2', [studentid, courseid])
@@ -708,7 +767,7 @@ function removeStudentFromCourse(req, res, next){
         });
 }
 
-function removeLecturerCourse(req, res, next){
+function removeLecturerCourse(req, res, next) {
     var lecturerid = req.body.params.studentid;
     var courseid = req.body.params.courseid;
     db.none('delete from taughtby where lecturerid = $1 and courseid = $2', [lecturerid, courseid])

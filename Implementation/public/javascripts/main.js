@@ -272,7 +272,6 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
 
     $scope.setAssessment = function (assessment) {
         assessmentInformation(assessment.assessmentid);
-        $scope.tasks = $rootScope.qs.studentTasks();
         $scope.currentAssessment = assessment;
         $rootScope.currentAssessment = assessment;
         $scope.minDate = assessment.startdate;
@@ -696,23 +695,38 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
 
         request.then(function success(data) {
             $rootScope.qs.getAssessments($scope.courseid);
-            var confirm = dialogService.confirm($scope.title + ' has been successfully added!',
-                'Added Assessment', 'Add Another Assessment', 'Back', ev);
+            $rootScope.qs.getMaxAssessmentId().then(function (response) {
+                var maxid = response.data.data.max;
+                for (let i = 0; i < $rootScope.qs.studentsInCourse().length; i++) {
+                    addAssessmentToStudent($rootScope.qs.studentsInCourse()[i].studentid, maxid);
+                }
+                var confirm = dialogService.confirm($scope.title + ' has been successfully added!',
+                    'Added Assessment', 'Add Another Assessment', 'Back', ev);
 
-            $scope.course = '';
-            $scope.type = '';
-            $scope.dueDate = '';
-            $scope.title = '';
-            $scope.details = '';
-            $scope.errorMessage = '';
+                $scope.course = '';
+                $scope.type = '';
+                $scope.dueDate = '';
+                $scope.title = '';
+                $scope.details = '';
+                $scope.errorMessage = '';
 
-            $mdDialog.show(confirm).then(function () {
+                $mdDialog.show(confirm).then(function () {
 
-            }, function () {
-                $scope.goBack();
+                }, function () {
+                    $scope.goBack();
+                });
             });
         });
     };
+
+    function addAssessmentToStudent(studentid, assessmentid){
+        var request = $http.post('/api/addToCompleteAssessment', {
+            params: {
+                studentid: studentid,
+                assessmentid: assessmentid
+            }
+        });
+    }
 
     $scope.updateAssessment = function (ev) {
         if ($scope.currentAssessment.title == undefined || $scope.currentAssessment.assessmenttype == undefined || $scope.currentAssessment.details == undefined) {
@@ -805,10 +819,12 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
             });
 
             request.then(function success(data) {
-                $rootScope.qs.getTasks($scope.currentAssessment.assessmentid);
-                var alert = dialogService.alert('Task has been successfully deleted!',
-                    'Task Successfully Deleted', ev);
-                $mdDialog.show(alert);
+                $rootScope.qs.getTasks($rootScope.currentAssessment.assessmentid).then(function() {
+                    $scope.tasks = $rootScope.qs.tasks();
+                    var alert = dialogService.alert('Task has been successfully deleted!',
+                        'Task Successfully Deleted', ev);
+                    $mdDialog.show(alert);
+                });
             });
         }, function () {
             //Stay on current page
@@ -849,10 +865,12 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
                         addTaskToStudent($rootScope.qs.studentsInCourse()[i].studentid, maxid);
                     }
 
-                    $rootScope.qs.getTasks($rootScope.currentAssessment.assessmentid);
-                    var alert = dialogService.alert('Task successfully added',
-                        'Task saved', ev);
-                    $mdDialog.show(alert);
+                    $rootScope.qs.getTasks($rootScope.currentAssessment.assessmentid).then(function(){
+                        $scope.tasks = $rootScope.qs.tasks();
+                        var alert = dialogService.alert('Task successfully added',
+                            'Task saved', ev);
+                        $mdDialog.show(alert);
+                    });
                 });
             });
 
@@ -875,10 +893,12 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
             });
 
             request.then(function success(data) {
-                $rootScope.qs.getTasks($rootScope.currentAssessment.assessmentid);
-                var alert = dialogService.alert('Task successfully updated',
-                    'Task updated', ev);
-                $mdDialog.show(alert);
+                $rootScope.qs.getTasks($rootScope.currentAssessment.assessmentid).then(function() {
+                    $scope.tasks = $rootScope.qs.tasks();
+                    var alert = dialogService.alert('Task successfully updated',
+                        'Task updated', ev);
+                    $mdDialog.show(alert);
+                });
             });
 
         };
@@ -896,12 +916,18 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
     $scope.taskDone = function(task){
         if(task.completed == true){
             task.completed = false;
+            updateStudentPoints(task);
         }else if(task.completed == false){
             task.completed = true;
+            updateStudentPoints(task);
         }
+
+    };
+
+    function updateStudentPoints(task){
         $rootScope.qs.updateTaskCompleted(task.taskid, task.completed, $rootScope.user.studentid).then(function(){
             $scope.reloadStudent();
-            $rootScope.qs.updateStudentPoints(task.points, $rootScope.user.studentid).then(function(){
+            $rootScope.qs.updateStudentPoints(task.points, task.completed, $rootScope.user.studentid).then(function(){
 
             });
         });

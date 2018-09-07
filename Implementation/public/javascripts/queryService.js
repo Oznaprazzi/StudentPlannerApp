@@ -188,10 +188,11 @@ angular.module('queries', []).service('queryService', function($http){
         });
     };
 
-    this.updateStudentPoints = function(points, studentid){
+    this.updateStudentPoints = function(points, completed, studentid){
         return $http.post('/api/updateStudentPoints', {
             params: {
                 points: points,
+                completed: completed,
                 studentid: studentid
             }
         });
