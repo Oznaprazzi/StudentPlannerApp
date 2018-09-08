@@ -11,6 +11,8 @@ angular.module('queries', []).service('queryService', function($http){
     var lecturersCourses = [];
     var studentTasks = [];
     var tasks = [];
+    var coupons = [];
+    var studentCoupons = [];
 
     /***************************/
     /*********Get IDs**********/
@@ -26,6 +28,10 @@ angular.module('queries', []).service('queryService', function($http){
 
     this.getMaxTaskId = function(){
         return $http.get('/api/getMaxTaskId');
+    };
+
+    this.getMaxCouponId = function(){
+        return $http.get('/api/getMaxCouponId');
     };
 
     this.getMaxAssessmentId = function(){
@@ -105,6 +111,16 @@ angular.module('queries', []).service('queryService', function($http){
             );
     };
 
+    this.getCoupons = function(){
+        return $http.get('/api/getCoupons')
+            .then(function sucessCall(response)	{
+                coupons = response.data.data;
+            },function errorCall()	{
+                console.log("Error reading coupons list.");
+            }
+        );
+    };
+
     /***************************/
     /******Get Join Lists*******/
     /***************************/
@@ -175,6 +191,19 @@ angular.module('queries', []).service('queryService', function($http){
         );
     };
 
+    this.getStudentCoupons = function(studentid){
+        return $http.get('/api/getStudentCoupons', {
+            params: {
+                studentid: studentid
+            }
+        }).then(function sucessCall(response)	{
+                studentCoupons = response.data.data;
+            },function errorCall()	{
+                console.log("Error reading student\'s coupon list.");
+            }
+        );
+    };
+
     /***************************/
     /*********Update***********/
     /***************************/
@@ -227,6 +256,10 @@ angular.module('queries', []).service('queryService', function($http){
         return tasks;
     };
 
+    this.coupons = function(){
+        return coupons;
+    };
+
     this.studentsInCourse = function(){
         return studentsInCourse;
     };
@@ -245,5 +278,9 @@ angular.module('queries', []).service('queryService', function($http){
 
     this.studentTasks = function(){
         return studentTasks;
+    };
+
+    this.studentCoupons = function(){
+        return studentCoupons;
     };
 });

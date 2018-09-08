@@ -16,6 +16,7 @@ module.exports = {
     getMaxLecturerId: getMaxLecturerId,
     getMaxTaskId: getMaxTaskId,
     getMaxAssessmentId: getMaxAssessmentId,
+    getMaxCouponId: getMaxCouponId,
 
     getUsers: getUsers,
     getStudents: getStudents,
@@ -23,12 +24,14 @@ module.exports = {
     getCourses: getCourses,
     getAssessments: getAssessments,
     getTasks: getTasks,
+    getCoupons: getCoupons,
 
     getStudentsInCourse: getStudentsInCourse,
     getStudentsNotInCourse: getStudentsNotInCourse,
     getStudentsCourses: getStudentsCourses,
     getLecturersCourses: getLecturersCourses,
     getStudentTasks: getStudentTasks,
+    getStudentCoupons: getStudentCoupons,
 
     createNewUser: createNewUser,
     createNewStudent: createNewStudent,
@@ -36,11 +39,13 @@ module.exports = {
     createNewCourse: createNewCourse,
     createNewAssessment: createNewAssessment,
     createNewTask: createNewTask,
+    createNewCoupon: createNewCoupon,
 
     addStudentToCourse: addStudentToCourse,
     addLecturerCourses: addLecturerCourses,
     addToCompleteTask: addToCompleteTask,
     addToCompleteAssessment: addToCompleteAssessment,
+    addCouponToStudent: addCouponToStudent,
 
     updateCourse: updateCourse,
     updateUser: updateUser,
@@ -50,6 +55,8 @@ module.exports = {
     updateTask: updateTask,
     updateTaskCompleted: updateTaskCompleted,
     updateStudentPoints: updateStudentPoints,
+    updateStudentCouponsGet: updateStudentCouponsGet,
+    updateStudentCouponsUse: updateStudentCouponsUse,
 
     deleteCourse: deleteCourse,
     deleteUser: deleteUser,
@@ -118,6 +125,21 @@ function getMaxAssessmentId(req, res, next) {
                     status: 'success',
                     data: data,
                     message: 'Retrieved max assessment id'
+                });
+        })
+        .catch(function (err) {
+            return next(err);
+        });
+}
+
+function getMaxCouponId(req, res, next){
+    db.one('select max(couponid) from coupons')
+        .then(function (data) {
+            res.status(200)
+                .json({
+                    status: 'success',
+                    data: data,
+                    message: 'Retrieved max coupon id'
                 });
         })
         .catch(function (err) {
@@ -222,6 +244,21 @@ function getTasks(req, res, next) {
         });
 }
 
+function getCoupons(req, res, next) {
+    db.any('select * from coupons order by couponid asc;')
+        .then(function (data) {
+            res.status(200)
+                .json({
+                    status: 'success',
+                    data: data,
+                    message: 'Retrieved ALL Coupons'
+                });
+        })
+        .catch(function (err) {
+            return next(err);
+        });
+}
+
 /***************************/
 /******Get Join Lists*******/
 
@@ -261,7 +298,7 @@ function getStudentsNotInCourse(req, res, next) {
 
 function getStudentsCourses(req, res, next) {
     var studentid = req.query.studentid;
-    db.any('select * from courses join enrolledin on courses.courseid = enrolledin.courseid and enrolledin.studentid = $1', [studentid])
+    db.any('select * from courses join enrolledin on courses.courseid = enrolledin.courseid and enrolledin.studentid = $1 order by courses.courseid asc', [studentid])
         .then(function (data) {
             res.status(200)
                 .json({
@@ -277,7 +314,7 @@ function getStudentsCourses(req, res, next) {
 
 function getLecturersCourses(req, res, next) {
     var lecturerid = req.query.lecturerid;
-    db.any('select * from courses join taughtby on courses.courseid = taughtby.courseid and taughtby.lecturerid = $1', [lecturerid])
+    db.any('select * from courses join taughtby on courses.courseid = taughtby.courseid and taughtby.lecturerid = $1 order by courses.courseid asc', [lecturerid])
         .then(function (data) {
             res.status(200)
                 .json({
@@ -294,13 +331,29 @@ function getLecturersCourses(req, res, next) {
 function getStudentTasks(req, res, next) {
     var studentid = req.query.studentid;
     var assessmentid = req.query.assessmentid;
-    db.any('select * from tasks join completestask on tasks.taskid = completestask.taskid and completestask.studentid = $1 and tasks.assessmentid = $2', [studentid, assessmentid])
+    db.any('select * from tasks join completestask on tasks.taskid = completestask.taskid and completestask.studentid = $1 and tasks.assessmentid = $2 order by task.taskid asc', [studentid, assessmentid])
         .then(function (data) {
             res.status(200)
                 .json({
                     status: 'success',
                     data: data,
                     message: 'Retrieved ALL Student\'s tasks for current assessment'
+                });
+        })
+        .catch(function (err) {
+            return next(err);
+        });
+}
+
+function getStudentCoupons(req, res, next) {
+    var studentid = req.query.studentid;
+    db.any('select * from studentcoupons join coupons on studentcoupons.couponid = coupons.couponid and studentcoupons.studentid = $1 order by studentcoupons.scouponid asc', [studentid])
+        .then(function (data) {
+            res.status(200)
+                .json({
+                    status: 'success',
+                    data: data,
+                    message: 'Retrieved ALL Student\'s coupons'
                 });
         })
         .catch(function (err) {
@@ -413,6 +466,22 @@ function createNewTask(req, res, next) {
         });
 }
 
+function createNewCoupon(req, res, next) {
+    var amount = req.body.params.amount;
+    var points = req.body.params.points;
+    db.none('insert into coupons(amount, points) values($1, $2)', [amount, points])
+        .then(function () {
+            res.status(200)
+                .json({
+                    status: 'success',
+                    message: 'Created new coupon'
+                });
+        })
+        .catch(function (err) {
+            return next(err);
+        });
+}
+
 /***************************/
 /**********Add To***********/
 
@@ -469,7 +538,7 @@ function addToCompleteTask(req, res, next) {
 function addToCompleteAssessment(req, res, next) {
     var studentid = req.body.params.studentid;
     var assessmentid = req.body.params.assessmentid;
-    db.none('insert into completesassessment(lecturerid, assessmentid) values($1, $2)', [studentid, assessmentid])
+    db.none('insert into completesassessment(studentid, assessmentid) values($1, $2)', [studentid, assessmentid])
         .then(function () {
             res.status(200)
                 .json({
@@ -482,9 +551,24 @@ function addToCompleteAssessment(req, res, next) {
         });
 }
 
+function addCouponToStudent(req, res, next) {
+    var studentid = req.body.params.studentid;
+    var couponid = req.body.params.couponid;
+    db.none('insert into studentcoupons(studentid, couponid) values($1, $2)', [studentid, couponid])
+        .then(function () {
+            res.status(200)
+                .json({
+                    status: 'success',
+                    message: 'Linked coupon to student'
+                });
+        })
+        .catch(function (err) {
+            return next(err);
+        });
+}
+
 /***************************/
 /**********Update***********/
-
 /***************************/
 
 function updateCourse(req, res, next) {
@@ -600,11 +684,9 @@ function updateTaskCompleted(req, res, next) {
             db.one('select assessments.assessmentid from assessments join tasks on assessments.assessmentid =' +
                 ' tasks.assessmentid where tasks.taskid = $1', [taskid]) //gets associated assessmentid
                 .then(function (data) {
-                    console.log(data);
                     db.any('select assessments.assessmentid,  completestask.completed from assessments join tasks on assessments.assessmentid = tasks.assessmentid join completestask on completestask.taskid = tasks.taskid where completestask.studentid = $1 and assessments.assessmentid = $2;', [studentid, data.assessmentid])
                         .then(function (data) {
-                            if (allTasksCompleted(data)) {
-                                console.log(data);
+                            if (allTasksCompleted(data)) { //student has completed all tasks associated with the assessment
                                 db.none('update completesassessment set completed = true where assessmentid = $1 and studentid = $2', [data[0].assessmentid, studentid])
                                     .then(function () {
                                         res.status(200)
@@ -643,6 +725,7 @@ function updateTaskCompleted(req, res, next) {
         });
 }
 
+//Check if student has completed all tasks
 function allTasksCompleted(data) {
     for (let i = 0; i < data.length; i++) {
         if (!data[i].completed) {
@@ -679,6 +762,59 @@ function updateStudentPoints(req, res, next) {
         .catch(function (err) {
             return next(err);
         });
+}
+
+function updateStudentCouponsGet(req, res, next) {
+    var couponid = req.body.params.couponid;
+    var studentid = req.body.params.studentid;
+    var scouponid = req.body.params.scouponid;
+    db.one('select points from coupons where couponid = $1', [couponid]) //get coupon points to deduct from student's points
+        .then(function (data) {
+            var cpoints = data.points;
+            db.none('update studentcoupons set owned = true where scouponid = $1', [scouponid]) //student now owns the coupon
+                .then(function () {
+                    db.one('select points from students where studentid = $1', [studentid]) //get student's points
+                        .then(function (data) {
+                            var spoints = data.points;
+                            db.none('update students set points = $1 where studentid = $2', [spoints - cpoints, studentid]) //deduct coupon points from student's points
+                                .then(function () {
+                                    res.status(200)
+                                        .json({
+                                            status: 'success',
+                                            message: 'Updated student points and coupons'
+                                        });
+                                })
+                                .catch(function (err) {
+                                    return next(err);
+                                });
+                        })
+                        .catch(function (err) {
+                            return next(err);
+                        });
+                })
+                .catch(function (err) {
+                    return next(err);
+                });
+        })
+        .catch(function (err) {
+            return next(err);
+        });
+}
+
+function updateStudentCouponsUse(req, res, next) {
+    var scouponid = req.body.params.scouponid;
+    db.none('update studentcoupons set owned = false where scouponid = $1', [scouponid]) //student does not own the coupon anymore
+        .then(function () {
+            res.status(200)
+                .json({
+                    status: 'success',
+                    message: 'Updated student points and coupons'
+                });
+        })
+        .catch(function (err) {
+            return next(err);
+        });
+
 }
 
 /***************************/

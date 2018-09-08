@@ -103,6 +103,7 @@ app.controller('calendarController', function(moment, alert, calendarConfig, $ro
     $scope.qs = queryService;
     async function loadStudent(user){
         await $scope.qs.getStudentsCourses(user.studentid);
+        await $scope.qs.getStudentCoupons(user.studentid);
         $scope.courses = $scope.qs.studentsCourses();
     }
 
@@ -117,14 +118,9 @@ app.controller('calendarController', function(moment, alert, calendarConfig, $ro
 
     checkLoggedIn();
 
-   /* $scope.setView = function (view) {
-        $rootScope.view = view;
-        console.log("View" + view);
-    };*/
-
-    $scope.isView = function (type, view) {
+    /*$scope.isView = function (type, view) {
         return $rootScope.userType == type && $rootScope.view == view;
-    };
+    };*/
 
 
 });

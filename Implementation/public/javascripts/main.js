@@ -16,12 +16,12 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
 
     var viewStack = [];
 
-
     async function loadAllQueries(){
         await $rootScope.qs.getUsers();
         await $rootScope.qs.getStudents();
         await $rootScope.qs.getLecturers();
         await $rootScope.qs.getCourses();
+        await $rootScope.qs.getCoupons();
         if (JSON.parse(sessionStorage.getItem('loggedIn'))) {
             $rootScope.user = JSON.parse(sessionStorage.getItem('user'));
             $rootScope.userType = sessionStorage.getItem('userType');
@@ -31,7 +31,10 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
                 $rootScope.setView(3);
             }else if($rootScope.userType == 'student'){
                 await $rootScope.qs.getStudentsCourses($rootScope.user.studentid);
+                await $rootScope.qs.getStudentCoupons($rootScope.user.studentid);
                 $scope.courses = $rootScope.qs.studentsCourses();
+                $rootScope.user = $rootScope.qs.students()[sessionStorage.getItem('studentIndex')];
+                sessionStorage.setItem('user', JSON.stringify($rootScope.user));
                 $rootScope.setView(2);
             }else{
                 $scope.courses = $rootScope.qs.courses();
@@ -40,12 +43,15 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
         }
     }
 
-    async function loadLecturerCourses(lecturerId){
-        await $rootScope.qs.getLecturersCourses(lecturerId);
+    async function loadLecturerCourses(){
+        await $rootScope.qs.getLecturersCourses($rootScope.user.lecturerid);
+        $scope.courses = $rootScope.qs.lecturersCourses();
     }
 
-    async function loadStudent(studentid){
-        await $rootScope.qs.getStudentsCourses(studentid);
+    async function loadStudent(){
+        await $rootScope.qs.getStudentsCourses($rootScope.user.studentid);
+        await $rootScope.qs.getStudentCoupons($rootScope.user.studentid);
+        $scope.courses = $rootScope.qs.studentsCourses();
     }
 
     loadAllQueries();
@@ -57,7 +63,7 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
         $scope.errorMessage = '';
     };
 
-    $scope.isView = function (type, view) {
+    $rootScope.isView = function (type, view) {
         return $rootScope.userType == type && $rootScope.view == view;
     };
 
@@ -128,12 +134,10 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
                 sessionStorage.setItem('loggedIn', true);
                 sessionStorage.setItem('userIndex', userIndex);
                 if($rootScope.userType == 'lecturer'){
-                    loadLecturerCourses($rootScope.user.lecturerid);
-                    $scope.courses = $rootScope.qs.lecturersCourses();
+                    loadLecturerCourses();
                     $rootScope.setView(3);
                 }else if($rootScope.userType == 'student'){
-                    loadStudent($rootScope.user.studentid);
-                    $scope.courses = $scope.qs.studentsCourses();
+                    loadStudent();
                     $rootScope.setView(2);
                 }else {
                     $scope.courses = $rootScope.qs.courses();
@@ -150,6 +154,8 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
     $scope.reloadStudent = function(){
         $rootScope.qs.getStudents().then(function(){
             $rootScope.user = $rootScope.qs.students()[sessionStorage.getItem('studentIndex')];
+            $scope.user = $rootScope.qs.students()[sessionStorage.getItem('studentIndex')];
+            sessionStorage.setItem('user', JSON.stringify($rootScope.user));
         });
     };
 
@@ -843,7 +849,7 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
         };
 
         $scope.saveTask = function(ev){
-            if($scope.description == '' || $scope.description == undefined){
+            if($scope.task.description || !$scope.task.points){
                 var alert = dialogService.alert('An error occured. New task was not added.',
                     'Task not saved', ev);
                 $mdDialog.show(alert);
@@ -866,18 +872,17 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
                     }
 
                     $rootScope.qs.getTasks($rootScope.currentAssessment.assessmentid).then(function(){
-                        $scope.tasks = $rootScope.qs.tasks();
+                        $rootScope.tasks = $rootScope.qs.tasks();
                         var alert = dialogService.alert('Task successfully added',
                             'Task saved', ev);
                         $mdDialog.show(alert);
                     });
                 });
             });
-
         };
 
         $scope.updateTask = function(ev){
-            if($scope.task.description == '' || $scope.task.description == undefined){
+            if(!$scope.task.description || !$scope.task.points){
                 var alert = dialogService.alert('An error occured. New task was not added.',
                     'Task not saved', ev);
                 $mdDialog.show(alert);
@@ -894,7 +899,7 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
 
             request.then(function success(data) {
                 $rootScope.qs.getTasks($rootScope.currentAssessment.assessmentid).then(function() {
-                    $scope.tasks = $rootScope.qs.tasks();
+                    $rootScope.tasks = $rootScope.qs.tasks();
                     var alert = dialogService.alert('Task successfully updated',
                         'Task updated', ev);
                     $mdDialog.show(alert);
@@ -932,6 +937,107 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
             });
         });
     }
+
+    $scope.addCoupon = function(ev){
+        if(!$scope.amount || !$scope.points){
+            $scope.errorMessage = 'Please input coupon amount.';
+            return;
+        }
+
+        var request = $http.post('/api/createNewCoupon', {
+            params: {
+                amount: $scope.amount,
+                points: $scope.points
+            }
+        });
+
+        request.then(function success(data) {
+            $rootScope.qs.getMaxCouponId().then(function (response) {
+                var maxid = response.data.data.max;
+                for(let i = 0; i < $rootScope.qs.students().length; i++){
+                    addCouponToStudent($rootScope.qs.students()[i].studentid, maxid);
+                }
+
+                $rootScope.qs.getCoupons();
+
+                var confirm = dialogService.confirm('Coupon successfully created!',
+                    'Created Coupon', 'Create Another Coupon', 'Back', ev);
+
+                $scope.amount = '';
+                $scope.errorMessage = '';
+
+                $mdDialog.show(confirm).then(function () {
+
+                }, function () {
+                    $scope.goBack();
+                });
+            });
+        });
+    }
+
+    function addCouponToStudent(studentid, couponid){
+        var request = $http.post('/api/addCouponToStudent', {
+            params: {
+                studentid: studentid,
+                couponid: couponid
+            }
+        });
+    }
+
+    $scope.useCoupon = function(coupon, ev){
+        var confirm = dialogService.confirm('This action cannot be undone', 'Use Coupon', 'Confirm',
+            'Cancel', ev);
+
+        $mdDialog.show(confirm).then(function () {
+            var request = $http.post('/api/updateStudentCouponsUse', {
+                params: {
+                    scouponid: coupon.scouponid
+                }
+            });
+
+            request.then(function success(data) {
+                $rootScope.qs.getStudentCoupons($rootScope.user.studentid);
+                $scope.reloadStudent();
+            });
+        }, function () {
+            //Stay on current page
+        });
+    };
+
+    $scope.getCoupon = function(coupon, ev){
+        if(coupon.points > $rootScope.user.points){
+            var alert = dialogService.alert('Error! You do not have enough points to redeem this coupon',
+                'Not enough points', ev);
+            $mdDialog.show(alert).then(function(){
+                return;
+            });
+        }else{
+            var confirm = dialogService.confirm('This coupon will be exchanged for ' + coupon.points + ' point(s) and cannot be undone', 'Get Coupon', 'Confirm',
+                'Cancel', ev);
+
+            $mdDialog.show(confirm).then(function () {
+                var request = $http.post('/api/updateStudentCouponsGet', {
+                    params: {
+                        couponid: coupon.couponid,
+                        studentid: coupon.studentid,
+                        scouponid: coupon.scouponid
+                    }
+                });
+
+                request.then(function success(data) {
+                    $scope.reloadStudent();
+                    console.log($rootScope.user);
+                    $rootScope.qs.getStudentCoupons($rootScope.user.studentid).then(function() {
+                        var alert = dialogService.alert('Coupon successfully redeemed!',
+                            'Coupon Successfully Redeemed', ev);
+                        $mdDialog.show(alert);
+                    });
+                });
+            }, function () {
+                //Stay on current page
+            });
+        }
+    };
 });
 
 app.config(function($mdDateLocaleProvider){

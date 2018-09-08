@@ -1,0 +1,34 @@
+<div ng-show="isView('student', 4)">
+    <h2>My Points and Rewards</h2>
+    <hr>
+    <table class="table">
+        <tbody>
+        <tr>
+            <th scope="row" class="col-sm-4">Points</th>
+            <td scope="col" class="col-sm-8">{{user.points}}</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <hr>
+    <table class="table table-striped">
+        <tbody>
+        <thead>
+        <tr>
+            <th scope="col" style="font-size: 20px">VicBook Coupons</th>
+            <th></th>
+            <th></th>
+        </tr>
+        </thead>
+        <tr ng-repeat="c in qs.studentCoupons()" ng-hide="c.used">
+            <td>{{c.amount}}% discount</td>
+            <td>{{c.points}} Points</td>
+            <td>
+                <button class="btn btn-default" ng-click="useCoupon(c, $event)" ng-show="c.owned">Use</button>
+                <button class="btn btn-default" ng-click="getCoupon(c, $event)" ng-hide="c.owned">Get</button>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <p ng-if="tasks.length <= 0">There are currently no tasks for this assessment.</p>
+</div>

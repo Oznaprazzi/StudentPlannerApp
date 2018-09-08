@@ -1,0 +1,40 @@
+<div ng-show="isView('admin', 15)">
+    <h2>Manage Coupons
+        <i class="titleIcon fa fa-plus-circle" ng-click="setView(16); points = 100;" aria-hidden="true"></i>
+    </h2>
+
+    <hr>
+    <table class="table table-striped" ng-if="qs.coupons().length > 0">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Points Worth</th>
+            </tr>
+        </thead>
+        <tbody>
+        <tr ng-repeat="c in qs.coupons()">
+            <td>{{c.amount}}% discount</td>
+            <td>{{c.points}}</td>
+        </tr>
+        </tbody>
+    </table>
+    <p ng-if="qs.coupons().length <= 0">There are currently no coupons in the system.</p>
+</div>
+
+<div ng-show="isView('admin', 16)">
+    <h2>Add Coupon</h2>
+    <hr>
+    <p class="alert alert-danger" ng-if="errorMessage != ''">{{errorMessage}}</p>
+    <div id="input">
+        <h3>Discount Amount</h3>
+        <input type="number" ng-model="amount" name="couponAmount"/>%
+    </div>
+    <div id="input">
+        <h3>Points Worth</h3>
+        <input type="number" ng-model="points" name="couponPoints"/>
+    </div>
+    <div id="btn-group">
+        <button class="btn btn-default" ng-click="setView(15)">Cancel</button>
+        <md-button md-disable-backdrop="true" class="btn btn-default" ng-click="addCoupon($event)">Save</md-button>
+    </div>
+</div>
