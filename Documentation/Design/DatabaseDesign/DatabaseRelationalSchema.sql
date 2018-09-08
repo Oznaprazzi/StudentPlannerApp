@@ -66,5 +66,18 @@ CREATE TABLE CompletesTask (
 	PRIMARY KEY(StudentId, TaskId)
 );
 
+CREATE TABLE Coupons (
+	CouponId SERIAL PRIMARY KEY NOT NULL,
+	Amount int NOT NULL,
+	Points int NOT NULL DEFAULT 100
+);
+
+CREATE TABLE StudentCoupons (
+	SCouponId SERIAL PRIMARY KEY NOT NULL,
+	StudentId int NOT NULL references Students(StudentId) ON UPDATE CASCADE ON DELETE CASCADE,
+	CouponId int NOT NULL references Coupons(CouponId) ON UPDATE CASCADE ON DELETE CASCADE,
+	Owned boolean NOT NULL DEFAULT false
+);
+
 /*Create Admin Login*/
 insert into users(username, name, password) values('admin', 'admin', 'password');
