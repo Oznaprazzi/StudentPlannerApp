@@ -16,7 +16,7 @@ app.controller('calendarController', function(moment, alert, calendarConfig, $ro
     }];
 
     $scope.qs = queryService;
-    async function loadStudent(user){
+    /*async function loadStudent(user){
         await $scope.qs.getStudentsCourses(user.studentid);
         await $scope.qs.getStudentCoupons(user.studentid);
         await $scope.qs.getStudentAssessments(user.studentid);
@@ -32,15 +32,26 @@ app.controller('calendarController', function(moment, alert, calendarConfig, $ro
         }
     }
 
-    checkLoggedIn();
+    checkLoggedIn();*/
+
+    $scope.isView = function(userType, view){
+        return $scope.userType == userType && $scope.view == view;
+    };
 
     //Calendar
-    $rootScope.setEvents = function(assessments){
+    $rootScope.setEvents = function(assessments, userType, view){
         if (JSON.parse(sessionStorage.getItem('loggedIn'))) {
+            console.log(assessments);
             $scope.assessments = assessments;
             $rootScope.transformEvents();
             vm.events = $scope.assessments;
             $rootScope.setView(2);
+            $scope.userType = userType;
+            $scope.view = view;
+
+            console.log($scope.isView("student", 2));
+            console.log($rootScope.userType + " " + $rootScope.view);
+            console.log($scope.userType + " " + $scope.view);
         }
     }
 

@@ -380,7 +380,6 @@ function getStudentAssessments(req, res, next) {
 
 /***************************/
 /********Create New*********/
-
 /***************************/
 
 function createNewUser(req, res, next) {

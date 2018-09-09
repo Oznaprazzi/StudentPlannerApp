@@ -14,6 +14,10 @@
     <link href="https://unpkg.com/angular-bootstrap-calendar/dist/css/angular-bootstrap-calendar.min.css" rel="stylesheet">
 </head>
 <body ng-cloak ng-controller="calendarController as vm">
+{{isView('student', 2)}}
+<!--<p ng-model="userType"></p>
+<p ng-model="view"></p>-->
+{{userType}} {{view}}
 <div ng-show="isView('student', 2)">
     <h2 class="text-center">{{ vm.calendarTitle }}</h2>
 

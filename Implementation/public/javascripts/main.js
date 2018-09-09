@@ -32,10 +32,11 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
             }else if($scope.userType == 'student'){
                 await $scope.qs.getStudentsCourses($scope.user.studentid);
                 await $scope.qs.getStudentCoupons($scope.user.studentid);
+                await $scope.qs.getStudentAssessments($scope.user.studentid);
                 $scope.courses = $scope.qs.studentsCourses();
                 $scope.user = $scope.qs.students()[sessionStorage.getItem('studentIndex')];
                 sessionStorage.setItem('user', JSON.stringify($scope.user));
-                $rootScope.setView(2);
+                $rootScope.setEvents($scope.qs.studentAssessments(), $scope.userType, 2);
             }else{
                 $scope.courses = $scope.qs.courses();
                 $rootScope.setView(2);
@@ -51,6 +52,7 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
 
     async function loadStudent(){
         await $scope.qs.getStudentsCourses($scope.user.studentid);
+        await $scope.qs.getStudentCoupons($scope.user.studentid);
         await $scope.qs.getStudentAssessments($scope.user.studentid);
         $scope.courses = $scope.qs.studentsCourses();
         $rootScope.setEvents($scope.qs.studentAssessments());
@@ -66,7 +68,7 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
         $scope.errorMessage = '';
     };
 
-    $rootScope.isView = function (type, view) {
+    $scope.isView = function (type, view) {
         return $scope.userType == type && $scope.view == view;
     };
 
@@ -132,7 +134,6 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
             if ($scope.validUsername && $scope.validPassword) {
                 sessionStorage.setItem('user', JSON.stringify($scope.qs.users()[userIndex]));
                 $scope.userType = getUserType(userIndex);
-                $scope.userType = $scope.userType;
                 sessionStorage.setItem('userType', $scope.userType);
                 sessionStorage.setItem('loggedIn', true);
                 sessionStorage.setItem('userIndex', userIndex);
