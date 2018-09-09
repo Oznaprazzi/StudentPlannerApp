@@ -32,6 +32,7 @@ module.exports = {
     getLecturersCourses: getLecturersCourses,
     getStudentTasks: getStudentTasks,
     getStudentCoupons: getStudentCoupons,
+    getStudentAssessments: getStudentAssessments,
 
     createNewUser: createNewUser,
     createNewStudent: createNewStudent,
@@ -331,7 +332,7 @@ function getLecturersCourses(req, res, next) {
 function getStudentTasks(req, res, next) {
     var studentid = req.query.studentid;
     var assessmentid = req.query.assessmentid;
-    db.any('select * from tasks join completestask on tasks.taskid = completestask.taskid and completestask.studentid = $1 and tasks.assessmentid = $2 order by task.taskid asc', [studentid, assessmentid])
+    db.any('select * from tasks join completestask on tasks.taskid = completestask.taskid and completestask.studentid = $1 and tasks.assessmentid = $2 order by tasks.taskid asc', [studentid, assessmentid])
         .then(function (data) {
             res.status(200)
                 .json({
@@ -354,6 +355,22 @@ function getStudentCoupons(req, res, next) {
                     status: 'success',
                     data: data,
                     message: 'Retrieved ALL Student\'s coupons'
+                });
+        })
+        .catch(function (err) {
+            return next(err);
+        });
+}
+
+function getStudentAssessments(req, res, next) {
+    var studentid = req.query.studentid;
+    db.any('select * from completesassessment join assessments on completesassessment.assessmentid = assessments.assessmentid join courses on courses.courseid = assessments.courseid and completesassessment.studentid = $1 order by completesassessment.assessmentid asc', [studentid])
+        .then(function (data) {
+            res.status(200)
+                .json({
+                    status: 'success',
+                    data: data,
+                    message: 'Retrieved ALL Student\'s assessments'
                 });
         })
         .catch(function (err) {

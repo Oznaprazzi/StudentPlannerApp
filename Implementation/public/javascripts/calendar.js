@@ -1,78 +1,72 @@
 var app = angular.module('studentPlanner');
 app.controller('calendarController', function(moment, alert, calendarConfig, $rootScope, $scope, queryService) {
     var vm = this;
-
-    //These variables MUST be set as a minimum for the calendar to work
     vm.calendarView = 'month';
     vm.viewDate = new Date();
+    vm.events = [];
     var actions = [{
-        label: '<i class=\'glyphicon glyphicon-pencil\'></i>',
+        label: 'View Details',
         onClick: function (args) {
-            alert.show('Edited', args.calendarEvent);
-        }
-    }, {
-        label: '<i class=\'glyphicon glyphicon-remove\'></i>',
-        onClick: function (args) {
-            alert.show('Deleted', args.calendarEvent);
+            $scope.currentAssessment = args.calendarEvent;
+            $scope.qs.getTasks($scope.currentAssessment.assessmentid).then(function() {
+                $scope.tasks = $scope.qs.tasks();
+                $rootScope.setView(9);
+            });
         }
     }];
-    vm.events = [
-        {
-            title: 'An event',
-            color: calendarConfig.colorTypes.warning,
-            startsAt: moment().startOf('week').subtract(2, 'days').add(8, 'hours').toDate(),
-            endsAt: moment().startOf('week').add(1, 'week').add(9, 'hours').toDate(),
-            draggable: true,
-            resizable: true,
-            actions: actions
-        }, {
-            title: '<i class="glyphicon glyphicon-asterisk"></i> <span class="text-primary">Another event</span>, with a <i>html</i> title',
-            color: calendarConfig.colorTypes.info,
-            startsAt: moment().subtract(1, 'day').toDate(),
-            endsAt: moment().add(5, 'days').toDate(),
-            draggable: true,
-            resizable: true,
-            actions: actions
-        }, {
-            title: 'This is a really long event title that occurs on every year',
-            color: calendarConfig.colorTypes.important,
-            startsAt: moment().startOf('day').add(7, 'hours').toDate(),
-            endsAt: moment().startOf('day').add(19, 'hours').toDate(),
-            recursOn: 'year',
-            draggable: true,
-            resizable: true,
-            actions: actions
+
+    $scope.qs = queryService;
+    async function loadStudent(user){
+        await $scope.qs.getStudentsCourses(user.studentid);
+        await $scope.qs.getStudentCoupons(user.studentid);
+        await $scope.qs.getStudentAssessments(user.studentid);
+        $scope.courses = $scope.qs.studentsCourses();
+        $rootScope.setEvents($scope.qs.studentAssessments());
+    }
+
+    function checkLoggedIn(){
+        if (JSON.parse(sessionStorage.getItem('loggedIn'))) {
+            $scope.userType = sessionStorage.getItem('userType');
+            $scope.user = JSON.parse(sessionStorage.getItem('user'));
+            loadStudent($scope.user);
         }
-    ];
+    }
+
+    checkLoggedIn();
+
+    //Calendar
+    $rootScope.setEvents = function(assessments){
+        if (JSON.parse(sessionStorage.getItem('loggedIn'))) {
+            $scope.assessments = assessments;
+            $rootScope.transformEvents();
+            vm.events = $scope.assessments;
+            $rootScope.setView(2);
+        }
+    }
+
+    $rootScope.dateDiffInDays = function(date1, date2) {
+        //date1 and date2 are in UTC format
+        dt1 = date1;
+        dt2 = new Date(date2);
+        return Math.floor((Date.UTC(dt2.getFullYear(), dt2.getMonth(), dt2.getDate()) - Date.UTC(dt1.getFullYear(), dt1.getMonth(), dt1.getDate()) ) /(1000 * 60 * 60 * 24)); //divide by ms per day
+    }
+
+    $rootScope.transformEvents = function(){
+        for(let i = 0; i < $scope.assessments.length; i++){
+            if($rootScope.dateDiffInDays( new Date(), $scope.assessments[i].duedate) <= 3){
+                $scope.assessments[i].color = calendarConfig.colorTypes.important;
+            }else{
+                $scope.assessments[i].color = calendarConfig.colorTypes.info;
+            }
+            $scope.assessments[i].startsAt = new Date($scope.assessments[i].startdate);
+            $scope.assessments[i].endsAt = new Date($scope.assessments[i].duedate);
+            $scope.assessments[i].draggable = true;
+            $scope.assessments[i].resizable = true;
+            $scope.assessments[i].actions = actions;
+        }
+    }
 
     vm.cellIsOpen = true;
-
-    vm.addEvent = function () {
-        vm.events.push({
-            title: 'New event',
-            startsAt: moment().startOf('day').toDate(),
-            endsAt: moment().endOf('day').toDate(),
-            color: calendarConfig.colorTypes.important,
-            draggable: true,
-            resizable: true
-        });
-    };
-
-    vm.eventClicked = function (event) {
-        alert.show('Clicked', event);
-    };
-
-    vm.eventEdited = function (event) {
-        alert.show('Edited', event);
-    };
-
-    vm.eventDeleted = function (event) {
-        alert.show('Deleted', event);
-    };
-
-    vm.eventTimesChanged = function (event) {
-        alert.show('Dropped or resized', event);
-    };
 
     vm.toggle = function ($event, field, event) {
         $event.preventDefault();
@@ -99,28 +93,4 @@ app.controller('calendarController', function(moment, alert, calendarConfig, $ro
         }
 
     };
-
-    $scope.qs = queryService;
-    async function loadStudent(user){
-        await $scope.qs.getStudentsCourses(user.studentid);
-        await $scope.qs.getStudentCoupons(user.studentid);
-        $scope.courses = $scope.qs.studentsCourses();
-    }
-
-    function checkLoggedIn(){
-        if (JSON.parse(sessionStorage.getItem('loggedIn'))) {
-            $rootScope.userType = sessionStorage.getItem('userType');
-            $scope.user = JSON.parse(sessionStorage.getItem('user'));
-            loadStudent($scope.user);
-            $rootScope.view = 2;
-        }
-    }
-
-    checkLoggedIn();
-
-    /*$scope.isView = function (type, view) {
-        return $rootScope.userType == type && $rootScope.view == view;
-    };*/
-
-
 });

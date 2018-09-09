@@ -13,6 +13,7 @@ angular.module('queries', []).service('queryService', function($http){
     var tasks = [];
     var coupons = [];
     var studentCoupons = [];
+    var studentAssessments = [];
 
     /***************************/
     /*********Get IDs**********/
@@ -204,6 +205,19 @@ angular.module('queries', []).service('queryService', function($http){
         );
     };
 
+    this.getStudentAssessments = function(studentid){
+        return $http.get('/api/getStudentAssessments', {
+            params: {
+                studentid: studentid
+            }
+        }).then(function sucessCall(response)	{
+                studentAssessments = response.data.data;
+            },function errorCall()	{
+                console.log("Error reading student\'s assessments list.");
+            }
+        );
+    };
+
     /***************************/
     /*********Update***********/
     /***************************/
@@ -282,5 +296,9 @@ angular.module('queries', []).service('queryService', function($http){
 
     this.studentCoupons = function(){
         return studentCoupons;
+    };
+
+    this.studentAssessments = function(){
+        return studentAssessments;
     };
 });

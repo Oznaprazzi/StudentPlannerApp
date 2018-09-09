@@ -2,73 +2,76 @@ var app = angular.module('studentPlanner', ['mwl.calendar', 'ngAnimate', 'ui.boo
 
 app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route, queryService, dialogService, $rootScope) {
     //Calendar Implementation
-    $rootScope.view = 1;
+    $scope.view = 1;
     $scope.done = false;
     $scope.loginFailMessage = '';
-    $rootScope.userType = '';
-    $rootScope.coursecode = '';
-    $rootScope.currentCourse = '';
+    $scope.userType = '';
+    $scope.coursecode = '';
+    $scope.currentCourse = '';
     $scope.formData = {};
     $scope.studentsList = [];
-    $rootScope.qs = queryService;
+    $scope.qs = queryService;
 
     $scope.assessmentType = ['Assignment', 'Test', 'Exam', 'Other'];
 
     var viewStack = [];
 
     async function loadAllQueries(){
-        await $rootScope.qs.getUsers();
-        await $rootScope.qs.getStudents();
-        await $rootScope.qs.getLecturers();
-        await $rootScope.qs.getCourses();
-        await $rootScope.qs.getCoupons();
+        await $scope.qs.getUsers();
+        await $scope.qs.getStudents();
+        await $scope.qs.getLecturers();
+        await $scope.qs.getCourses();
+        await $scope.qs.getCoupons();
         if (JSON.parse(sessionStorage.getItem('loggedIn'))) {
-            $rootScope.user = JSON.parse(sessionStorage.getItem('user'));
-            $rootScope.userType = sessionStorage.getItem('userType');
-            if($rootScope.userType == 'lecturer'){
-                await $rootScope.qs.getLecturersCourses($rootScope.user.lecturerid);
-                $scope.courses = $rootScope.qs.lecturersCourses();
+            $scope.user = JSON.parse(sessionStorage.getItem('user'));
+            $scope.userType = sessionStorage.getItem('userType');
+            if($scope.userType == 'lecturer'){
+                await $scope.qs.getLecturersCourses($scope.user.lecturerid);
+                $scope.courses = $scope.qs.lecturersCourses();
                 $rootScope.setView(3);
-            }else if($rootScope.userType == 'student'){
-                await $rootScope.qs.getStudentsCourses($rootScope.user.studentid);
-                await $rootScope.qs.getStudentCoupons($rootScope.user.studentid);
-                $scope.courses = $rootScope.qs.studentsCourses();
-                $rootScope.user = $rootScope.qs.students()[sessionStorage.getItem('studentIndex')];
-                sessionStorage.setItem('user', JSON.stringify($rootScope.user));
+            }else if($scope.userType == 'student'){
+                await $scope.qs.getStudentsCourses($scope.user.studentid);
+                await $scope.qs.getStudentCoupons($scope.user.studentid);
+                $scope.courses = $scope.qs.studentsCourses();
+                $scope.user = $scope.qs.students()[sessionStorage.getItem('studentIndex')];
+                sessionStorage.setItem('user', JSON.stringify($scope.user));
                 $rootScope.setView(2);
             }else{
-                $scope.courses = $rootScope.qs.courses();
+                $scope.courses = $scope.qs.courses();
                 $rootScope.setView(2);
             }
         }
     }
 
     async function loadLecturerCourses(){
-        await $rootScope.qs.getLecturersCourses($rootScope.user.lecturerid);
-        $scope.courses = $rootScope.qs.lecturersCourses();
+        await $scope.qs.getLecturersCourses($scope.user.lecturerid);
+        $scope.courses = $scope.qs.lecturersCourses();
+        $rootScope.setView(3);
     }
 
     async function loadStudent(){
-        await $rootScope.qs.getStudentsCourses($rootScope.user.studentid);
-        await $rootScope.qs.getStudentCoupons($rootScope.user.studentid);
-        $scope.courses = $rootScope.qs.studentsCourses();
+        await $scope.qs.getStudentsCourses($scope.user.studentid);
+        await $scope.qs.getStudentAssessments($scope.user.studentid);
+        $scope.courses = $scope.qs.studentsCourses();
+        $rootScope.setEvents($scope.qs.studentAssessments());
     }
 
     loadAllQueries();
 
     $rootScope.setView = function (view) {
-        $rootScope.view = view;
-        viewStack.push(view);
-        console.log(viewStack);
+        $scope.view = view;
+        if($scope.view != viewStack[viewStack.length -1]){
+            viewStack.push(view);
+        }
         $scope.errorMessage = '';
     };
 
     $rootScope.isView = function (type, view) {
-        return $rootScope.userType == type && $rootScope.view == view;
+        return $scope.userType == type && $scope.view == view;
     };
 
     $scope.isSharedView = function (view) {
-        return $rootScope.view == view;
+        return $scope.view == view;
     };
 
     function getUserType(i) {
@@ -81,10 +84,10 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
     }
 
     function isLecturer(i){
-        for(let j = 0; j < $rootScope.qs.lecturers().length; j++){
-            if ($rootScope.qs.lecturers()[j].userid === $rootScope.qs.users()[i].userid) {
-                sessionStorage.setItem('user', JSON.stringify($rootScope.qs.lecturers()[j]));
-                $rootScope.user = $rootScope.qs.lecturers()[j];
+        for(let j = 0; j < $scope.qs.lecturers().length; j++){
+            if ($scope.qs.lecturers()[j].userid === $scope.qs.users()[i].userid) {
+                sessionStorage.setItem('user', JSON.stringify($scope.qs.lecturers()[j]));
+                $scope.user = $scope.qs.lecturers()[j];
                 return true;
             }
         }
@@ -92,10 +95,10 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
     }
 
     function isStudent(i){
-        for(let j = 0; j < $rootScope.qs.students().length; j++){
-            if ($rootScope.qs.students()[j].userid === $rootScope.qs.users()[i].userid) {
-                sessionStorage.setItem('user', JSON.stringify($rootScope.qs.students()[j]));
-                $rootScope.user = $rootScope.qs.students()[j];
+        for(let j = 0; j < $scope.qs.students().length; j++){
+            if ($scope.qs.students()[j].userid === $scope.qs.users()[i].userid) {
+                sessionStorage.setItem('user', JSON.stringify($scope.qs.students()[j]));
+                $scope.user = $scope.qs.students()[j];
                 sessionStorage.setItem('studentIndex', j);
                 return true;
             }
@@ -115,32 +118,30 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
             $scope.validPassword = false;
             var userIndex = -1;
 
-            for (let i = 0; i < $rootScope.qs.users().length; i++) {
-                if ($rootScope.qs.users()[i].username == $scope.username) {
+            for (let i = 0; i < $scope.qs.users().length; i++) {
+                if ($scope.qs.users()[i].username == $scope.username) {
                     $scope.validUsername = true;
-                    $scope.currentUser = $rootScope.qs.users()[i];
+                    $scope.currentUser = $scope.qs.users()[i];
                     userIndex = i;
                     break;
                 }
             }
-            if (userIndex >= 0 && $rootScope.qs.users()[userIndex].password == $scope.password) {
+            if (userIndex >= 0 && $scope.qs.users()[userIndex].password == $scope.password) {
                 $scope.validPassword = true;
             }
             if ($scope.validUsername && $scope.validPassword) {
-                sessionStorage.setItem('user', JSON.stringify($rootScope.qs.users()[userIndex]));
-                $rootScope.userType = getUserType(userIndex);
-                $rootScope.userType = $rootScope.userType;
-                sessionStorage.setItem('userType', $rootScope.userType);
+                sessionStorage.setItem('user', JSON.stringify($scope.qs.users()[userIndex]));
+                $scope.userType = getUserType(userIndex);
+                $scope.userType = $scope.userType;
+                sessionStorage.setItem('userType', $scope.userType);
                 sessionStorage.setItem('loggedIn', true);
                 sessionStorage.setItem('userIndex', userIndex);
-                if($rootScope.userType == 'lecturer'){
+                if($scope.userType == 'lecturer'){
                     loadLecturerCourses();
-                    $rootScope.setView(3);
-                }else if($rootScope.userType == 'student'){
+                }else if($scope.userType == 'student'){
                     loadStudent();
-                    $rootScope.setView(2);
                 }else {
-                    $scope.courses = $rootScope.qs.courses();
+                    $scope.courses = $scope.qs.courses();
                     $rootScope.setView(2);
                 }
                 $scope.cancelLogin();
@@ -152,10 +153,9 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
     };
 
     $scope.reloadStudent = function(){
-        $rootScope.qs.getStudents().then(function(){
-            $rootScope.user = $rootScope.qs.students()[sessionStorage.getItem('studentIndex')];
-            $scope.user = $rootScope.qs.students()[sessionStorage.getItem('studentIndex')];
-            sessionStorage.setItem('user', JSON.stringify($rootScope.user));
+        $scope.qs.getStudents().then(function(){
+            $scope.user = $scope.qs.students()[sessionStorage.getItem('studentIndex')];
+            sessionStorage.setItem('user', JSON.stringify($scope.user));
         });
     };
 
@@ -164,24 +164,25 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
     });
 
     function resetCourse() {
-        angular.forEach($rootScope.qs.courses(), function (course) {
+        angular.forEach($scope.qs.courses(), function (course) {
             course.ticked = false;
         });
-        $rootScope.currentCourse.ticked = true;
+        $scope.currentCourse.ticked = true;
     }
 
     //Logout
     $scope.logout = function () {
-        $rootScope.userType = '';
+        $scope.userType = '';
         $rootScope.setView(1);
         $scope.cancelLogin();
         sessionStorage.clear();
-        $rootScope.user = {};
-        $rootScope.userType = '';
+        $scope.user = {};
+        $scope.userType = '';
+        viewStack = [];
     };
 
     $scope.goHome = function () {
-        if($rootScope.userType == 'lecturer'){
+        if($scope.userType == 'lecturer'){
             $rootScope.setView(3);
             return;
         }
@@ -191,7 +192,7 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
     $scope.goBack = function () {
         viewStack.splice(-1, 1);
         console.log(viewStack);
-        $rootScope.view = viewStack[viewStack.length - 1];
+        $scope.view = viewStack[viewStack.length - 1];
         sessionStorage.setItem('viewStack', viewStack);
     };
 
@@ -202,27 +203,26 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
     };
 
     async function loadCourseInformation(courseid){
-        await $rootScope.qs.getAssessments(courseid);
-        await $rootScope.qs.getStudentsInCourse(courseid);
-        await $rootScope.qs.getStudentsNotInCourse(courseid);
-        $scope.studentsList = $rootScope.qs.studentsNotInCourse();
-        console.log($rootScope.qs.assessments());
+        await $scope.qs.getAssessments(courseid);
+        await $scope.qs.getStudentsInCourse(courseid);
+        await $scope.qs.getStudentsNotInCourse(courseid);
+        $scope.studentsList = $scope.qs.studentsNotInCourse();
     }
 
 
     $scope.setCourse = function (course) {
         $scope.courseList = [];
-        $rootScope.currentCourse = course;
-        $rootScope.coursecode = course.coursecode;
-        $rootScope.currentCourse.ticked = true;
+        $scope.currentCourse = course;
+        $scope.coursecode = course.coursecode;
+        $scope.currentCourse.ticked = true;
         loadCourseInformation(course.courseid);
     };
 
     $scope.setLecturer = function (lecturer) {
         $scope.selectedUser = lecturer;
-        $rootScope.qs.getLecturersCourses(lecturer.lecturerid).then(function () {
-            angular.forEach($rootScope.qs.courses(), function (course) {
-                angular.forEach($rootScope.qs.lecturersCourses(), function (lCourse) {
+        $scope.qs.getLecturersCourses(lecturer.lecturerid).then(function () {
+            angular.forEach($scope.qs.courses(), function (course) {
+                angular.forEach($scope.qs.lecturersCourses(), function (lCourse) {
                     if (course.courseid == lCourse.courseid) {
                         course.ticked = true;
                     }
@@ -233,7 +233,7 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
 
     $scope.setLecturerId = function () {
         $scope.maxid = 0;
-        $rootScope.qs.getMaxUserId()
+        $scope.qs.getMaxUserId()
             .then(function sucessCall(response) {
                     $scope.maxid = response.data.data.max;
                 }, function errorCall() {
@@ -248,9 +248,9 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
 
     $scope.setStudent = function (student) {
         $scope.selectedUser = student;
-        $rootScope.qs.getStudentsCourses(student.studentid).then(function () {
-            angular.forEach($rootScope.qs.courses(), function (course) {
-                angular.forEach($rootScope.qs.studentsCourses(), function (studentCourse) {
+        $scope.qs.getStudentsCourses(student.studentid).then(function () {
+            angular.forEach($scope.qs.courses(), function (course) {
+                angular.forEach($scope.qs.studentsCourses(), function (studentCourse) {
                     if (course.courseid == studentCourse.courseid) {
                         course.ticked = true;
                     }
@@ -267,44 +267,45 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
         }
     };
 
-    async function assessmentInformation(assessmentid){
-        await $rootScope.qs.getTasks(assessmentid);
-        $scope.tasks = $rootScope.qs.tasks();
-        if($rootScope.userType == 'student'){
-            await $rootScope.qs.getStudentTasks($rootScope.user.studentid, assessmentid);
-            $scope.tasks = $rootScope.qs.studentTasks();
+    async function assessmentInformation(assessmentid, assessment){
+        if($scope.userType == 'student'){
+            await $scope.qs.getStudentTasks($scope.user.studentid, assessmentid);
+            $scope.tasks = $scope.qs.studentTasks();
+        }else{
+            await $scope.qs.getTasks(assessmentid);
+            $scope.tasks = $scope.qs.tasks();
         }
+        $scope.currentAssessment = assessment;
+        $scope.minDate = assessment.startdate;
+        $rootScope.setView(9);
     }
 
     $scope.setAssessment = function (assessment) {
-        assessmentInformation(assessment.assessmentid);
-        $scope.currentAssessment = assessment;
-        $rootScope.currentAssessment = assessment;
-        $scope.minDate = assessment.startdate;
+        assessmentInformation(assessment.assessmentid, assessment);
     };
 
     async function loadCourses(){
-        await $rootScope.qs.getCourses();
+        await $scope.qs.getCourses();
     }
 
     $scope.addCourse = function (ev) {
-        if ($rootScope.coursecode == '') {
+        if ($scope.coursecode == '') {
             $scope.errorMessage = 'Course Code Cannot Be Empty!';
             return;
         }
         var request = $http.post('/api/createNewCourse', {
             params: {
-                coursecode: $rootScope.coursecode
+                coursecode: $scope.coursecode
             }
         });
 
         request.then(function success(data) {
             loadCourses();
             // Appending dialog to document.body to cover sidenav in docs app
-            var confirm = dialogService.confirm($rootScope.coursecode + ' has been successfully added!',
+            var confirm = dialogService.confirm($scope.coursecode + ' has been successfully added!',
                 'Added Course', 'Add Another Course', 'Back', ev);
 
-            $rootScope.coursecode = '';
+            $scope.coursecode = '';
             $scope.errorMessage = '';
             $mdDialog.show(confirm).then(function () {
                 //Stay on current page
@@ -322,16 +323,16 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
         console.log($scope.formData.studentsList);
         angular.forEach($scope.formData.studentsList, function (student) {
             console.log(student.studentid);
-            $scope.addStudentToCourse(student.studentid, $rootScope.currentCourse.courseid);
+            $scope.addStudentToCourse(student.studentid, $scope.currentCourse.courseid);
         });
 
-        var alert = dialogService.alert('Student(s) have been successfully added to ' + $rootScope.currentCourse.coursecode + '!',
+        var alert = dialogService.alert('Student(s) have been successfully added to ' + $scope.currentCourse.coursecode + '!',
             'Student(s) Successfully Added', ev);
 
         $scope.errorMessage = '';
 
         $mdDialog.show(alert).then(function () {
-            $rootScope.qs.getStudentsInCourse($rootScope.currentCourse.courseid);
+            $scope.qs.getStudentsInCourse($scope.currentCourse.courseid);
             $scope.goBack();
         });
     };
@@ -351,7 +352,7 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
         });
 
         request.then(function success(data) {
-            $rootScope.qs.getMaxUserId().then(function (response) {
+            $scope.qs.getMaxUserId().then(function (response) {
                     var maxid = response.data.data.max;
                     $http.post('/api/createNewStudent', {
                         params: {
@@ -359,8 +360,8 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
                             studentid: $scope.studentid
                         }
                     }).then(function success() {
-                        $rootScope.qs.getUsers();
-                        $rootScope.qs.getStudents();
+                        $scope.qs.getUsers();
+                        $scope.qs.getStudents();
                         angular.forEach($scope.formData.coursesList, function (course) {
                             $scope.addStudentToCourse($scope.studentid, course.courseid);
                         });
@@ -381,7 +382,7 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
                         }, function () {
                             $scope.goBack();
                             resetCourse();
-                            $rootScope.qs.getStudentsInCourse($rootScope.currentCourse.courseid);
+                            $scope.qs.getStudentsInCourse($scope.currentCourse.courseid);
                         });
                     });
                 }, function errorCall() {
@@ -401,23 +402,23 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
     };
 
     $scope.updateCourse = function (ev) {
-        if ($rootScope.currentCourse.coursecode == '') {
+        if ($scope.currentCourse.coursecode == '') {
             $scope.errorMessage = 'Course Code Cannot Be Empty!';
             return;
         }
 
         var request = $http.post('/api/updateCourse', {
             params: {
-                coursecode: $rootScope.currentCourse.coursecode,
-                id: $rootScope.currentCourse.courseid
+                coursecode: $scope.currentCourse.coursecode,
+                id: $scope.currentCourse.courseid
             }
         });
 
         request.then(function success(data) {
-            $rootScope.qs.getCourses();
+            $scope.qs.getCourses();
             $route.reload();
             // Appending dialog to document.body to cover sidenav in docs app
-            var alert = dialogService.alert($rootScope.currentCourse.coursecode + ' has been successfully updated!',
+            var alert = dialogService.alert($scope.currentCourse.coursecode + ' has been successfully updated!',
                 'Course Successfully Updated', ev);
 
             $scope.errorMessage = '';
@@ -435,17 +436,17 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
         $mdDialog.show(confirm).then(function () {
             var request = $http.post('/api/deleteCourse', {
                 params: {
-                    id: $rootScope.currentCourse.courseid
+                    id: $scope.currentCourse.courseid
                 }
             });
             request.then(function success(data) {
                 $route.reload();
                 // Appending dialog to document.body to cover sidenav in docs app
-                var alert = dialogService.alert($rootScope.coursecode + ' has been successfully deleted!',
+                var alert = dialogService.alert($scope.coursecode + ' has been successfully deleted!',
                     'Course Successfully Deleted', ev);
 
                 $mdDialog.show(alert).then(function () {
-                    $rootScope.qs.getCourses();
+                    $scope.qs.getCourses();
                     $scope.goBack();
                     $scope.goBack();
                 });
@@ -476,7 +477,7 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
         });
 
         request.then(function success(data) {
-            $rootScope.qs.getUsers();
+            $scope.qs.getUsers();
             $route.reload();
             var alert = dialogService.alert($scope.selectedUser.name + ' has been successfully updated!',
                 'User Successfully Updated', ev);
@@ -489,12 +490,12 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
                     }
                 }).then(function success(data) {
                     angular.forEach($scope.formData.coursesList, function (course) {
-                        if (isNewCourse(course.courseid, $rootScope.qs.studentsCourses())) {
+                        if (isNewCourse(course.courseid, $scope.qs.studentsCourses())) {
                             $scope.addStudentToCourse($scope.selectedUser.studentid, course.courseid);
                         }
                     });
 
-                    angular.forEach($rootScope.qs.studentsCourses(), function (course) {
+                    angular.forEach($scope.qs.studentsCourses(), function (course) {
                         if (isRemoveCourse(course.courseid)) {
                             $http.post('/api/removeStudentFromCourse', {
                                 params: {
@@ -506,8 +507,8 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
                     });
                     $mdDialog.show(alert).then(function () {
                         $scope.setCancelEditStudentView();
-                        $rootScope.qs.getStudents();
-                        $rootScope.qs.getStudentsInCourse($rootScope.currentCourse.courseid);
+                        $scope.qs.getStudents();
+                        $scope.qs.getStudentsInCourse($scope.currentCourse.courseid);
                     });
                 });
             } else if(userType == 'lecturer') {
@@ -518,12 +519,12 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
                     }
                 }).then(function success(data) {
                     angular.forEach($scope.formData.coursesList, function (course) {
-                        if (isNewCourse(course.courseid, $rootScope.qs.lecturersCourses())) {
+                        if (isNewCourse(course.courseid, $scope.qs.lecturersCourses())) {
                             addLecturerCourses($scope.selectedUser.lecturerid, course.courseid);
                         }
                     });
 
-                    angular.forEach($rootScope.qs.lecturersCourses(), function (course) {
+                    angular.forEach($scope.qs.lecturersCourses(), function (course) {
                         if (isRemoveCourse(course.courseid)) {
                             $http.post('/api/removeLecturerCourse', {
                                 params: {
@@ -535,7 +536,7 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
                     });
                     $mdDialog.show(alert).then(function () {
                         $scope.goBack();
-                        $rootScope.qs.getLecturers();
+                        $scope.qs.getLecturers();
                     });
                 });
             }else{
@@ -577,8 +578,8 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
                 }
             });
             request.then(function success(data) {
-                $rootScope.qs.getUsers();
-                $rootScope.qs.getCourses();
+                $scope.qs.getUsers();
+                $scope.qs.getCourses();
                 $scope.username = '';
                 $scope.studentid = '';
                 $scope.name = '';
@@ -589,11 +590,11 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
                     'User Successfully Deleted', ev);
                 $mdDialog.show(alert).then(function () {
                     if (userType == 'student') {//Student
-                        $rootScope.qs.getStudents();
-                        $rootScope.qs.getStudentsInCourse($rootScope.currentCourse.courseid);
+                        $scope.qs.getStudents();
+                        $scope.qs.getStudentsInCourse($scope.currentCourse.courseid);
                         $scope.setCancelEditStudentView();
                     } else if (userType == 'lecturer') {//Lecturer
-                        $rootScope.qs.getLecturers();
+                        $scope.qs.getLecturers();
                         $scope.goBack();
                     }
                 });
@@ -612,10 +613,10 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
             $http.post('/api/removeStudentFromCourse', {
                 params: {
                     studentid: student.studentid,
-                    courseid: $rootScope.currentCourse.courseid
+                    courseid: $scope.currentCourse.courseid
                 }
             }).then(function () {
-                $rootScope.qs.getStudentsInCourse($rootScope.currentCourse.courseid);
+                $scope.qs.getStudentsInCourse($scope.currentCourse.courseid);
             });
         }, function(){
 
@@ -637,16 +638,16 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
         });
 
         request.then(function success(data) {
-            $rootScope.qs.getMaxUserId().then(function (response) {
+            $scope.qs.getMaxUserId().then(function (response) {
                 var maxid = response.data.data.max;
                 $http.post('/api/createNewLecturer', {
                     params: {
                         userid: maxid
                     }
                 }).then(function success() {
-                    $rootScope.qs.getUsers();
-                    $rootScope.qs.getLecturers();
-                    $rootScope.qs.getMaxLecturerId().then(function (response) {
+                    $scope.qs.getUsers();
+                    $scope.qs.getLecturers();
+                    $scope.qs.getMaxLecturerId().then(function (response) {
                         angular.forEach($scope.formData.coursesList, function (course) {
                             addLecturerCourses(response.data.data.max, course.courseid);
                         });
@@ -665,7 +666,7 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
                         }, function () {
                             $scope.goBack();
                             resetCourse();
-                            $rootScope.qs.getStudentsInCourse($rootScope.currentCourse.courseid);
+                            $scope.qs.getStudentsInCourse($scope.currentCourse.courseid);
                         });
                     });
                 });
@@ -700,11 +701,11 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
         });
 
         request.then(function success(data) {
-            $rootScope.qs.getAssessments($scope.courseid);
-            $rootScope.qs.getMaxAssessmentId().then(function (response) {
+            $scope.qs.getAssessments($scope.courseid);
+            $scope.qs.getMaxAssessmentId().then(function (response) {
                 var maxid = response.data.data.max;
-                for (let i = 0; i < $rootScope.qs.studentsInCourse().length; i++) {
-                    addAssessmentToStudent($rootScope.qs.studentsInCourse()[i].studentid, maxid);
+                for (let i = 0; i < $scope.qs.studentsInCourse().length; i++) {
+                    addAssessmentToStudent($scope.qs.studentsInCourse()[i].studentid, maxid);
                 }
                 var confirm = dialogService.confirm($scope.title + ' has been successfully added!',
                     'Added Assessment', 'Add Another Assessment', 'Back', ev);
@@ -751,7 +752,7 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
         });
 
         request.then(function success(data) {
-            $rootScope.qs.getAssessments($scope.currentAssessment.courseid);
+            $scope.qs.getAssessments($scope.currentAssessment.courseid);
             var alert = dialogService.alert($scope.currentAssessment.title + ' has been successfully updated!',
                 'Assessment Successfully Updated', ev);
             $mdDialog.show(alert).then(function () {
@@ -772,7 +773,7 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
             });
 
             request.then(function success(data) {
-                $rootScope.qs.getAssessments($scope.currentAssessment.courseid);
+                $scope.qs.getAssessments($scope.currentAssessment.courseid);
                 var alert = dialogService.alert($scope.currentAssessment.title + ' has been successfully deleted!',
                     'Assessment Successfully Deleted', ev);
                 $mdDialog.show(alert).then(function () {
@@ -786,9 +787,9 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
     };
 
     $scope.showHomeButton = function(){
-        if($rootScope.view > 2 && $rootScope.userType != 'lecturer'){
+        if($scope.view > 2 && $scope.userType != 'lecturer'){
             return true;
-        }else if($rootScope.view > 3 && $rootScope.userType == 'lecturer'){
+        }else if($scope.view > 3 && $scope.userType == 'lecturer'){
             return true;
         }
         return false;
@@ -796,7 +797,7 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
 
     $scope.setNewAssessment = function(){
         $scope.dueDate = new Date();
-        $scope.courseid = $rootScope.currentCourse.courseid;
+        $scope.courseid = $scope.currentCourse.courseid;
         $scope.type = "Assignment";
         $scope.minDate = new Date();
         console.log($scope.minDate);
@@ -808,7 +809,7 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
     };
 
     $scope.editTask = function (task) {
-        $rootScope.task = task;
+        $scope.task = task;
         var prompt = dialogService.editTaskPrompt(DialogController);
         $mdDialog.show(prompt);
     };
@@ -825,8 +826,8 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
             });
 
             request.then(function success(data) {
-                $rootScope.qs.getTasks($rootScope.currentAssessment.assessmentid).then(function() {
-                    $scope.tasks = $rootScope.qs.tasks();
+                $scope.qs.getTasks($scope.currentAssessment.assessmentid).then(function() {
+                    $scope.tasks = $scope.qs.tasks();
                     var alert = dialogService.alert('Task has been successfully deleted!',
                         'Task Successfully Deleted', ev);
                     $mdDialog.show(alert);
@@ -871,8 +872,8 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
                         addTaskToStudent($rootScope.qs.studentsInCourse()[i].studentid, maxid);
                     }
 
-                    $rootScope.qs.getTasks($rootScope.currentAssessment.assessmentid).then(function(){
-                        $rootScope.tasks = $rootScope.qs.tasks();
+                    $rootScope.qs.getTasks($scope.currentAssessment.assessmentid).then(function(){
+                        $scope.tasks = $rootScope.qs.tasks();
                         var alert = dialogService.alert('Task successfully added',
                             'Task saved', ev);
                         $mdDialog.show(alert);
@@ -898,8 +899,8 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
             });
 
             request.then(function success(data) {
-                $rootScope.qs.getTasks($rootScope.currentAssessment.assessmentid).then(function() {
-                    $rootScope.tasks = $rootScope.qs.tasks();
+                $rootScope.qs.getTasks($scope.currentAssessment.assessmentid).then(function() {
+                    $scope.tasks = $rootScope.qs.tasks();
                     var alert = dialogService.alert('Task successfully updated',
                         'Task updated', ev);
                     $mdDialog.show(alert);
@@ -930,10 +931,10 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
     };
 
     function updateStudentPoints(task){
-        $rootScope.qs.updateTaskCompleted(task.taskid, task.completed, $rootScope.user.studentid).then(function(){
+        $scope.qs.updateTaskCompleted(task.taskid, task.completed, $scope.user.studentid).then(function(){
             $scope.reloadStudent();
-            $rootScope.qs.updateStudentPoints(task.points, task.completed, $rootScope.user.studentid).then(function(){
-
+            $scope.qs.updateStudentPoints(task.points, task.completed, $scope.user.studentid).then(function(){
+                $scope.reloadStudent();
             });
         });
     }
@@ -952,13 +953,13 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
         });
 
         request.then(function success(data) {
-            $rootScope.qs.getMaxCouponId().then(function (response) {
+            $scope.qs.getMaxCouponId().then(function (response) {
                 var maxid = response.data.data.max;
-                for(let i = 0; i < $rootScope.qs.students().length; i++){
-                    addCouponToStudent($rootScope.qs.students()[i].studentid, maxid);
+                for(let i = 0; i < $scope.qs.students().length; i++){
+                    addCouponToStudent($scope.qs.students()[i].studentid, maxid);
                 }
 
-                $rootScope.qs.getCoupons();
+                $scope.qs.getCoupons();
 
                 var confirm = dialogService.confirm('Coupon successfully created!',
                     'Created Coupon', 'Create Another Coupon', 'Back', ev);
@@ -996,7 +997,7 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
             });
 
             request.then(function success(data) {
-                $rootScope.qs.getStudentCoupons($rootScope.user.studentid);
+                $scope.qs.getStudentCoupons($scope.user.studentid);
                 $scope.reloadStudent();
             });
         }, function () {
@@ -1005,7 +1006,7 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
     };
 
     $scope.getCoupon = function(coupon, ev){
-        if(coupon.points > $rootScope.user.points){
+        if(coupon.points > $scope.user.points){
             var alert = dialogService.alert('Error! You do not have enough points to redeem this coupon',
                 'Not enough points', ev);
             $mdDialog.show(alert).then(function(){
@@ -1026,8 +1027,8 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
 
                 request.then(function success(data) {
                     $scope.reloadStudent();
-                    console.log($rootScope.user);
-                    $rootScope.qs.getStudentCoupons($rootScope.user.studentid).then(function() {
+                    console.log($scope.user);
+                    $scope.qs.getStudentCoupons($scope.user.studentid).then(function() {
                         var alert = dialogService.alert('Coupon successfully redeemed!',
                             'Coupon Successfully Redeemed', ev);
                         $mdDialog.show(alert);

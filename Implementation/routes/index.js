@@ -26,6 +26,7 @@ router.get('/api/getStudentsCourses', db.getStudentsCourses);
 router.get('/api/getLecturersCourses', db.getLecturersCourses);
 router.get('/api/getStudentTasks', db.getStudentTasks);
 router.get('/api/getStudentCoupons', db.getStudentCoupons);
+router.get('/api/getStudentAssessments', db.getStudentAssessments);
 
 router.post('/api/createNewUser', db.createNewUser);
 router.post('/api/createNewStudent', db.createNewStudent);
