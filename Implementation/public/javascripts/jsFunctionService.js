@@ -1,31 +1,13 @@
 'use strict';
-angular.module('functions', ['queries']).service('jsFunctionService', function(queryService){
-    var qs = queryService;
+angular.module('functions', []).service('jsFunctionService', function(){
+    this.view = 1;
+    this.viewStack = [];
+    this.userType = "";
 
-    this.getUserType = function(i){
-        if(isLecturer(i)){
-            return 'lecturer';
-        }else if(isStudent(i)){
-            return 'student';
+    this.setView = function(view){
+        this.view = view;
+        if(this.view != this.viewStack[this.viewStack.length -1]){
+            this.viewStack.push(view);
         }
-        return 'admin';
-    }
-
-    function isLecturer(i){
-        for(let j = 0; j < this.qs.lecturers().length; j++){
-            if (this.qs.lecturers()[j].userid === this.qs.users()[i].userid) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    function isStudent(i){
-        for(let j = 0; j < this.qs.students().length; j++){
-            if (this.qs.students()[j].userid === this.qs.users()[i].userid) {
-                return true;
-            }
-        }
-        return false;
-    }
+    };
 });

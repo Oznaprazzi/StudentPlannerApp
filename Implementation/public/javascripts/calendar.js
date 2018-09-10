@@ -1,5 +1,5 @@
 var app = angular.module('studentPlanner');
-app.controller('calendarController', function(moment, alert, calendarConfig, $rootScope, $scope, queryService) {
+app.controller('calendarController', function(moment, alert, calendarConfig, $rootScope, $scope, queryService, jsFunctionService) {
     var vm = this;
     vm.calendarView = 'month';
     vm.viewDate = new Date();
@@ -16,51 +16,29 @@ app.controller('calendarController', function(moment, alert, calendarConfig, $ro
     }];
 
     $scope.qs = queryService;
-    /*async function loadStudent(user){
-        await $scope.qs.getStudentsCourses(user.studentid);
-        await $scope.qs.getStudentCoupons(user.studentid);
-        await $scope.qs.getStudentAssessments(user.studentid);
-        $scope.courses = $scope.qs.studentsCourses();
-        $rootScope.setEvents($scope.qs.studentAssessments());
-    }
-
-    function checkLoggedIn(){
-        if (JSON.parse(sessionStorage.getItem('loggedIn'))) {
-            $scope.userType = sessionStorage.getItem('userType');
-            $scope.user = JSON.parse(sessionStorage.getItem('user'));
-            loadStudent($scope.user);
-        }
-    }
-
-    checkLoggedIn();*/
+    $scope.fs = jsFunctionService;
 
     $scope.isView = function(userType, view){
-        return $scope.userType == userType && $scope.view == view;
+        return $scope.fs.userType == userType && $scope.fs.view == view;
     };
 
     //Calendar
-    $rootScope.setEvents = function(assessments, userType, view){
+    $rootScope.setEvents = function(assessments){
         if (JSON.parse(sessionStorage.getItem('loggedIn'))) {
             console.log(assessments);
             $scope.assessments = assessments;
             $rootScope.transformEvents();
             vm.events = $scope.assessments;
             $rootScope.setView(2);
-            $scope.userType = userType;
-            $scope.view = view;
-
-            console.log($scope.isView("student", 2));
-            console.log($rootScope.userType + " " + $rootScope.view);
-            console.log($scope.userType + " " + $scope.view);
         }
-    }
+    };
 
     $rootScope.dateDiffInDays = function(date1, date2) {
         //date1 and date2 are in UTC format
         dt1 = date1;
         dt2 = new Date(date2);
         return Math.floor((Date.UTC(dt2.getFullYear(), dt2.getMonth(), dt2.getDate()) - Date.UTC(dt1.getFullYear(), dt1.getMonth(), dt1.getDate()) ) /(1000 * 60 * 60 * 24)); //divide by ms per day
-    }
+    };
 
     $rootScope.transformEvents = function(){
         for(let i = 0; i < $scope.assessments.length; i++){
@@ -75,7 +53,7 @@ app.controller('calendarController', function(moment, alert, calendarConfig, $ro
             $scope.assessments[i].resizable = true;
             $scope.assessments[i].actions = actions;
         }
-    }
+    };
 
     vm.cellIsOpen = true;
 

@@ -1,6 +1,6 @@
-var app = angular.module('studentPlanner', ['mwl.calendar', 'ngAnimate', 'ui.bootstrap', 'colorpicker.module', 'ngRoute', 'ngMaterial', 'queries', 'dialogs', 'isteven-multi-select']);
+var app = angular.module('studentPlanner', ['mwl.calendar', 'ngAnimate', 'ui.bootstrap', 'colorpicker.module', 'ngRoute', 'ngMaterial', 'queries', 'dialogs', 'isteven-multi-select', 'functions']);
 
-app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route, queryService, dialogService, $rootScope) {
+app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route, queryService, dialogService, $rootScope, jsFunctionService) {
     //Calendar Implementation
     $scope.view = 1;
     $scope.done = false;
@@ -11,10 +11,9 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
     $scope.formData = {};
     $scope.studentsList = [];
     $scope.qs = queryService;
+    $scope.fs = jsFunctionService;
 
     $scope.assessmentType = ['Assignment', 'Test', 'Exam', 'Other'];
-
-    var viewStack = [];
 
     async function loadAllQueries(){
         await $scope.qs.getUsers();
@@ -25,6 +24,7 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
         if (JSON.parse(sessionStorage.getItem('loggedIn'))) {
             $scope.user = JSON.parse(sessionStorage.getItem('user'));
             $scope.userType = sessionStorage.getItem('userType');
+            $scope.fs.userType = $scope.userType;
             if($scope.userType == 'lecturer'){
                 await $scope.qs.getLecturersCourses($scope.user.lecturerid);
                 $scope.courses = $scope.qs.lecturersCourses();
@@ -36,7 +36,7 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
                 $scope.courses = $scope.qs.studentsCourses();
                 $scope.user = $scope.qs.students()[sessionStorage.getItem('studentIndex')];
                 sessionStorage.setItem('user', JSON.stringify($scope.user));
-                $rootScope.setEvents($scope.qs.studentAssessments(), $scope.userType, 2);
+                $rootScope.setEvents($scope.qs.studentAssessments());
             }else{
                 $scope.courses = $scope.qs.courses();
                 $rootScope.setView(2);
@@ -47,7 +47,6 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
     async function loadLecturerCourses(){
         await $scope.qs.getLecturersCourses($scope.user.lecturerid);
         $scope.courses = $scope.qs.lecturersCourses();
-        $rootScope.setView(3);
     }
 
     async function loadStudent(){
@@ -61,10 +60,8 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
     loadAllQueries();
 
     $rootScope.setView = function (view) {
-        $scope.view = view;
-        if($scope.view != viewStack[viewStack.length -1]){
-            viewStack.push(view);
-        }
+        $scope.fs.setView(view);
+        $scope.view = $scope.fs.view;
         $scope.errorMessage = '';
     };
 
@@ -134,13 +131,16 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
             if ($scope.validUsername && $scope.validPassword) {
                 sessionStorage.setItem('user', JSON.stringify($scope.qs.users()[userIndex]));
                 $scope.userType = getUserType(userIndex);
+                $scope.fs.userType = $scope.userType;
                 sessionStorage.setItem('userType', $scope.userType);
                 sessionStorage.setItem('loggedIn', true);
                 sessionStorage.setItem('userIndex', userIndex);
                 if($scope.userType == 'lecturer'){
                     loadLecturerCourses();
+                    $rootScope.setView(3);
                 }else if($scope.userType == 'student'){
                     loadStudent();
+                    $rootScope.setView(2);
                 }else {
                     $scope.courses = $scope.qs.courses();
                     $rootScope.setView(2);
@@ -178,8 +178,8 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
         $scope.cancelLogin();
         sessionStorage.clear();
         $scope.user = {};
-        $scope.userType = '';
-        viewStack = [];
+        $scope.fs.userType = $scope.userType;
+        $scope.fs.viewStack = [];
     };
 
     $scope.goHome = function () {
@@ -191,10 +191,8 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
     };
 
     $scope.goBack = function () {
-        viewStack.splice(-1, 1);
-        console.log(viewStack);
-        $scope.view = viewStack[viewStack.length - 1];
-        sessionStorage.setItem('viewStack', viewStack);
+        $scope.fs.viewStack.splice(-1, 1);
+        $scope.view = $scope.fs.viewStack[$scope.fs.viewStack.length - 1];
     };
 
     $scope.cancelLogin = function () {
@@ -261,7 +259,7 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
     };
 
     $scope.setCancelEditStudentView = function () {
-        if (viewStack[viewStack.length - 2] == 5) {
+        if ($scope.fs.viewStack[$scope.fs.viewStack.length - 2] == 5) {
             $rootScope.setView(5);
         } else {
             $rootScope.setView(7);
