@@ -269,16 +269,17 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
     async function assessmentInformation(assessmentid){
         if($scope.userType == 'student'){
             await $scope.qs.getStudentTasks($scope.user.studentid, assessmentid);
-            $scope.tasks = $scope.qs.studentTasks();
+            $rootScope.tasks = $scope.qs.studentTasks();
         }else{
             await $scope.qs.getTasks(assessmentid);
-            $scope.tasks = $scope.qs.tasks();
+            $rootScope.tasks = $scope.qs.tasks();
         }
     }
 
     $scope.setAssessment = function (assessment) {
         assessmentInformation(assessment.assessmentid, assessment);
         $scope.currentAssessment = assessment;
+        $rootScope.currentAssessment = assessment;
         $scope.minDate = assessment.startdate;
         $rootScope.setView(9);
     };
@@ -808,6 +809,7 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
     };
 
     $scope.editTask = function (task) {
+        $rootScope.task = task;
         $scope.task = task;
         var prompt = dialogService.editTaskPrompt(DialogController);
         $mdDialog.show(prompt);
@@ -826,7 +828,7 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
 
             request.then(function success(data) {
                 $scope.qs.getTasks($scope.currentAssessment.assessmentid).then(function() {
-                    $scope.tasks = $scope.qs.tasks();
+                    $rootScope.tasks = $scope.qs.tasks();
                     var alert = dialogService.alert('Task has been successfully deleted!',
                         'Task Successfully Deleted', ev);
                     $mdDialog.show(alert);
@@ -841,8 +843,9 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
         $mdMenu.open(ev);
     };
 
-    function DialogController($scope, $mdDialog, $rootScope, dialogService) {
+    function DialogController($scope, $mdDialog, $rootScope, dialogService, queryService) {
         $scope.task = $rootScope.task;
+        $scope.qs = queryService;
         $scope.points = 2;
         $scope.closeDialog = function() {
             $mdDialog.hide();
@@ -865,14 +868,14 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
             });
 
             request.then(function success(data) {
-                $rootScope.qs.getMaxTaskId().then(function (response) {
+                $scope.qs.getMaxTaskId().then(function (response) {
                     var maxid = response.data.data.max;
-                    for(let i = 0; i < $rootScope.qs.studentsInCourse().length; i++){
-                        addTaskToStudent($rootScope.qs.studentsInCourse()[i].studentid, maxid);
+                    for(let i = 0; i < $scope.qs.studentsInCourse().length; i++){
+                        addTaskToStudent($scope.qs.studentsInCourse()[i].studentid, maxid);
                     }
 
-                    $rootScope.qs.getTasks($scope.currentAssessment.assessmentid).then(function(){
-                        $scope.tasks = $rootScope.qs.tasks();
+                    $scope.qs.getTasks($rootScope.currentAssessment.assessmentid).then(function(){
+                        $rootScope.tasks = $scope.qs.tasks();
                         var alert = dialogService.alert('Task successfully added',
                             'Task saved', ev);
                         $mdDialog.show(alert);
@@ -898,8 +901,8 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
             });
 
             request.then(function success(data) {
-                $rootScope.qs.getTasks($scope.currentAssessment.assessmentid).then(function() {
-                    $scope.tasks = $rootScope.qs.tasks();
+                $scope.qs.getTasks($rootScope.currentAssessment.assessmentid).then(function() {
+                    $rootScope.tasks = $scope.qs.tasks();
                     var alert = dialogService.alert('Task successfully updated',
                         'Task updated', ev);
                     $mdDialog.show(alert);
