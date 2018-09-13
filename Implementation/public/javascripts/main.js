@@ -266,7 +266,7 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
         }
     };
 
-    async function assessmentInformation(assessmentid, assessment){
+    async function assessmentInformation(assessmentid){
         if($scope.userType == 'student'){
             await $scope.qs.getStudentTasks($scope.user.studentid, assessmentid);
             $scope.tasks = $scope.qs.studentTasks();
@@ -274,13 +274,13 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
             await $scope.qs.getTasks(assessmentid);
             $scope.tasks = $scope.qs.tasks();
         }
-        $scope.currentAssessment = assessment;
-        $scope.minDate = assessment.startdate;
-        $rootScope.setView(9);
     }
 
     $scope.setAssessment = function (assessment) {
         assessmentInformation(assessment.assessmentid, assessment);
+        $scope.currentAssessment = assessment;
+        $scope.minDate = assessment.startdate;
+        $rootScope.setView(9);
     };
 
     async function loadCourses(){
@@ -849,7 +849,7 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
         };
 
         $scope.saveTask = function(ev){
-            if($scope.task.description || !$scope.task.points){
+            if(!$scope.description || !$scope.points){
                 var alert = dialogService.alert('An error occured. New task was not added.',
                     'Task not saved', ev);
                 $mdDialog.show(alert);
