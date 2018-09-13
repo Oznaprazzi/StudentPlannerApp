@@ -18,6 +18,8 @@ app.controller('calendarController', function(moment, alert, calendarConfig, $ro
     $scope.qs = queryService;
     $scope.fs = jsFunctionService;
 
+    $scope.dangerEvents = []; //list of near dueD date assessments
+
     $scope.isView = function(userType, view){
         return $scope.fs.userType == userType && $scope.fs.view == view;
     };
@@ -25,7 +27,7 @@ app.controller('calendarController', function(moment, alert, calendarConfig, $ro
     //Calendar
     $rootScope.setEvents = function(assessments){
         if (JSON.parse(sessionStorage.getItem('loggedIn'))) {
-            console.log(assessments);
+            $scope.dangerEvents = [];
             $scope.assessments = assessments;
             $rootScope.transformEvents();
             vm.events = $scope.assessments;
@@ -42,11 +44,15 @@ app.controller('calendarController', function(moment, alert, calendarConfig, $ro
 
     $rootScope.transformEvents = function(){
         for(let i = 0; i < $scope.assessments.length; i++){
-            if($rootScope.dateDiffInDays( new Date(), $scope.assessments[i].duedate) <= 3){
+            if($rootScope.dateDiffInDays(new Date(), $scope.assessments[i].duedate) <= 3 && $rootScope.dateDiffInDays(new Date(), $scope.assessments[i].duedate) >= 0){
                 $scope.assessments[i].color = calendarConfig.colorTypes.important;
+                $scope.dangerEvents.push($scope.assessments[i]);
+            }else if($rootScope.dateDiffInDays(new Date(), $scope.assessments[i].duedate) < 0){
+                $scope.assessments[i].color = calendarConfig.colorTypes.special;
             }else{
                 $scope.assessments[i].color = calendarConfig.colorTypes.info;
             }
+            $scope.assessments[i].title = $scope.assessments[i].coursecode + " " + $scope.assessments[i].title;
             $scope.assessments[i].startsAt = new Date($scope.assessments[i].startdate);
             $scope.assessments[i].endsAt = new Date($scope.assessments[i].duedate);
             $scope.assessments[i].draggable = true;

@@ -267,21 +267,29 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
     };
 
     async function assessmentInformation(assessmentid){
+        $scope.tasksCount = 0;
         if($scope.userType == 'student'){
             await $scope.qs.getStudentTasks($scope.user.studentid, assessmentid);
             $rootScope.tasks = $scope.qs.studentTasks();
+            for(let i = 0; i < $rootScope.tasks.length; i++){
+                if($rootScope.tasks[i].completed){
+                    $scope.tasksCount++;
+                }
+            }
         }else{
             await $scope.qs.getTasks(assessmentid);
             $rootScope.tasks = $scope.qs.tasks();
         }
+
+        $rootScope.setView(9);
     }
 
     $scope.setAssessment = function (assessment) {
+        $scope.tasksCount = 0;
         assessmentInformation(assessment.assessmentid, assessment);
         $scope.currentAssessment = assessment;
         $rootScope.currentAssessment = assessment;
         $scope.minDate = assessment.startdate;
-        $rootScope.setView(9);
     };
 
     async function loadCourses(){
@@ -937,6 +945,15 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
             $scope.reloadStudent();
             $scope.qs.updateStudentPoints(task.points, task.completed, $scope.user.studentid).then(function(){
                 $scope.reloadStudent();
+                $scope.qs.getStudentTasks($scope.user.studentid, task.assessmentid).then(function(){
+                    $scope.tasksCount = 0;
+                    $rootScope.tasks = $scope.qs.studentTasks();
+                    for(let i = 0; i < $rootScope.tasks.length; i++){
+                        if($rootScope.tasks[i].completed){
+                            $scope.tasksCount++;
+                        }
+                    }
+                });
             });
         });
     }

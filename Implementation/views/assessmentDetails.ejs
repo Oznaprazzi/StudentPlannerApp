@@ -34,7 +34,7 @@
             <thead>
                 <tr>
                     <th scope="col" style="font-size: 20px">Tasks</th>
-                    <th></th>
+                    <th><p ng-if="tasks.length > 0">{{tasksCount}}/{{tasks.length}} Completed</p></th>
                     <th scope="col"><i class="fa fa-plus-circle" ng-click="addTask($event)" ng-show="userType == 'lecturer'" style="font-size: 25px; float: right" aria-hidden="true"></i></th>
                 </tr>
             </thead>

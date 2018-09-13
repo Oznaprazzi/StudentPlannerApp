@@ -15,6 +15,13 @@
 </head>
 <body ng-cloak ng-controller="calendarController as vm">
 <div ng-show="isView('student', 2)">
+    <div class="alert alert-info" ng-if="assessments.length == 0">
+        <p>There are no current assessments.</p>
+    </div>
+    <div class="alert alert-danger" ng-if="dangerEvents.length > 0">
+        <strong>You have {{dangerEvents.length}} assessment(s) near the due date.</strong>
+        <p ng-repeat="e in dangerEvents">{{e.title}} is due on {{e.duedate | date: 'dd/MM/yyyy'}}</p>
+    </div>
     <h2 class="text-center">{{ vm.calendarTitle }}</h2>
 
     <% include calendar-buttons.ejs %>
