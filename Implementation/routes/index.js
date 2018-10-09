@@ -1,8 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const pg = require('pg');
-const path = require('path');
-const connectionString = process.env.DATABASE_URL || 'postgres://postgres:123456@localhost:5432/studentplannerdb';
 var db = require('../queries');
 //http://mherman.org/blog/2016/03/13/designing-a-restful-api-with-node-and-postgres/
 
