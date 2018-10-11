@@ -267,10 +267,10 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
     };
 
     async function assessmentInformation(assessmentid){
-        $scope.tasksCount = 0;
         if($scope.userType == 'student'){
             await $scope.qs.getStudentTasks($scope.user.studentid, assessmentid);
             $rootScope.tasks = $scope.qs.studentTasks();
+
             for(let i = 0; i < $rootScope.tasks.length; i++){
                 if($rootScope.tasks[i].completed){
                     $scope.tasksCount++;
@@ -930,10 +930,11 @@ app.controller('mainBodyController', function ($scope, $http, $mdDialog, $route,
     }
 
     $scope.taskDone = function(task){
+        console.log(task);
         if(task.completed == true){
             task.completed = false;
             updateStudentPoints(task);
-        }else if(task.completed == false){
+        }else{
             task.completed = true;
             updateStudentPoints(task);
         }
